@@ -1,0 +1,307 @@
+
+<style>
+  .ref { font-family: var(--font-sans); padding: 1.5rem 0; }
+  .ref-header { margin-bottom: 2rem; }
+  .ref-header h1 { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-secondary); margin: 0 0 4px; }
+  .ref-header p { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+  .section { margin-bottom: 2rem; }
+  .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 0 0 10px; padding-bottom: 6px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+  .card-sub { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 10px; line-height: 1.5; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 4px; margin: 2px 2px 2px 0; }
+  .tag-t1 { background: #E6F1FB; color: #0C447C; }
+  .tag-t2 { background: #EAF3DE; color: #27500A; }
+  .tag-t3 { background: #EEEDFE; color: #3C3489; }
+  .tag-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+  code { font-family: var(--font-mono); font-size: 11px; background: var(--color-background-secondary); padding: 2px 6px; border-radius: 4px; color: var(--color-text-primary); }
+  .formula { font-family: var(--font-mono); font-size: 13px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px 16px; color: var(--color-text-primary); margin: 0; line-height: 1.8; }
+  .formula span.dim { color: var(--color-text-tertiary); }
+  .formula span.t1 { color: #185FA5; }
+  .formula span.t2 { color: #3B6D11; }
+  .formula span.t3 { color: #534AB7; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .pill { font-size: 11px; font-family: var(--font-mono); padding: 3px 8px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); color: var(--color-text-secondary); background: var(--color-background-primary); }
+  .q-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .q-num { font-size: 11px; font-weight: 500; min-width: 36px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: var(--color-background-secondary); color: var(--color-text-secondary); flex-shrink: 0; margin-top: 1px; }
+  .q-body { font-size: 13px; color: var(--color-text-primary); line-height: 1.5; }
+  .q-body span { font-size: 11px; color: var(--color-text-secondary); display: block; margin-top: 1px; }
+  .tier-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .tier-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 4px; min-width: 60px; text-align: center; flex-shrink: 0; }
+  .tier-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.4; }
+  .tier-desc code { font-size: 10px; }
+  .chain { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .chain-box { font-family: var(--font-mono); font-size: 10px; padding: 4px 8px; border-radius: 4px; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); color: var(--color-text-primary); }
+  .chain-arrow { color: var(--color-text-tertiary); font-size: 12px; }
+  .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1.5rem 0; }
+</style>
+
+<div class="ref">
+  <h2 class="sr-only">Design System Token Naming — complete reference card covering all six workshop layers</h2>
+
+  <div class="ref-header">
+    <h1>Workshop reference</h1>
+    <p>Design system token naming</p>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Core mental models</p>
+    <div class="grid-2">
+      <div class="card">
+        <p class="card-title">Names are rules, not labels</p>
+        <p class="card-sub">A label identifies a thing. A rule encodes where it lives, what it does, and how it relates to everything else.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:100px;padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">
+            <p style="font-size:10px;color:var(--color-text-tertiary);margin:0 0 4px;">label</p>
+            <code>blue</code>
+          </div>
+          <div style="flex:1;min-width:100px;padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">
+            <p style="font-size:10px;color:var(--color-text-tertiary);margin:0 0 4px;">rule</p>
+            <code style="word-break:break-all;">color-action-primary-default</code>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title">Names are coordinates</p>
+        <p class="card-sub">Built from consistent axes your whole team understands. Anyone who knows the axes can locate any token.</p>
+        <div class="pill-row">
+          <span class="pill">category</span>
+          <span class="pill">role</span>
+          <span class="pill">emphasis</span>
+          <span class="pill">state</span>
+          <span class="pill">scale</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-label">The naming formula</p>
+    <pre class="formula"><span class="t1">primitive</span>  →  <span class="dim">[category]</span>-<span class="dim">[family]</span>-<span class="dim">[scale]</span>
+             e.g. <span class="t1">color-blue-500</span> · <span class="t1">space-16</span>
+
+<span class="t2">semantic</span>   →  <span class="dim">[category]</span>-<span class="dim">[role]</span>-<span class="dim">[emphasis]</span>-<span class="dim">[state]</span>
+             e.g. <span class="t2">color-action-primary-default</span>
+
+<span class="t3">component</span>  →  <span class="dim">[component]</span>-<span class="dim">[part]</span>-<span class="dim">[property]</span>-<span class="dim">[state]</span>
+             e.g. <span class="t3">button-container-background-hover</span></pre>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Three-tier structure</p>
+    <div class="card" style="margin-bottom:10px;">
+      <div class="tier-row">
+        <span class="tier-badge tag-t1">Tier 1</span>
+        <div class="tier-desc"><strong style="font-weight:500;">Primitive</strong> — raw values, no meaning. Describes what a value <em>is</em>.<br><code>color-blue-600</code> · <code>space-8</code> · <code>font-size-14</code></div>
+      </div>
+      <div class="tier-row">
+        <span class="tier-badge tag-t2">Tier 2</span>
+        <div class="tier-desc"><strong style="font-weight:500;">Semantic</strong> — aliases a primitive and assigns purpose. Describes what a value <em>means</em>.<br><code>color-action-primary-default</code> → <code>color-blue-600</code></div>
+      </div>
+      <div class="tier-row" style="margin-bottom:0;">
+        <span class="tier-badge tag-t3">Tier 3</span>
+        <div class="tier-desc"><strong style="font-weight:500;">Component</strong> — scopes a semantic to one component part. Describes where a value is <em>applied</em>.<br><code>button-container-background-default</code> → <code>color-action-primary-default</code></div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary);">
+        <p style="font-size:11px;color:var(--color-text-tertiary);margin:0 0 6px;">Full chain example</p>
+        <div class="chain">
+          <span class="chain-box" style="border-color:#85B7EB;color:#185FA5;">color-blue-600</span>
+          <span class="chain-arrow">←</span>
+          <span class="chain-box" style="border-color:#97C459;color:#3B6D11;">color-action-primary-default</span>
+          <span class="chain-arrow">←</span>
+          <span class="chain-box" style="border-color:#AFA9EC;color:#534AB7;">button-container-background-default</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Four semantic naming domains</p>
+    <div class="grid-2">
+      <div class="card">
+        <p class="card-title">Scales</p>
+        <p class="card-sub">Ordered progressions of a value</p>
+        <div class="pill-row">
+          <span class="pill">100–900</span>
+          <span class="pill">xs · sm · md · lg · xl</span>
+          <span class="pill">role-based</span>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title">Emphasis</p>
+        <p class="card-sub">Hierarchy of visual weight</p>
+        <div class="pill-row">
+          <span class="pill">primary</span>
+          <span class="pill">secondary</span>
+          <span class="pill">tertiary</span>
+          <span class="pill">subtle</span>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title">Hierarchy</p>
+        <p class="card-sub">Structural levels (heading-1, body, caption)</p>
+        <div class="pill-row">
+          <span class="pill">display</span>
+          <span class="pill">heading-1/2/3</span>
+          <span class="pill">body</span>
+          <span class="pill">caption</span>
+          <span class="pill">label</span>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title">States</p>
+        <p class="card-sub">Conditions that change a value</p>
+        <div class="pill-row">
+          <span class="pill">default</span>
+          <span class="pill">hover</span>
+          <span class="pill">active</span>
+          <span class="pill">focus</span>
+          <span class="pill">disabled</span>
+          <span class="pill">error</span>
+          <span class="pill">selected</span>
+          <span class="pill">loading</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Component types</p>
+    <div class="grid-4">
+      <div class="card">
+        <p class="card-title">Simple</p>
+        <p class="card-sub" style="margin-bottom:6px;">Single-purpose, minimal parts</p>
+        <p style="font-size:11px;color:var(--color-text-tertiary);margin:0;">badge · avatar · divider · tag</p>
+      </div>
+      <div class="card">
+        <p class="card-title">Sophisticated</p>
+        <p class="card-sub" style="margin-bottom:6px;">Richer anatomy, one unit</p>
+        <p style="font-size:11px;color:var(--color-text-tertiary);margin:0;">button · input · tooltip · toggle</p>
+      </div>
+      <div class="card">
+        <p class="card-title">Compound</p>
+        <p class="card-sub" style="margin-bottom:6px;">Assembled from simpler components</p>
+        <p style="font-size:11px;color:var(--color-text-tertiary);margin:0;">card · modal · nav bar · form</p>
+      </div>
+      <div class="card">
+        <p class="card-title">Composed</p>
+        <p class="card-sub" style="margin-bottom:6px;">Full interface patterns</p>
+        <p style="font-size:11px;color:var(--color-text-tertiary);margin:0;">hero · data table · settings page</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Anatomy formula — component token naming</p>
+    <pre class="formula"><span class="dim">[component]</span> · <span class="dim">[part]</span> · <span class="dim">[property]</span> · <span class="dim">[state]</span>
+
+Parts:    container · label · description · icon
+          leading · trailing · track · thumb · indicator · overlay
+Properties: background · foreground · text · border
+            border-width · border-radius · shadow · spacing · size
+States:   default · hover · active · focus · focus-visible
+          disabled · selected · checked · error · success · loading</pre>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Naming template — the six questions</p>
+    <div class="card">
+      <div class="q-row">
+        <span class="q-num">Who</span>
+        <div class="q-body">Who is this token for?<span>Designer · engineer · both · neither (internal alias)</span></div>
+      </div>
+      <div class="q-row">
+        <span class="q-num">What</span>
+        <div class="q-body">What design decision does this token represent?<span>The decision — not just the value</span></div>
+      </div>
+      <div class="q-row">
+        <span class="q-num">Where</span>
+        <div class="q-body">Where is this token used?<span>Global · contextual · component-scoped</span></div>
+      </div>
+      <div class="q-row">
+        <span class="q-num">When</span>
+        <div class="q-body">When does this token apply?<span>Which state or condition activates it</span></div>
+      </div>
+      <div class="q-row">
+        <span class="q-num">Why</span>
+        <div class="q-body">Why was this name chosen over alternatives?<span>Document the runner-ups and the reasoning</span></div>
+      </div>
+      <div class="q-row" style="margin-bottom:0;">
+        <span class="q-num">How</span>
+        <div class="q-body">How does this token connect to adjacent tokens?<span>What it references · what references it · its family</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Four systems thinking questions — before naming anything</p>
+    <div class="grid-2">
+      <div class="card">
+        <p class="card-title">1 · Where in the hierarchy?</p>
+        <p class="card-sub" style="margin:0;">Primitive → what it is. Semantic → what it means. Component → how it's applied.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">2 · What is this token's job?</p>
+        <p class="card-sub" style="margin:0;">One responsibility only. A token that does two things creates ambiguity.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">3 · How does it relate to neighbors?</p>
+        <p class="card-sub" style="margin:0;">Does the family make sense read together? Is the progression legible?</p>
+      </div>
+      <div class="card">
+        <p class="card-title">4 · What changes vs. stays stable?</p>
+        <p class="card-sub" style="margin:0;">If the value changed tomorrow, would the name still be accurate?</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Common failure modes to avoid</p>
+    <div class="grid-2">
+      <div class="card">
+        <p class="card-title" style="color:var(--color-text-danger);">Naming from the value</p>
+        <p class="card-sub" style="margin-bottom:6px;">Breaks when values change. Doesn't explain why.</p>
+        <code>red</code> · <code>#FF0000</code> · <code>blue-500</code>
+      </div>
+      <div class="card">
+        <p class="card-title" style="color:var(--color-text-danger);">Naming from a specific use case</p>
+        <p class="card-sub" style="margin-bottom:6px;">Can't be reused. Creates token duplication.</p>
+        <code>checkout-button-color</code>
+      </div>
+      <div class="card">
+        <p class="card-title" style="color:var(--color-text-danger);">Skipping tier 2</p>
+        <p class="card-sub" style="margin-bottom:6px;">Component tokens reference primitives directly. Theming becomes impossible.</p>
+        <code>button-bg → color-blue-600</code>
+      </div>
+      <div class="card">
+        <p class="card-title" style="color:var(--color-text-danger);">Naming without hierarchy awareness</p>
+        <p class="card-sub" style="margin-bottom:6px;">Same pattern used for primitives and semantics. Nobody knows which tier they're in.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="margin-bottom:0;">
+    <p class="section-label">Documentation stack</p>
+    <div class="grid-4">
+      <div class="card">
+        <p class="card-title">Source of truth</p>
+        <p class="card-sub" style="margin:0;">Conventions, vocabulary, tier rules. Read this first.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">Token catalog</p>
+        <p class="card-sub" style="margin:0;">Every token, its tier, reference, and status.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">Decision records</p>
+        <p class="card-sub" style="margin:0;">Why names were chosen. Written at time of decision.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">In-tool notes</p>
+        <p class="card-sub" style="margin:0;">Short signposts in Figma linking to deeper docs.</p>
+      </div>
+    </div>
+  </div>
+</div>

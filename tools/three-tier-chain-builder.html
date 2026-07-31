@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Three-Tier Token Chain Builder — Design System Workshop</title>
+  <style>
+    /* ── Design tokens: light ──────────────────────────── */
+    :root {
+      --bg:          #ffffff;
+      --bg-2:        #f4f3ef;
+      --bg-3:        #eceae4;
+      --bg-info:     #e6f1fb;
+      --bg-success:  #eaf3de;
+      --bg-danger:   #fcebeb;
+      --bg-warn:     #fdf3e0;
+      --tx:          #1a1a18;
+      --tx-2:        #56564f;
+      --tx-3:        #8a8a82;
+      --tx-info:     #185fa5;
+      --tx-success:  #3b6d11;
+      --tx-danger:   #a32d2d;
+      --tx-warn:     #854f0b;
+      --bd-1:        rgba(26,26,24,.09);
+      --bd-2:        rgba(26,26,24,.20);
+      --bd-3:        rgba(26,26,24,.36);
+      --t1:          #185fa5;
+      --t1-bg:       #e6f1fb;
+      --t1-bd:       rgba(24,95,165,.30);
+      --t2:          #3b6d11;
+      --t2-bg:       #eaf3de;
+      --t2-bd:       rgba(59,109,17,.30);
+      --t3:          #534ab7;
+      --t3-bg:       #eeedfe;
+      --t3-bd:       rgba(83,74,183,.30);
+      --r:           8px;
+      --r-lg:        12px;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --mono: 'SF Mono','Cascadia Code','Fira Code',Consolas,'Liberation Mono',monospace;
+    }
+    /* ── Design tokens: dark ───────────────────────────── */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:         #1e1e1b;
+        --bg-2:       #292926;
+        --bg-3:       #323230;
+        --bg-info:    #042c53;
+        --bg-success: #173404;
+        --bg-danger:  #501313;
+        --bg-warn:    #412402;
+        --tx:         #f0ede5;
+        --tx-2:       #aeaba2;
+        --tx-3:       #76736c;
+        --tx-info:    #85b7eb;
+        --tx-success: #97c459;
+        --tx-danger:  #f09595;
+        --tx-warn:    #ef9f27;
+        --bd-1:       rgba(240,237,229,.09);
+        --bd-2:       rgba(240,237,229,.20);
+        --bd-3:       rgba(240,237,229,.36);
+        --t1:         #85b7eb;
+        --t1-bg:      #042c53;
+        --t1-bd:      rgba(133,183,235,.30);
+        --t2:         #97c459;
+        --t2-bg:      #173404;
+        --t2-bd:      rgba(151,196,89,.30);
+        --t3:         #afa9ec;
+        --t3-bg:      #1e1a4a;
+        --t3-bd:      rgba(175,169,236,.30);
+      }
+    }
+
+    /* ── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg-3);
+      color: var(--tx);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* ── Inputs ────────────────────────────────────────── */
+    input[type="text"] {
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--tx);
+      background: var(--bg);
+      border: 0.5px solid var(--bd-2);
+      border-radius: var(--r);
+      padding: 0 10px;
+      height: 36px;
+      width: 100%;
+      outline: none;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    input[type="text"]::placeholder { color: var(--tx-3); }
+    input[type="text"]:hover  { border-color: var(--bd-3); }
+    input[type="text"]:focus  { border-color: var(--bd-3); box-shadow: 0 0 0 3px rgba(26,26,24,.05); }
+    @media (prefers-color-scheme: dark) {
+      input[type="text"]:focus { box-shadow: 0 0 0 3px rgba(240,237,229,.05); }
+    }
+
+    /* ── Buttons ───────────────────────────────────────── */
+    button {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--tx);
+      background: var(--bg);
+      border: 0.5px solid var(--bd-2);
+      border-radius: var(--r);
+      padding: 0 12px;
+      height: 32px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .1s, border-color .1s;
+    }
+    button:hover  { background: var(--bg-2); border-color: var(--bd-3); }
+    button:active { transform: scale(.98); }
+    .btn-ghost { color: var(--tx-3); border-color: transparent; background: transparent; }
+    .btn-ghost:hover { background: var(--bg-2); border-color: var(--bd-2); color: var(--tx); }
+
+    /* ── Page ──────────────────────────────────────────── */
+    .page {
+      max-width: 1060px;
+      margin: 0 auto;
+      background: var(--bg);
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r-lg);
+      padding: 2rem;
+    }
+
+    /* ── Header ────────────────────────────────────────── */
+    .hdr         { margin-bottom: 1.75rem; }
+    .hdr-eye     { font-size: 11px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--tx-3); margin-bottom: 4px; }
+    .hdr-h1      { font-size: 22px; font-weight: 500; margin-bottom: .3rem; }
+    .hdr-desc    { font-size: 14px; color: var(--tx-2); line-height: 1.6; margin-bottom: 1rem; }
+    .hdr-presets { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .hdr-presets > span { font-size: 12px; color: var(--tx-3); }
+    .preset-broken { color: var(--tx-danger); }
+
+    /* ── Main two columns ──────────────────────────────── */
+    .cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
+
+    /* ── Tier cards ────────────────────────────────────── */
+    .tier-stack { display: flex; flex-direction: column; gap: 0; }
+    .tier-card {
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .tc-head {
+      padding: 10px 14px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .tc-head-t1 { background: var(--t1-bg); border-bottom: 0.5px solid var(--t1-bd); }
+    .tc-head-t2 { background: var(--t2-bg); border-bottom: 0.5px solid var(--t2-bd); }
+    .tc-head-t3 { background: var(--t3-bg); border-bottom: 0.5px solid var(--t3-bd); }
+    .tc-tier { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
+    .tc-tier-t1 { color: var(--t1); }
+    .tc-tier-t2 { color: var(--t2); }
+    .tc-tier-t3 { color: var(--t3); }
+    .tc-job  { font-size: 12px; color: var(--tx-3); }
+
+    .tc-body { padding: 14px; background: var(--bg); }
+    .tc-field { margin-bottom: 10px; }
+    .tc-field:last-child { margin-bottom: 0; }
+    .tc-label { font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--tx-3); margin-bottom: 5px; }
+    .tc-formula { font-size: 11px; color: var(--tx-3); font-family: var(--mono); margin-top: 4px; }
+    .tc-formula .seg { opacity: .5; }
+
+    /* tier-specific border accent */
+    .tier-card-t1 { border-left: 2px solid var(--t1); }
+    .tier-card-t2 { border-left: 2px solid var(--t2); }
+    .tier-card-t3 { border-left: 2px solid var(--t3); }
+
+    /* connector between tiers */
+    .tier-connector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      margin: 0;
+    }
+    .tc-line {
+      width: 1px;
+      height: 24px;
+      background: var(--bd-2);
+      margin-left: 20px;
+    }
+    .tc-arrow-label {
+      font-size: 11px;
+      color: var(--tx-3);
+      margin-left: 28px;
+    }
+
+    /* inline validation hints below fields */
+    .field-issues { margin-top: 5px; }
+    .fi-row {
+      font-size: 11px;
+      line-height: 1.5;
+      padding: 3px 0;
+      display: flex;
+      gap: 5px;
+      align-items: flex-start;
+    }
+    .fi-row.ok   { color: var(--tx-success); }
+    .fi-row.warn { color: var(--tx-warn); }
+    .fi-row.err  { color: var(--tx-danger); }
+    .fi-row.crit { color: var(--tx-danger); font-weight: 500; }
+    .fi-icon     { flex-shrink: 0; width: 14px; margin-top: 1px; }
+
+    /* ── Right column ──────────────────────────────────── */
+    .viz-col { position: sticky; top: 1.5rem; display: flex; flex-direction: column; gap: 16px; }
+
+    /* panel shared styles */
+    .panel {
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .panel-head {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      padding: 8px 14px;
+      border-bottom: 0.5px solid var(--bd-1);
+      background: var(--bg-2);
+    }
+    .panel-body { padding: 14px; background: var(--bg); }
+
+    /* ── Chain visualization ───────────────────────────── */
+    .chain-box {
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r);
+      padding: 10px 12px;
+      margin-bottom: 4px;
+    }
+    .cb-tier { font-size: 10px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+    .cb-tier-t1 { color: var(--t1); }
+    .cb-tier-t2 { color: var(--t2); }
+    .cb-tier-t3 { color: var(--t3); }
+    .cb-name { font-family: var(--mono); font-size: 12px; color: var(--tx); font-weight: 500; word-break: break-all; }
+    .cb-name.empty { color: var(--tx-3); font-style: italic; font-weight: 400; }
+    .cb-val  { font-size: 11px; color: var(--tx-3); font-family: var(--mono); margin-top: 3px; }
+    .cb-ref  { font-size: 11px; color: var(--tx-3); font-family: var(--mono); margin-top: 3px; }
+    .chain-box-t1 { border-left: 2px solid var(--t1); background: var(--t1-bg); }
+    .chain-box-t2 { border-left: 2px solid var(--t2); background: var(--t2-bg); }
+    .chain-box-t3 { border-left: 2px solid var(--t3); background: var(--t3-bg); }
+    .chain-box-violation { border-left: 2px solid var(--tx-danger) !important; background: var(--bg-danger) !important; }
+
+    .chain-arrow-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 0 3px 14px;
+    }
+    .car-line  { width: 1px; height: 16px; background: var(--bd-2); flex-shrink: 0; }
+    .car-label { font-size: 11px; color: var(--tx-3); }
+
+    /* resolution tree */
+    .res-head { font-size: 10px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--tx-3); margin-bottom: 8px; margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--bd-1); }
+    .rt-row { font-family: var(--mono); font-size: 11px; line-height: 1.8; }
+    .rt-t3  { color: var(--t3); }
+    .rt-t2  { color: var(--t2); }
+    .rt-t1  { color: var(--t1); }
+    .rt-val { color: var(--tx-3); }
+
+    /* ── Validation panel ──────────────────────────────── */
+    .val-item {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-size: 12px;
+      line-height: 1.55;
+      padding: 5px 0;
+      border-bottom: 0.5px solid var(--bd-1);
+    }
+    .val-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .val-item:first-child { padding-top: 0; }
+    .vi-icon { flex-shrink: 0; width: 16px; font-size: 11px; margin-top: 1px; }
+    .vi-tier { font-size: 10px; font-weight: 500; flex-shrink: 0; padding: 1px 5px; border-radius: 3px; margin-top: 1px; }
+    .vi-msg  { color: var(--tx-2); }
+    .val-item.ok   .vi-icon { color: var(--tx-success); }
+    .val-item.ok   .vi-tier { background: var(--bg-success); color: var(--tx-success); }
+    .val-item.warn .vi-icon { color: var(--tx-warn); }
+    .val-item.warn .vi-tier { background: var(--bg-warn); color: var(--tx-warn); }
+    .val-item.err  .vi-icon { color: var(--tx-danger); }
+    .val-item.err  .vi-tier { background: var(--bg-danger); color: var(--tx-danger); }
+    .val-item.crit .vi-icon { color: var(--tx-danger); }
+    .val-item.crit .vi-tier { background: var(--tx-danger); color: var(--bg); }
+    .val-empty { font-size: 12px; color: var(--tx-3); font-style: italic; }
+
+    /* ── Theming demo ──────────────────────────────────── */
+    .demo-section { margin-top: 20px; padding-top: 20px; border-top: 0.5px solid var(--bd-1); }
+    .demo-title { font-size: 13px; font-weight: 500; color: var(--tx); margin-bottom: 6px; }
+    .demo-desc  { font-size: 12px; color: var(--tx-2); line-height: 1.6; margin-bottom: 14px; }
+    .demo-cols  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    @media (max-width: 600px) { .demo-cols { grid-template-columns: 1fr; } }
+    .demo-col   { border: 0.5px solid var(--bd-1); border-radius: var(--r); padding: 10px 12px; background: var(--bg-2); }
+    .demo-col.bad  { border-color: var(--bd-2); }
+    .demo-col.good { border-color: var(--t2-bd); }
+    .dc-head    { font-size: 11px; font-weight: 500; color: var(--tx); margin-bottom: 8px; }
+    .dc-chain-row {
+      display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+      font-family: var(--mono); font-size: 10px; line-height: 1.8;
+    }
+    .dc-ref-arrow { color: var(--tx-3); }
+    .dc-note {
+      font-size: 11px; color: var(--tx-2); line-height: 1.5;
+      margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--bd-1);
+    }
+    .demo-note {
+      font-size: 12px; color: var(--tx-2); line-height: 1.6;
+      background: var(--bg-2); border-radius: var(--r); padding: 10px 12px;
+    }
+    .mono-t1 { color: var(--t1); }
+    .mono-t2 { color: var(--t2); }
+    .mono-t3 { color: var(--t3); }
+    .badge-update { font-size: 9px; padding: 1px 5px; border-radius: 3px; background: var(--t2-bg); color: var(--t2); border: 0.5px solid var(--t2-bd); margin-left: 2px; }
+    .badge-ok     { font-size: 9px; padding: 1px 5px; border-radius: 3px; background: var(--bg-2); color: var(--tx-3); border: 0.5px solid var(--bd-1); margin-left: 2px; }
+    code { font-family: var(--mono); font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Header ──────────────────────────────────────────── -->
+  <div class="hdr">
+    <p class="hdr-eye">Workshop tool · Layer 3</p>
+    <h1 class="hdr-h1">Three-tier token chain builder</h1>
+    <p class="hdr-desc">
+      Build a complete token chain from primitive → semantic → component.
+      The chain visualization and validator update live — catching tier violations before they become systemic problems.
+    </p>
+    <div class="hdr-presets">
+      <span>Load example:</span>
+      <button onclick="load('btn_bg')">Button background</button>
+      <button onclick="load('input_err')">Input border error</button>
+      <button onclick="load('spacing')">Spacing</button>
+      <span style="margin-left:4px;color:var(--tx-3)">Broken chains:</span>
+      <button class="preset-broken" onclick="load('broken_skip')">Tier skip</button>
+      <button class="preset-broken" onclick="load('broken_prim')">Meaning in primitive</button>
+      <button class="btn-ghost" onclick="clearAll()" style="margin-left:4px">Clear</button>
+    </div>
+  </div>
+
+  <!-- ── Main columns ────────────────────────────────────── -->
+  <div class="cols">
+
+    <!-- LEFT: tier form cards ─────────────────────────── -->
+    <div class="tier-stack">
+
+      <!-- Tier 1 -->
+      <div class="tier-card tier-card-t1">
+        <div class="tc-head tc-head-t1">
+          <span class="tc-tier tc-tier-t1">Tier 1 · Primitive</span>
+          <span class="tc-job">Stores a raw value · Describes what something IS</span>
+        </div>
+        <div class="tc-body">
+          <div class="tc-field">
+            <p class="tc-label">Token name</p>
+            <input type="text" id="t1-name" placeholder="e.g. color-blue-600" oninput="S.t1name=this.value.trim();sync('t2ref','t1');update()" />
+            <p class="tc-formula"><span class="seg">[category]</span>-<span class="seg">[family]</span>-<span class="seg">[scale]</span></p>
+          </div>
+          <div class="tc-field">
+            <p class="tc-label">Raw value</p>
+            <input type="text" id="t1-val" placeholder="e.g. #1D4ED8  ·  16  ·  500" oninput="S.t1val=this.value.trim();update()" />
+          </div>
+          <div class="field-issues" id="t1-issues"></div>
+        </div>
+      </div>
+
+      <!-- Connector 1→2 -->
+      <div class="tier-connector">
+        <div class="tc-line" style="margin-left:20px"></div>
+        <span class="tc-arrow-label">Tier 2 aliases Tier 1 ↓</span>
+      </div>
+
+      <!-- Tier 2 -->
+      <div class="tier-card tier-card-t2">
+        <div class="tc-head tc-head-t2">
+          <span class="tc-tier tc-tier-t2">Tier 2 · Semantic</span>
+          <span class="tc-job">Assigns meaning · Describes what something MEANS</span>
+        </div>
+        <div class="tc-body">
+          <div class="tc-field">
+            <p class="tc-label">Token name</p>
+            <input type="text" id="t2-name" placeholder="e.g. color-action-primary-default" oninput="S.t2name=this.value.trim();sync('t3ref','t2');update()" />
+            <p class="tc-formula"><span class="seg">[category]</span>-<span class="seg">[role]</span>-<span class="seg">[emphasis]</span>-<span class="seg">[state]</span></p>
+          </div>
+          <div class="tc-field">
+            <p class="tc-label">Points to <span style="font-weight:400;text-transform:none;letter-spacing:0">(Tier 1 token name)</span></p>
+            <input type="text" id="t2-ref" placeholder="auto-filled from Tier 1" oninput="S.t2ref=this.value.trim();setManual('t2ref');update()" />
+          </div>
+          <div class="field-issues" id="t2-issues"></div>
+        </div>
+      </div>
+
+      <!-- Connector 2→3 -->
+      <div class="tier-connector">
+        <div class="tc-line" style="margin-left:20px"></div>
+        <span class="tc-arrow-label">Tier 3 scopes Tier 2 ↓</span>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="tier-card tier-card-t3">
+        <div class="tc-head tc-head-t3">
+          <span class="tc-tier tc-tier-t3">Tier 3 · Component</span>
+          <span class="tc-job">Scopes to one component · Describes where something is APPLIED</span>
+        </div>
+        <div class="tc-body">
+          <div class="tc-field">
+            <p class="tc-label">Token name</p>
+            <input type="text" id="t3-name" placeholder="e.g. button-container-background-default" oninput="S.t3name=this.value.trim();update()" />
+            <p class="tc-formula"><span class="seg">[component]</span>-<span class="seg">[part]</span>-<span class="seg">[property]</span>-<span class="seg">[state]</span></p>
+          </div>
+          <div class="tc-field">
+            <p class="tc-label">Points to <span style="font-weight:400;text-transform:none;letter-spacing:0">(Tier 2 token name)</span></p>
+            <input type="text" id="t3-ref" placeholder="auto-filled from Tier 2" oninput="S.t3ref=this.value.trim();setManual('t3ref');update()" />
+          </div>
+          <div class="field-issues" id="t3-issues"></div>
+        </div>
+      </div>
+
+    </div><!-- /tier-stack -->
+
+    <!-- RIGHT: chain viz + validation ─────────────────── -->
+    <div class="viz-col">
+
+      <!-- Chain visualization -->
+      <div class="panel">
+        <div class="panel-head">Token chain</div>
+        <div class="panel-body" id="chain-panel">
+          <div style="font-size:12px;color:var(--tx-3);font-style:italic">Fill in token names to build the chain.</div>
+        </div>
+      </div>
+
+      <!-- Validation -->
+      <div class="panel">
+        <div class="panel-head">Validation</div>
+        <div class="panel-body" id="val-panel">
+          <div class="val-empty">Chain validation appears here as you build.</div>
+        </div>
+      </div>
+
+    </div><!-- /viz-col -->
+  </div><!-- /cols -->
+
+  <!-- ── Theming demo (full width, below columns) ──────── -->
+  <div id="theming-demo"></div>
+
+</div><!-- /page -->
+
+<script>
+  /* ── State ─────────────────────────────────────────────── */
+  let S = { t1name:'', t1val:'', t2name:'', t2ref:'', t3name:'', t3ref:'' };
+
+  // Track auto-filled ref values so we don't overwrite manual edits
+  let autoFilled = { t2ref: '', t3ref: '' };
+  let manualEdit = { t2ref: false, t3ref: false };
+
+  /* ── Vocabulary sets ───────────────────────────────────── */
+  const SEMANTIC_WORDS  = new Set(['action','brand','feedback','interactive','neutral','surface']);
+  const ROLE_WORDS      = new Set(['primary','secondary','tertiary','subtle']);
+  const STATE_WORDS     = new Set(['hover','active','focus','focused','disabled','selected','checked','loading','readonly','pressed','error','success','warning','info','default']);
+  const COMPONENT_WORDS = new Set(['button','input','card','modal','nav','form','alert','dialog','drawer','header','footer','tooltip','badge','avatar','tag','chip','toggle','checkbox','radio','select','table','tab','menu','list','sidebar','banner','hero','pagination','breadcrumb']);
+
+  /* ── Auto-ref sync ─────────────────────────────────────── */
+  function sync(field, from) {
+    const fromVal = from === 't1' ? S.t1name : S.t2name;
+    const el = document.getElementById(field);
+    if (!manualEdit[field] || el.value === autoFilled[field]) {
+      el.value = fromVal;
+      S[field] = fromVal;
+      autoFilled[field] = fromVal;
+      manualEdit[field] = false;
+    }
+  }
+  function setManual(field) { manualEdit[field] = true; }
+
+  /* ── Validation ────────────────────────────────────────── */
+  function segs(name) { return name ? name.toLowerCase().split('-').filter(Boolean) : []; }
+
+  function validateAll() {
+    const issues = [];
+    const s1 = segs(S.t1name), s2 = segs(S.t2name), s3 = segs(S.t3name);
+    const isTierSkip = S.t3ref && S.t1name && S.t3ref === S.t1name;
+
+    // ── Tier 1 ──
+    if (S.t1name) {
+      const stateInT1 = s1.filter(w => STATE_WORDS.has(w) && w !== 'default');
+      const compInT1  = s1.filter(w => COMPONENT_WORDS.has(w));
+      const semInT1   = s1.filter(w => SEMANTIC_WORDS.has(w) || ROLE_WORDS.has(w));
+
+      if (compInT1.length)
+        issues.push({ t:1, l:'err',  msg: `"${compInT1.join(', ')}" is component vocabulary. Component scoping belongs at Tier 3.` });
+      else if (stateInT1.length)
+        issues.push({ t:1, l:'err',  msg: `"${stateInT1.join(', ')}" is a state word. States belong in Tier 2 or Tier 3 names.` });
+      else if (semInT1.length)
+        issues.push({ t:1, l:'warn', msg: `"${semInT1.join(', ')}" is semantic vocabulary. Meaning and role belong at Tier 2.` });
+      else
+        issues.push({ t:1, l:'ok',   msg: 'Primitive name encodes no meaning — scale position only.' });
+
+      // Value check
+      if (S.t1val && !S.t1val.startsWith('#') && S.t1val.includes('-') && isNaN(parseFloat(S.t1val))) {
+        const vsegs = S.t1val.split('-');
+        if (vsegs.length >= 2 && vsegs.every(v => isNaN(v))) {
+          issues.push({ t:1, l:'warn', msg: `The raw value "${S.t1val}" looks like a token name. Tier 1 should store the actual CSS value (hex, px, rem, number).` });
+        }
+      }
+    }
+
+    // ── Tier 2 ──
+    if (S.t2name) {
+      const compInT2 = s2.filter(w => COMPONENT_WORDS.has(w));
+      const hasState = STATE_WORDS.has(s2[s2.length - 1]);
+      const isInteractive = s2.some(w => SEMANTIC_WORDS.has(w));
+
+      if (S.t2name === S.t1name)
+        issues.push({ t:2, l:'err',  msg: 'Semantic name is identical to the primitive — no meaning has been added at Tier 2.' });
+      else if (compInT2.length)
+        issues.push({ t:2, l:'warn', msg: `"${compInT2.join(', ')}" is component vocabulary. Component scoping belongs at Tier 3, not Tier 2.` });
+      else if (isInteractive && !hasState && s2.length >= 2)
+        issues.push({ t:2, l:'warn', msg: 'Semantic color/interaction token is missing a state suffix. Consider appending "-default" to make the state explicit.' });
+      else
+        issues.push({ t:2, l:'ok',   msg: 'Semantic name adds meaning without encoding component context.' });
+
+      if (S.t2ref && S.t1name && S.t2ref !== S.t1name)
+        issues.push({ t:2, l:'warn', msg: `"Points to" (${S.t2ref}) doesn't match the Tier 1 name (${S.t1name}). Expected an exact match.` });
+      else if (S.t2ref && S.t1name && S.t2ref === S.t1name)
+        issues.push({ t:2, l:'ok',   msg: `Correctly aliases Tier 1 token: ${S.t1name}` });
+    }
+
+    // ── Tier 3 ──
+    if (S.t3name) {
+      if (isTierSkip)
+        issues.push({ t:3, l:'crit', msg: `Critical tier violation: this component token references the Tier 1 primitive directly ("${S.t1name}"), bypassing the semantic tier. Any primitive change must now be applied to every component token individually — theming is broken.` });
+      else if (s3.length < 4)
+        issues.push({ t:3, l:'warn', msg: `Component token has ${s3.length} segment${s3.length!==1?'s':''} — the anatomy formula expects 4: [component]-[part]-[property]-[state].` });
+      else
+        issues.push({ t:3, l:'ok',   msg: 'Component name follows the anatomy formula with 4 segments.' });
+
+      if (!isTierSkip && S.t3ref && S.t2name && S.t3ref !== S.t2name)
+        issues.push({ t:3, l:'warn', msg: `"Points to" (${S.t3ref}) doesn't match the Tier 2 name (${S.t2name}). Expected an exact match.` });
+      else if (!isTierSkip && S.t3ref && S.t2name && S.t3ref === S.t2name)
+        issues.push({ t:3, l:'ok',   msg: `Correctly scopes Tier 2 token: ${S.t2name}` });
+    }
+
+    // ── Chain level ──
+    if (S.t1name && S.t2name && S.t3name) {
+      if (!isTierSkip && S.t2ref === S.t1name && S.t3ref === S.t2name)
+        issues.push({ t:0, l:'ok', msg: 'Complete valid chain: T3 → T2 → T1 → value. Theming is intact — all three tiers are correctly connected.' });
+    }
+
+    return issues;
+  }
+
+  /* ── Render: chain visualization ──────────────────────── */
+  function renderChain() {
+    const el = document.getElementById('chain-panel');
+    const { t1name, t1val, t2name, t2ref, t3name, t3ref } = S;
+    const isTierSkip = t3ref && t1name && t3ref === t1name;
+
+    if (!t1name && !t2name && !t3name) {
+      el.innerHTML = `<div style="font-size:12px;color:var(--tx-3);font-style:italic">Fill in token names to build the chain.</div>`;
+      return;
+    }
+
+    const t1box = `
+      <div class="chain-box chain-box-t1">
+        <div class="cb-tier cb-tier-t1">Tier 1 · Primitive</div>
+        <div class="cb-name${t1name?'':' empty'}">${t1name||'(empty)'}</div>
+        ${t1val ? `<div class="cb-val">= ${esc(t1val)}</div>` : ''}
+      </div>`;
+
+    const arrow1 = `
+      <div class="chain-arrow-row">
+        <div class="car-line"></div>
+        <span class="car-label">↓ aliased by</span>
+      </div>`;
+
+    const t2box = t2name ? `
+      <div class="chain-box chain-box-t2">
+        <div class="cb-tier cb-tier-t2">Tier 2 · Semantic</div>
+        <div class="cb-name">${esc(t2name)}</div>
+        ${t2ref ? `<div class="cb-ref">→ ${esc(t2ref)}</div>` : ''}
+      </div>` : `
+      <div class="chain-box" style="border-style:dashed;opacity:.5">
+        <div class="cb-tier cb-tier-t2">Tier 2 · Semantic</div>
+        <div class="cb-name empty">(not defined)</div>
+      </div>`;
+
+    const arrow2 = `
+      <div class="chain-arrow-row">
+        <div class="car-line"></div>
+        <span class="car-label">↓ scoped by</span>
+      </div>`;
+
+    const t3boxClass = isTierSkip ? 'chain-box chain-box-violation' : 'chain-box chain-box-t3';
+    const t3box = t3name ? `
+      <div class="${t3boxClass}">
+        <div class="cb-tier cb-tier-t3" style="${isTierSkip?'color:var(--tx-danger)':''}">Tier 3 · Component${isTierSkip?' ⚠ tier skip':''}</div>
+        <div class="cb-name">${esc(t3name)}</div>
+        ${t3ref ? `<div class="cb-ref" style="${isTierSkip?'color:var(--tx-danger)':''}">${isTierSkip?'⚠ ':''} → ${esc(t3ref)}</div>` : ''}
+      </div>` : '';
+
+    // Full resolution tree
+    const hasAny = t3name || t2name || t1name;
+    const tree = hasAny ? `
+      <div class="res-head">Full resolution</div>
+      <div>
+        ${t3name ? `<div class="rt-row rt-t3">${esc(t3name)}</div>` : ''}
+        ${t2name ? `<div class="rt-row rt-t2">&nbsp;&nbsp;→ ${esc(t2name)}</div>` : ''}
+        ${t1name ? `<div class="rt-row rt-t1">&nbsp;&nbsp;&nbsp;&nbsp;→ ${esc(t1name)}</div>` : ''}
+        ${t1val  ? `<div class="rt-row rt-val">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= ${esc(t1val)}</div>` : ''}
+      </div>` : '';
+
+    el.innerHTML = t1box + (t2name || true ? arrow1 : '') + t2box + arrow2 + t3box + tree;
+  }
+
+  /* ── Render: validation panel ──────────────────────────── */
+  function renderValidation() {
+    const el = document.getElementById('val-panel');
+    const issues = validateAll();
+
+    if (!issues.length) {
+      el.innerHTML = `<div class="val-empty">Fill in token names to see validation.</div>`;
+      return;
+    }
+
+    const icons = { ok:'✓', warn:'⚠', err:'✗', crit:'✗' };
+    const tierLbls = { 0:'Chain', 1:'T1', 2:'T2', 3:'T3' };
+
+    el.innerHTML = issues.map(i => `
+      <div class="val-item ${i.l}">
+        <span class="vi-icon">${icons[i.l]}</span>
+        <span class="vi-tier">${tierLbls[i.t]||''}</span>
+        <span class="vi-msg">${esc(i.msg)}</span>
+      </div>`
+    ).join('');
+
+    // Also render inline hints per tier
+    renderInlineIssues(issues);
+  }
+
+  function renderInlineIssues(issues) {
+    [1,2,3].forEach(t => {
+      const el = document.getElementById(`t${t}-issues`);
+      if (!el) return;
+      const mine = issues.filter(i => i.t === t);
+      if (!mine.length) { el.innerHTML = ''; return; }
+      const icons = { ok:'✓', warn:'⚠', err:'✗', crit:'✗' };
+      el.innerHTML = mine.map(i => `
+        <div class="fi-row ${i.l==='crit'?'crit':i.l==='err'?'err':i.l==='warn'?'warn':'ok'}">
+          <span class="fi-icon">${icons[i.l]}</span>
+          <span>${esc(i.msg)}</span>
+        </div>`
+      ).join('');
+    });
+  }
+
+  /* ── Render: theming demo ──────────────────────────────── */
+  function renderThemingDemo() {
+    const el = document.getElementById('theming-demo');
+    const { t1name, t1val, t2name, t2ref, t3name, t3ref } = S;
+
+    if (!t1name || !t2name || !t3name) { el.innerHTML = ''; return; }
+
+    // Generate a plausible rebrand alternative
+    const t1segs = t1name.split('-');
+    const family = t1segs[1] || 'blue';
+    const rebrandFamily = family === 'blue' ? 'teal' : family === 'red' ? 'orange' : family === 'gray' ? 'slate' : 'teal';
+    const rebrandPrim = t1name.replace(family, rebrandFamily);
+    const rebrandVal  = t1name.includes('color') ? (family === 'blue' ? '#0D9488' : '#EA580C') : `${t1val} (updated)`;
+
+    const isTierSkip = t3ref && t1name && t3ref === t1name;
+
+    el.innerHTML = `
+      <div class="demo-section">
+        <div class="demo-title">Why Tier 2 matters — the theming demonstration</div>
+        <p class="demo-desc">
+          The semantic tier creates an insulation layer between raw values and components.
+          When a primitive changes (rebrand, dark mode, theme variant), only one semantic
+          mapping needs updating — not every component token that uses that color.
+        </p>
+
+        <div class="demo-cols">
+          <div class="demo-col bad">
+            <div class="dc-head">❌ Without Tier 2 — direct reference</div>
+            <div style="margin-bottom:6px">
+              <div class="dc-chain-row"><span class="mono-t3">${esc(t3name)}</span><span class="dc-ref-arrow">&nbsp;→&nbsp;</span><span class="mono-t1">${esc(t1name)}</span></div>
+              <div class="dc-chain-row" style="opacity:.6"><span class="mono-t3">card-header-background-default</span><span class="dc-ref-arrow">&nbsp;→&nbsp;</span><span class="mono-t1">${esc(t1name)}</span></div>
+              <div class="dc-chain-row" style="opacity:.4"><span class="mono-t3">link-text-default</span><span class="dc-ref-arrow">&nbsp;→&nbsp;</span><span class="mono-t1">${esc(t1name)}</span></div>
+              <div class="dc-chain-row" style="opacity:.25"><span class="mono-t3">icon-button-foreground-default</span><span class="dc-ref-arrow">&nbsp;→&nbsp;</span><span class="mono-t1">${esc(t1name)}</span></div>
+            </div>
+            <div class="dc-note">
+              To rebrand: find and update every component token that references
+              <code>${esc(t1name)}</code> — potentially dozens.
+            </div>
+          </div>
+
+          <div class="demo-col good">
+            <div class="dc-head">✅ With Tier 2 — semantic insulation</div>
+            <div style="margin-bottom:6px">
+              <div class="dc-chain-row"><span class="mono-t1">${esc(rebrandPrim)}</span><span class="dc-ref-arrow">&nbsp;=&nbsp;</span><span style="color:var(--tx-3)">${rebrandVal}</span></div>
+              <div class="dc-chain-row"><span class="mono-t2">${esc(t2name)}</span><span class="dc-ref-arrow">&nbsp;→&nbsp;</span><span class="mono-t1">${esc(rebrandPrim)}</span><span class="badge-update">← 1 change</span></div>
+              <div class="dc-chain-row"><span class="mono-t3">${esc(t3name)}</span><span class="dc-ref-arrow">&nbsp;→&nbsp;</span><span class="mono-t2">${esc(t2name)}</span><span class="badge-ok">unchanged</span></div>
+              <div class="dc-chain-row" style="opacity:.6"><span class="mono-t3">card-header-background-default</span><span class="dc-ref-arrow">&nbsp;→&nbsp;</span><span class="mono-t2">${esc(t2name)}</span><span class="badge-ok">unchanged</span></div>
+              <div class="dc-chain-row" style="opacity:.4"><span class="mono-t3">link-text-default</span><span class="dc-ref-arrow">&nbsp;→&nbsp;</span><span class="mono-t2">${esc(t2name)}</span><span class="badge-ok">unchanged</span></div>
+            </div>
+            <div class="dc-note">
+              To rebrand: update <strong>one mapping</strong> — <code>${esc(t2name)}</code>
+              now points to <code>${esc(rebrandPrim)}</code>.
+              All component tokens resolve to the new value automatically.
+            </div>
+          </div>
+        </div>
+
+        ${isTierSkip ? `
+        <div class="demo-note" style="border-left:2px solid var(--tx-danger);color:var(--tx-danger)">
+          ⚠ Your current chain has a tier skip — the component token references the primitive directly.
+          This is exactly the "without Tier 2" scenario above. Add a semantic token as the middle tier to restore theming capability.
+        </div>` : `
+        <div class="demo-note">
+          Your current chain is correctly structured.
+          One change to <code>${esc(t2name)}</code> would cascade to every component that references it.
+        </div>`}
+      </div>
+    `;
+  }
+
+  /* ── Master update ─────────────────────────────────────── */
+  function update() {
+    renderChain();
+    renderValidation();
+    renderThemingDemo();
+  }
+
+  /* ── Presets ───────────────────────────────────────────── */
+  const PRESETS = {
+    btn_bg: {
+      t1name: 'color-blue-600',   t1val: '#1D4ED8',
+      t2name: 'color-action-primary-default', t2ref: 'color-blue-600',
+      t3name: 'button-container-background-default', t3ref: 'color-action-primary-default'
+    },
+    input_err: {
+      t1name: 'color-red-500',    t1val: '#EF4444',
+      t2name: 'color-feedback-error-default', t2ref: 'color-red-500',
+      t3name: 'input-container-border-error', t3ref: 'color-feedback-error-default'
+    },
+    spacing: {
+      t1name: 'space-16',         t1val: '16px',
+      t2name: 'space-component-padding', t2ref: 'space-16',
+      t3name: 'button-container-spacing-default', t3ref: 'space-component-padding'
+    },
+    broken_skip: {
+      t1name: 'color-blue-600',   t1val: '#1D4ED8',
+      t2name: '',                 t2ref: '',
+      t3name: 'button-container-background-default', t3ref: 'color-blue-600'
+    },
+    broken_prim: {
+      t1name: 'color-action-primary', t1val: '#1D4ED8',
+      t2name: 'color-action-primary-default', t2ref: 'color-action-primary',
+      t3name: 'button-container-background-default', t3ref: 'color-action-primary-default'
+    }
+  };
+
+  function load(key) {
+    const p = PRESETS[key]; if (!p) return;
+    S = { ...p };
+    manualEdit = { t2ref: false, t3ref: false };
+    autoFilled = { t2ref: p.t2ref, t3ref: p.t3ref };
+    setVal('t1-name', p.t1name); setVal('t1-val',  p.t1val);
+    setVal('t2-name', p.t2name); setVal('t2-ref',  p.t2ref);
+    setVal('t3-name', p.t3name); setVal('t3-ref',  p.t3ref);
+    update();
+  }
+
+  function clearAll() {
+    S = { t1name:'', t1val:'', t2name:'', t2ref:'', t3name:'', t3ref:'' };
+    manualEdit = { t2ref:false, t3ref:false };
+    autoFilled = { t2ref:'', t3ref:'' };
+    ['t1-name','t1-val','t2-name','t2-ref','t3-name','t3-ref'].forEach(i => setVal(i,''));
+    ['t1-issues','t2-issues','t3-issues'].forEach(i => { document.getElementById(i).innerHTML=''; });
+    document.getElementById('chain-panel').innerHTML = `<div style="font-size:12px;color:var(--tx-3);font-style:italic">Fill in token names to build the chain.</div>`;
+    document.getElementById('val-panel').innerHTML = `<div class="val-empty">Chain validation appears here as you build.</div>`;
+    document.getElementById('theming-demo').innerHTML = '';
+  }
+
+  /* ── Helpers ───────────────────────────────────────────── */
+  const setVal = (id, val) => { document.getElementById(id).value = val; };
+  const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  /* ── Init ──────────────────────────────────────────────── */
+  update();
+</script>
+</body>
+</html>

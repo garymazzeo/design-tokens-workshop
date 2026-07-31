@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Token Naming Worksheet — Design System Workshop</title>
+  <style>
+    /* ── Design tokens: light ──────────────────────────────── */
+    :root {
+      --bg:         #ffffff;
+      --bg-2:       #f4f3ef;
+      --bg-3:       #eceae4;
+      --bg-info:    #e6f1fb;
+      --bg-success: #eaf3de;
+      --bg-danger:  #fcebeb;
+      --tx:         #1a1a18;
+      --tx-2:       #56564f;
+      --tx-3:       #8a8a82;
+      --tx-info:    #185fa5;
+      --tx-success: #3b6d11;
+      --tx-danger:  #a32d2d;
+      --bd-1:       rgba(26,26,24,.09);
+      --bd-2:       rgba(26,26,24,.21);
+      --bd-3:       rgba(26,26,24,.38);
+      --r:          8px;
+      --r-lg:       12px;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --mono: 'SF Mono','Cascadia Code','Fira Code',Consolas,'Liberation Mono',monospace;
+    }
+
+    /* ── Design tokens: dark ───────────────────────────────── */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:         #1e1e1b;
+        --bg-2:       #292926;
+        --bg-3:       #323230;
+        --bg-info:    #042c53;
+        --bg-success: #173404;
+        --bg-danger:  #501313;
+        --tx:         #f0ede5;
+        --tx-2:       #aeaba2;
+        --tx-3:       #76736c;
+        --tx-info:    #85b7eb;
+        --tx-success: #97c459;
+        --tx-danger:  #f09595;
+        --bd-1:       rgba(240,237,229,.09);
+        --bd-2:       rgba(240,237,229,.21);
+        --bd-3:       rgba(240,237,229,.38);
+      }
+    }
+
+    /* ── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg-3);
+      color: var(--tx);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* ── Base: inputs + textareas ──────────────────────────── */
+    input[type="text"], textarea {
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--tx);
+      background: var(--bg);
+      border: 0.5px solid var(--bd-2);
+      border-radius: var(--r);
+      padding: 8px 10px;
+      width: 100%;
+      outline: none;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    input[type="text"] { height: 36px; resize: none; }
+    textarea { resize: vertical; min-height: 76px; }
+    input[type="text"]::placeholder,
+    textarea::placeholder { color: var(--tx-3); }
+    input[type="text"]:hover, textarea:hover { border-color: var(--bd-3); }
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--bd-3);
+      box-shadow: 0 0 0 3px rgba(26,26,24,.05);
+    }
+    @media (prefers-color-scheme: dark) {
+      input[type="text"]:focus, textarea:focus {
+        box-shadow: 0 0 0 3px rgba(240,237,229,.05);
+      }
+    }
+
+    /* ── Base: buttons ─────────────────────────────────────── */
+    button {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--tx);
+      background: var(--bg);
+      border: 0.5px solid var(--bd-2);
+      border-radius: var(--r);
+      padding: 0 12px;
+      height: 32px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .1s, border-color .1s;
+    }
+    button:hover  { background: var(--bg-2); border-color: var(--bd-3); }
+    button:active { transform: scale(.98); }
+    .btn-solid {
+      background: var(--tx);
+      color: var(--bg);
+      border-color: var(--tx);
+    }
+    .btn-solid:hover { opacity: .82; background: var(--tx); }
+    .btn-ghost { color: var(--tx-3); border-color: transparent; background: transparent; }
+    .btn-ghost:hover { background: var(--bg-2); border-color: var(--bd-2); color: var(--tx); }
+
+    /* ── Page chrome ───────────────────────────────────────── */
+    .page {
+      max-width: 1060px;
+      margin: 0 auto;
+      background: var(--bg);
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r-lg);
+      padding: 2rem;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .hdr          { margin-bottom: 1.75rem; }
+    .hdr-eye      { font-size: 11px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: var(--tx-3); margin-bottom: 4px; }
+    .hdr-h1       { font-size: 22px; font-weight: 500; margin-bottom: .3rem; }
+    .hdr-desc     { font-size: 14px; color: var(--tx-2); line-height: 1.6; margin-bottom: 1rem; }
+    .hdr-presets  { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .hdr-presets > span { font-size: 12px; color: var(--tx-3); }
+
+    /* ── Identity row ──────────────────────────────────────── */
+    .identity {
+      display: grid;
+      grid-template-columns: 2fr auto auto;
+      gap: 14px;
+      align-items: end;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.75rem;
+      border-bottom: 0.5px solid var(--bd-1);
+    }
+    @media (max-width: 700px) { .identity { grid-template-columns: 1fr; } }
+
+    .f-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      margin-bottom: 6px;
+    }
+
+    /* ── Pill selectors ────────────────────────────────────── */
+    .pill-group { display: flex; gap: 4px; flex-wrap: wrap; }
+    .pill {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 0.5px solid var(--bd-2);
+      color: var(--tx-2);
+      background: var(--bg);
+      cursor: pointer;
+      user-select: none;
+      transition: all .1s;
+    }
+    .pill:hover   { border-color: var(--bd-3); color: var(--tx); }
+    .pill.on      { background: var(--tx);    color: var(--bg);  border-color: var(--tx); }
+    .pill.on-t1   { background: #185fa5; color: #fff; border-color: #185fa5; }
+    .pill.on-t2   { background: #3b6d11; color: #fff; border-color: #3b6d11; }
+    .pill.on-t3   { background: #534ab7; color: #fff; border-color: #534ab7; }
+
+    /* ── Two-column layout ─────────────────────────────────── */
+    .cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
+
+    /* ── Question blocks ───────────────────────────────────── */
+    .q-block {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 0.5px solid var(--bd-1);
+    }
+    .q-block:last-of-type { border-bottom: none; margin-bottom: 0; }
+
+    .q-hdr    { display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px; }
+    .q-num    { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--tx-3); min-width: 38px; flex-shrink: 0; }
+    .q-prompt { font-size: 14px; font-weight: 500; color: var(--tx); }
+    .q-hint   { font-size: 12px; color: var(--tx-3); line-height: 1.55; margin: 4px 0 10px 46px; }
+    .q-body   { padding-left: 46px; }
+
+    /* conditional sub-fields */
+    .cond         { margin-top: 8px; display: none; }
+    .cond.show    { display: block; }
+    .sub-label    { font-size: 11px; color: var(--tx-3); margin-bottom: 4px; }
+    .sub-field    { margin-top: 8px; }
+
+    /* ── Systems check ─────────────────────────────────────── */
+    .check-block {
+      background: var(--bg-2);
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      margin-top: 1.5rem;
+    }
+    .check-title { font-size: 12px; font-weight: 500; color: var(--tx); margin-bottom: 10px; }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--tx-2);
+      cursor: pointer;
+      line-height: 1.5;
+      user-select: none;
+    }
+    .check-item:last-child { margin-bottom: 0; }
+    .check-item input[type="checkbox"] {
+      width: 15px; height: 15px;
+      margin-top: 2px; flex-shrink: 0;
+      cursor: pointer;
+      accent-color: var(--tx);
+    }
+    .check-item.ticked { color: var(--tx-success); }
+
+    /* ── Preview panel ─────────────────────────────────────── */
+    .preview-col { position: sticky; top: 1.5rem; }
+
+    .panel-head {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      padding-bottom: 8px;
+      border-bottom: 0.5px solid var(--bd-1);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-btns { display: flex; gap: 6px; }
+
+    .record {
+      background: var(--bg-2);
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r);
+      padding: 16px;
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
+    }
+
+    /* record internals */
+    .rec-name   { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--tx); margin-bottom: 2px; word-break: break-all; }
+    .rec-meta   { font-size: 11px; color: var(--tx-3); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 0.5px solid var(--bd-1); }
+    .rec-sec    { margin-bottom: 12px; }
+    .rec-head   { font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--tx-3); margin-bottom: 4px; }
+    .rec-body   { font-size: 12px; color: var(--tx); line-height: 1.65; }
+    .rec-sub    { font-size: 11px; color: var(--tx-3); margin-top: 5px; margin-bottom: 2px; }
+    .rec-mono   { font-family: var(--mono); font-size: 11px; color: var(--tx-2); word-break: break-all; }
+    .rec-alt    { font-size: 11px; font-style: italic; color: var(--tx-3); font-family: var(--mono); }
+    .rec-empty  { font-size: 12px; color: var(--tx-3); font-style: italic; }
+    .rec-checks { margin-top: 12px; padding-top: 12px; border-top: 0.5px solid var(--bd-1); }
+    .ck-row     { font-size: 11px; color: var(--tx-3); margin-bottom: 3px; }
+    .ck-row.y   { color: var(--tx-success); }
+    .ck-row.y::before  { content: '✓  '; }
+    .ck-row:not(.y)::before { content: '○  '; }
+
+    .t1c { color: #185fa5; } .t2c { color: #3b6d11; } .t3c { color: #534ab7; }
+    .empty-rec { font-size: 13px; color: var(--tx-3); text-align: center; padding: 2.5rem 1rem; line-height: 1.9; }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <div class="hdr">
+    <p class="hdr-eye">Workshop tool - Document one token’s naming decision · Layer 4</p>
+    <h1 class="hdr-h1">Token naming worksheet</h1>
+    <p class="hdr-desc">
+      Answer the six questions for any token. The decision record assembles
+      on the right as you type — copy or download it straight into your documentation.
+    </p>
+    <div class="hdr-presets">
+      <span>Load example:</span>
+      <button onclick="loadPreset('primitive')">Primitive token</button>
+      <button onclick="loadPreset('semantic')">Semantic token</button>
+      <button onclick="loadPreset('component')">Component token</button>
+      <button class="btn-ghost" onclick="clearForm()" style="margin-left:4px">Clear</button>
+    </div>
+  </div>
+
+  <!-- ── Identity row ───────────────────────────────────── -->
+  <div class="identity">
+    <div>
+      <p class="f-label">Token name</p>
+      <input type="text" id="f-name" placeholder="e.g. color-action-primary-default" oninput="update()" />
+    </div>
+    <div>
+      <p class="f-label">Tier</p>
+      <div class="pill-group" id="tier-pills">
+        <span class="pill" data-v="primitive" onclick="selTier(this)">Primitive</span>
+        <span class="pill" data-v="semantic"  onclick="selTier(this)">Semantic</span>
+        <span class="pill" data-v="component" onclick="selTier(this)">Component</span>
+      </div>
+    </div>
+    <div>
+      <p class="f-label">Status</p>
+      <div class="pill-group" id="status-pills">
+        <span class="pill" data-v="stable"       onclick="selStatus(this)">Stable</span>
+        <span class="pill" data-v="experimental" onclick="selStatus(this)">Experimental</span>
+        <span class="pill" data-v="deprecated"   onclick="selStatus(this)">Deprecated</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main columns ───────────────────────────────────── -->
+  <div class="cols">
+
+    <!-- LEFT: six questions + check ──────────────────────── -->
+    <div>
+
+      <!-- 1 · Who -->
+      <div class="q-block">
+        <div class="q-hdr">
+          <span class="q-num">1 · Who</span>
+          <span class="q-prompt">Who is this token for?</span>
+        </div>
+        <p class="q-hint">Determines the vocabulary the name must speak. A primitive is infrastructure — it doesn't need to communicate meaning. A semantic token must be legible to both designers and engineers.</p>
+        <div class="q-body">
+          <div class="pill-group" id="who-pills">
+            <span class="pill" data-v="Designers"           onclick="togWho(this)">Designers</span>
+            <span class="pill" data-v="Engineers"           onclick="togWho(this)">Engineers</span>
+            <span class="pill" data-v="Both"                onclick="togWho(this)">Both</span>
+            <span class="pill" data-v="Internal alias only" onclick="togWho(this)">Internal alias only</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 · What -->
+      <div class="q-block">
+        <div class="q-hdr">
+          <span class="q-num">2 · What</span>
+          <span class="q-prompt">What design decision does this token represent?</span>
+        </div>
+        <p class="q-hint">Describe the decision, not the value. What is this token <em>not</em> for? That negative boundary is often the most useful thing to document — it prevents misuse.</p>
+        <div class="q-body">
+          <textarea id="f-what" placeholder="e.g. The primary action color in its default resting state. Applied wherever an interactive element initiates a primary action. Not used for feedback states (error, warning, success), brand decoration, or non-interactive surfaces." oninput="update()"></textarea>
+        </div>
+      </div>
+
+      <!-- 3 · Where -->
+      <div class="q-block">
+        <div class="q-hdr">
+          <span class="q-num">3 · Where</span>
+          <span class="q-prompt">Where is this token used?</span>
+        </div>
+        <p class="q-hint">Global tokens apply everywhere. Contextual tokens apply within a specific theme or mode. Component-scoped tokens only operate inside one component — consuming them elsewhere creates invisible coupling.</p>
+        <div class="q-body">
+          <div class="pill-group" id="where-pills">
+            <span class="pill" data-v="Global"           onclick="selWhere(this,'global')">Global</span>
+            <span class="pill" data-v="Contextual"       onclick="selWhere(this,'contextual')">Contextual</span>
+            <span class="pill" data-v="Component-scoped" onclick="selWhere(this,'component')">Component-scoped</span>
+          </div>
+          <div class="cond" id="cond-ctx">
+            <p class="sub-label" style="margin-top:8px">Which theme or mode?</p>
+            <input type="text" id="f-where-ctx" placeholder="e.g. dark mode, high contrast, brand-B" oninput="update()" />
+          </div>
+          <div class="cond" id="cond-comp">
+            <p class="sub-label" style="margin-top:8px">Which component?</p>
+            <input type="text" id="f-where-comp" placeholder="e.g. button, input, card" oninput="update()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 · When -->
+      <div class="q-block">
+        <div class="q-hdr">
+          <span class="q-num">4 · When</span>
+          <span class="q-prompt">When does this token apply?</span>
+        </div>
+        <p class="q-hint">What state or condition activates this token? For stateless tokens (most primitives), document that explicitly — it tells the reader this token has no interaction dependency.</p>
+        <div class="q-body">
+          <input type="text" id="f-when" placeholder="e.g. Default state — no interaction has occurred. Replaced by color-action-primary-hover on hover." oninput="update()" />
+        </div>
+      </div>
+
+      <!-- 5 · Why -->
+      <div class="q-block">
+        <div class="q-hdr">
+          <span class="q-num">5 · Why</span>
+          <span class="q-prompt">Why was this name chosen over alternatives?</span>
+        </div>
+        <p class="q-hint">This is the question most often skipped and the one that pays off most over time. The reasoning you document today prevents the same debate from being relitigated by every future team member who encounters this name.</p>
+        <div class="q-body">
+          <textarea id="f-why" placeholder="e.g. 'action' chosen over 'interactive' (too broad) and 'cta' (too marketing-specific). 'primary' chosen over 'brand' because action hierarchy is independent of brand expression — a brand color may not be the action color across all themes." oninput="update()"></textarea>
+          <div class="sub-field">
+            <p class="sub-label">Alternatives considered — one per line</p>
+            <textarea id="f-alts" style="min-height:60px" placeholder="color-interactive-primary-default&#10;color-brand-default&#10;color-cta-default" oninput="update()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 · How -->
+      <div class="q-block">
+        <div class="q-hdr">
+          <span class="q-num">6 · How</span>
+          <span class="q-prompt">How does this token connect to adjacent tokens?</span>
+        </div>
+        <p class="q-hint">A token is a node in a network, not a standalone object. Documenting its connections makes the network visible — and makes the system navigable by anyone, including an LLM.</p>
+        <div class="q-body">
+          <div class="sub-field" style="margin-top:0">
+            <p class="sub-label">References — what this token points to</p>
+            <input type="text" id="f-refs" placeholder="e.g. color-blue-600" oninput="update()" />
+          </div>
+          <div class="sub-field">
+            <p class="sub-label">Referenced by — what consumes this token</p>
+            <input type="text" id="f-used-by" placeholder="e.g. button-container-background-default, link-text-default" oninput="update()" />
+          </div>
+          <div class="sub-field">
+            <p class="sub-label">Family — related tokens in the same set</p>
+            <input type="text" id="f-family" placeholder="e.g. color-action-primary-hover, color-action-primary-active, color-action-primary-disabled" oninput="update()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Systems thinking check -->
+      <div class="check-block">
+        <p class="check-title">Systems thinking check — tick before you commit the name</p>
+        <label class="check-item" id="chk0"><input type="checkbox" onchange="updateChecks()" /><span>The tier is correct for this token's job — it describes what the value <em>is</em>, what it <em>means</em>, or where it's <em>applied</em></span></label>
+        <label class="check-item" id="chk1"><input type="checkbox" onchange="updateChecks()" /><span>The name would still be accurate if the underlying value changed tomorrow</span></label>
+        <label class="check-item" id="chk2"><input type="checkbox" onchange="updateChecks()" /><span>The name makes sense within its family — the progression is legible when read together</span></label>
+        <label class="check-item" id="chk3"><input type="checkbox" onchange="updateChecks()" /><span>The name encodes meaning and position in the system, not just the current value</span></label>
+      </div>
+
+    </div><!-- /form col -->
+
+    <!-- RIGHT: decision record preview ───────────────────── -->
+    <div class="preview-col">
+      <div class="panel-head">
+        <span>Decision record</span>
+        <div class="panel-btns">
+          <button onclick="copyRecord()">Copy</button>
+          <button class="btn-solid" onclick="downloadRecord()">Download .txt</button>
+        </div>
+      </div>
+      <div class="record" id="record">
+        <div class="empty-rec">
+          Fill in the token name or select a tier<br>to start building the decision record.<br><br>
+          Or load one of the examples above<br>to see a completed record.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cols -->
+</div><!-- /page -->
+
+<script>
+  /* ── State object ──────────────────────────────────────── */
+  let S = {
+    name:'', tier:null, status:null,
+    who: new Set(),
+    what:'', where:null, whereCtx:'', whereComp:'',
+    when:'', why:'', alts:'', refs:'', usedBy:'', family:'',
+    checks: [false,false,false,false]
+  };
+
+  const TIER_CLS  = { primitive:'on-t1', semantic:'on-t2', component:'on-t3' };
+  const TIER_TCLS = { primitive:'t1c',   semantic:'t2c',   component:'t3c'   };
+  const CHK_LABELS = [
+    "Tier correct for token's job",
+    "Name survives a value change",
+    "Name makes sense in its family",
+    "Name encodes meaning, not just value"
+  ];
+
+  /* ── Pill handlers ─────────────────────────────────────── */
+  function selTier(el) {
+    qsa('#tier-pills .pill', p => p.className = 'pill');
+    const v = el.dataset.v;
+    el.className = 'pill ' + (TIER_CLS[v] || 'on');
+    S.tier = v; update();
+  }
+
+  function selStatus(el) {
+    qsa('#status-pills .pill', p => p.className = 'pill');
+    el.className = 'pill on';
+    S.status = el.dataset.v; update();
+  }
+
+  function togWho(el) {
+    const v = el.dataset.v;
+    if (S.who.has(v)) { S.who.delete(v); el.className = 'pill'; }
+    else              { S.who.add(v);    el.className = 'pill on'; }
+    update();
+  }
+
+  function selWhere(el, type) {
+    qsa('#where-pills .pill', p => p.className = 'pill');
+    el.className = 'pill on';
+    S.where = el.dataset.v;
+    id('cond-ctx').className  = 'cond' + (type === 'contextual' ? ' show' : '');
+    id('cond-comp').className = 'cond' + (type === 'component'  ? ' show' : '');
+    update();
+  }
+
+  function updateChecks() {
+    qsa('.check-block input[type="checkbox"]', (cb, i) => {
+      S.checks[i] = cb.checked;
+      cb.closest('label').className = 'check-item' + (cb.checked ? ' ticked' : '');
+    });
+    update();
+  }
+
+  /* ── Gather text fields ────────────────────────────────── */
+  function gather() {
+    S.name      = v('f-name');
+    S.what      = v('f-what');
+    S.whereCtx  = v('f-where-ctx');
+    S.whereComp = v('f-where-comp');
+    S.when      = v('f-when');
+    S.why       = v('f-why');
+    S.alts      = v('f-alts');
+    S.refs      = v('f-refs');
+    S.usedBy    = v('f-used-by');
+    S.family    = v('f-family');
+  }
+
+  function update() { gather(); renderRecord(); }
+
+  /* ── Render record ─────────────────────────────────────── */
+  function renderRecord() {
+    const el = id('record');
+
+    if (!S.name && !S.tier) {
+      el.innerHTML = `<div class="empty-rec">Fill in the token name or select a tier<br>to start building the decision record.<br><br>Or load one of the examples above<br>to see a completed record.</div>`;
+      return;
+    }
+
+    const date    = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+    const tierLbl = S.tier   ? cap(S.tier)   : '—';
+    const statLbl = S.status ? cap(S.status) : '—';
+    const tc      = S.tier ? TIER_TCLS[S.tier] : '';
+    const whoStr  = S.who.size ? [...S.who].join(', ') : null;
+
+    let whereStr = S.where || null;
+    if (S.where === 'Contextual'       && S.whereCtx)  whereStr += ` — ${S.whereCtx}`;
+    if (S.where === 'Component-scoped' && S.whereComp) whereStr += ` — ${S.whereComp}`;
+
+    const altsArr = S.alts ? S.alts.split('\n').map(a => a.trim()).filter(Boolean) : [];
+    const anyCheck = S.checks.some(Boolean);
+
+    el.innerHTML = `
+      <div class="rec-name">${S.name || '(unnamed token)'}</div>
+      <div class="rec-meta">
+        <span class="${tc}">${tierLbl}</span> · ${statLbl} · ${date}
+      </div>
+
+      ${sec('WHO', whoStr
+        ? `<div class="rec-body">${esc(whoStr)}</div>`
+        : empty())}
+
+      ${sec('WHAT', S.what
+        ? `<div class="rec-body">${esc(S.what)}</div>`
+        : empty())}
+
+      ${sec('WHERE', whereStr
+        ? `<div class="rec-body">${esc(whereStr)}</div>`
+        : empty())}
+
+      ${sec('WHEN', S.when
+        ? `<div class="rec-body">${esc(S.when)}</div>`
+        : empty())}
+
+      ${sec('WHY',
+        S.why || altsArr.length ? `
+          ${S.why ? `<div class="rec-body">${esc(S.why)}</div>` : ''}
+          ${altsArr.length ? `
+            <div class="rec-sub">Alternatives considered:</div>
+            ${altsArr.map(a => `<div class="rec-alt">&nbsp;· ${esc(a)}</div>`).join('')}
+          ` : ''}
+        ` : empty()
+      )}
+
+      ${sec('HOW',
+        S.refs || S.usedBy || S.family ? `
+          ${S.refs    ? `<div class="rec-sub">References:</div><div class="rec-body rec-mono">${esc(S.refs)}</div>` : ''}
+          ${S.usedBy  ? `<div class="rec-sub" style="margin-top:5px">Referenced by:</div><div class="rec-body rec-mono">${esc(S.usedBy)}</div>` : ''}
+          ${S.family  ? `<div class="rec-sub" style="margin-top:5px">Family:</div><div class="rec-body rec-mono">${esc(S.family)}</div>` : ''}
+        ` : empty()
+      )}
+
+      ${anyCheck ? `
+        <div class="rec-checks">
+          <div class="rec-head">Systems check</div>
+          ${CHK_LABELS.map((l, i) => `<div class="ck-row${S.checks[i] ? ' y' : ''}">${l}</div>`).join('')}
+        </div>` : ''}
+    `;
+  }
+
+  const sec   = (h, b) => `<div class="rec-sec"><div class="rec-head">${h}</div>${b}</div>`;
+  const empty = ()     => `<div class="rec-empty">Not specified</div>`;
+  const cap   = s      => s.charAt(0).toUpperCase() + s.slice(1);
+  const esc   = s      => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+
+  /* ── Plain text build ──────────────────────────────────── */
+  function buildText() {
+    gather();
+    const date    = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+    const tierLbl = S.tier   ? cap(S.tier)   : '—';
+    const statLbl = S.status ? cap(S.status) : '—';
+    const whoStr  = S.who.size ? [...S.who].join(', ') : '—';
+    let whereStr  = S.where || '—';
+    if (S.where === 'Contextual'       && S.whereCtx)  whereStr += ` — ${S.whereCtx}`;
+    if (S.where === 'Component-scoped' && S.whereComp) whereStr += ` — ${S.whereComp}`;
+    const altsArr = S.alts ? S.alts.split('\n').map(a => a.trim()).filter(Boolean) : [];
+
+    let t = '';
+    t += `TOKEN DECISION RECORD\n${'─'.repeat(44)}\n\n`;
+    t += `Token:  ${S.name || '(unnamed)'}\n`;
+    t += `Tier:   ${tierLbl}\n`;
+    t += `Status: ${statLbl}\n`;
+    t += `Date:   ${date}\n\n`;
+    t += `WHO\n${whoStr}\n\n`;
+    t += `WHAT\n${S.what || '—'}\n\n`;
+    t += `WHERE\n${whereStr}\n\n`;
+    t += `WHEN\n${S.when || '—'}\n\n`;
+    t += `WHY\n${S.why || '—'}\n`;
+    if (altsArr.length) t += `\nAlternatives considered:\n${altsArr.map(a => `  · ${a}`).join('\n')}\n`;
+    t += `\nHOW\n`;
+    t += `References:    ${S.refs   || '—'}\n`;
+    t += `Referenced by: ${S.usedBy || '—'}\n`;
+    t += `Family:        ${S.family || '—'}\n`;
+    if (S.checks.some(Boolean)) {
+      t += `\nSYSTEMS CHECK\n`;
+      CHK_LABELS.forEach((l, i) => t += `${S.checks[i] ? '[✓]' : '[ ]'} ${l}\n`);
+    }
+    return t;
+  }
+
+  async function copyRecord() {
+    try { await navigator.clipboard.writeText(buildText()); } catch(e) {}
+    const btn = document.querySelector('.panel-btns button');
+    const orig = btn.textContent; btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = orig, 1400);
+  }
+
+  function downloadRecord() {
+    const text = buildText();
+    const slug = (S.name || 'token').replace(/[^a-z0-9\-_]/gi,'-').toLowerCase();
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a    = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: `${slug}-decision-record.txt`
+    });
+    a.click();
+  }
+
+  /* ── Presets ───────────────────────────────────────────── */
+  const PRESETS = {
+    primitive: {
+      name:'color-blue-600', tier:'primitive', status:'stable',
+      who:['Internal alias only'], whereType:'global', where:'Global',
+      what:'A specific blue value at the 600 step — the darker half of the blue scale. No semantic meaning is assigned at this tier. Stores the raw hex value only. Cannot be used to express intent or context.',
+      when:'Stateless — primitives carry no interaction state. The value is always #1D4ED8 regardless of any condition or context.',
+      why:"'600' follows the numeric scale convention (100–900). The name uses family prefix (blue) and scale step only — no usage context is encoded at the primitive tier. The hex value was rejected as a name because it breaks the moment the value is adjusted.",
+      alts:'blue-dark\nblue-brand\n#1D4ED8\nblue-60',
+      refs:'#1D4ED8',
+      usedBy:'color-action-primary-default, color-action-primary-hover, color-link-default',
+      family:'color-blue-100, color-blue-200, color-blue-300, color-blue-400, color-blue-500, color-blue-700, color-blue-800, color-blue-900'
+    },
+    semantic: {
+      name:'color-action-primary-default', tier:'semantic', status:'stable',
+      who:['Both'], whereType:'global', where:'Global',
+      what:"The primary action color in its default resting state. Applied wherever an interactive element initiates a primary action — buttons, text links, icon buttons. Not used for feedback states (error, warning, success), brand decoration, or non-interactive surfaces.",
+      when:'Default — no interaction has occurred. Replaced by color-action-primary-hover on hover, -active on press, -disabled when the element is non-interactive.',
+      why:"'action' chosen over 'interactive' (too broad) and 'cta' (too marketing-specific, not engineering vocabulary). 'primary' chosen over 'brand' because action hierarchy is independent of brand expression — in some themes the brand color is not the action color.",
+      alts:'color-interactive-primary-default\ncolor-brand-default\ncolor-cta-default\ncolor-primary',
+      refs:'color-blue-600',
+      usedBy:'button-container-background-default, link-text-default, icon-button-foreground-default',
+      family:'color-action-primary-hover, color-action-primary-active, color-action-primary-focus, color-action-primary-disabled, color-action-secondary-default'
+    },
+    component: {
+      name:'button-container-background-hover', tier:'component', status:'stable',
+      who:['Engineers'], whereType:'component', where:'Component-scoped', whereComp:'button',
+      what:"The background color of the button's outermost container element when the user's pointer is over it. Scoped to the button component — consuming this token in any other context would create invisible coupling. Part of the button container's full interaction state progression.",
+      when:'Hover — pointer device is positioned over the button. Does not apply on touch-only devices. Replaces button-container-background-default.',
+      why:"'container' matches the engineering term for the wrapping element and follows the anatomy vocabulary established in Layer 2. 'background' chosen over 'fill' or 'color' for consistency with the property vocabulary. Follows anatomy formula: [component]-[part]-[property]-[state].",
+      alts:'button-background-hover\nbutton-fill-hover\nbutton-hover-background\nbtn-bg-hover',
+      refs:'color-action-primary-hover',
+      usedBy:'(consumed directly by the Button component)',
+      family:'button-container-background-default, button-container-background-active, button-container-background-focus, button-container-background-disabled'
+    }
+  };
+
+  function loadPreset(key) {
+    const p = PRESETS[key]; if (!p) return;
+    clearForm(false);
+
+    set('f-name',       p.name);
+    set('f-what',       p.what);
+    set('f-when',       p.when);
+    set('f-why',        p.why);
+    set('f-alts',       p.alts);
+    set('f-refs',       p.refs);
+    set('f-used-by',    p.usedBy);
+    set('f-family',     p.family);
+    set('f-where-comp', p.whereComp  || '');
+    set('f-where-ctx',  p.whereCtx   || '');
+
+    S = {
+      ...S,
+      name: p.name, tier: p.tier, status: p.status,
+      who:  new Set(p.who),
+      what: p.what, where: p.where,
+      whereCtx: p.whereCtx || '', whereComp: p.whereComp || '',
+      when: p.when, why: p.why, alts: p.alts,
+      refs: p.refs, usedBy: p.usedBy, family: p.family,
+      checks: [false,false,false,false]
+    };
+
+    // Sync tier pills
+    qsa('#tier-pills .pill', pl => {
+      pl.className = 'pill' + (pl.dataset.v === p.tier ? ' ' + TIER_CLS[p.tier] : '');
+    });
+    // Sync status pills
+    qsa('#status-pills .pill', pl => {
+      pl.className = 'pill' + (pl.dataset.v === p.status ? ' on' : '');
+    });
+    // Sync who pills
+    qsa('#who-pills .pill', pl => {
+      pl.className = 'pill' + (p.who.includes(pl.dataset.v) ? ' on' : '');
+    });
+    // Sync where pills + conditionals
+    qsa('#where-pills .pill', pl => {
+      pl.className = 'pill' + (pl.dataset.v === p.where ? ' on' : '');
+    });
+    id('cond-ctx').className  = 'cond' + (p.whereType === 'contextual' ? ' show' : '');
+    id('cond-comp').className = 'cond' + (p.whereType === 'component'  ? ' show' : '');
+
+    renderRecord();
+  }
+
+  function clearForm(render = true) {
+    ['f-name','f-what','f-when','f-why','f-alts','f-refs','f-used-by','f-family','f-where-comp','f-where-ctx']
+      .forEach(i => set(i, ''));
+    qsa('.pill-group .pill', p => p.className = 'pill');
+    qsa('.check-block input[type="checkbox"]', (cb, i) => {
+      cb.checked = false;
+      cb.closest('label').className = 'check-item';
+    });
+    id('cond-ctx').className  = 'cond';
+    id('cond-comp').className = 'cond';
+    S = { name:'',tier:null,status:null,who:new Set(),what:'',where:null,
+          whereCtx:'',whereComp:'',when:'',why:'',alts:'',refs:'',usedBy:'',
+          family:'',checks:[false,false,false,false] };
+    if (render) renderRecord();
+  }
+
+  /* ── Helpers ───────────────────────────────────────────── */
+  const id  = i   => document.getElementById(i);
+  const v   = i   => id(i).value.trim();
+  const set = (i, val) => { id(i).value = val; };
+  function qsa(sel, fn) {
+    document.querySelectorAll(sel).forEach((el, i) => fn(el, i));
+  }
+
+  /* ── Init ──────────────────────────────────────────────── */
+  renderRecord();
+</script>
+</body>
+</html>

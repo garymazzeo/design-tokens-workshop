@@ -1,0 +1,3459 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Token Naming Builder — Design System Workshop</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --bg-2: #f4f3ef;
+        --bg-3: #eceae4;
+        --tx: #1a1a18;
+        --tx-2: #56564f;
+        --tx-3: #8a8a82;
+        --bd-1: rgba(26, 26, 24, 0.09);
+        --bd-2: rgba(26, 26, 24, 0.2);
+        --bd-3: rgba(26, 26, 24, 0.38);
+        --t1: #185fa5;
+        --t1-bg: #e6f1fb;
+        --t1-bd: rgba(24, 95, 165, 0.3);
+        --t2: #3b6d11;
+        --t2-bg: #eaf3de;
+        --r: 8px;
+        --r-lg: 12px;
+        --sans:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+        --mono:
+          "SF Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono",
+          monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1e1e1b;
+          --bg-2: #292926;
+          --bg-3: #323230;
+          --tx: #f0ede5;
+          --tx-2: #aeaba2;
+          --tx-3: #76736c;
+          --bd-1: rgba(240, 237, 229, 0.09);
+          --bd-2: rgba(240, 237, 229, 0.2);
+          --bd-3: rgba(240, 237, 229, 0.38);
+          --t1: #85b7eb;
+          --t1-bg: #042c53;
+          --t1-bd: rgba(133, 183, 235, 0.3);
+          --t2: #97c459;
+          --t2-bg: #173404;
+        }
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--sans);
+        background: var(--bg-3);
+        color: var(--tx);
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+        line-height: 1.5;
+      }
+      input[type="text"],
+      input[type="number"],
+      select,
+      textarea {
+        font-family: var(--sans);
+        font-size: 13px;
+        color: var(--tx);
+        background: var(--bg);
+        border: 0.5px solid var(--bd-2);
+        border-radius: var(--r);
+        padding: 0 9px;
+        height: 32px;
+        outline: none;
+        transition: border-color 0.12s;
+        width: 100%;
+      }
+      textarea {
+        height: auto;
+        padding: 7px 9px;
+        resize: vertical;
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      input::placeholder,
+      textarea::placeholder {
+        color: var(--tx-3);
+      }
+      input:hover,
+      select:hover,
+      textarea:hover {
+        border-color: var(--bd-3);
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--bd-3);
+        box-shadow: 0 0 0 3px rgba(26, 26, 24, 0.05);
+      }
+      @media (prefers-color-scheme: dark) {
+        input:focus,
+        select:focus,
+        textarea:focus {
+          box-shadow: 0 0 0 3px rgba(240, 237, 229, 0.05);
+        }
+      }
+      button {
+        font-family: var(--sans);
+        font-size: 12px;
+        color: var(--tx);
+        background: var(--bg);
+        border: 0.5px solid var(--bd-2);
+        border-radius: var(--r);
+        padding: 0 11px;
+        height: 30px;
+        cursor: pointer;
+        transition:
+          background 0.1s,
+          border-color 0.1s;
+      }
+      button:hover {
+        background: var(--bg-2);
+        border-color: var(--bd-3);
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      .btn-solid {
+        background: var(--tx);
+        color: var(--bg);
+        border-color: var(--tx);
+      }
+      .btn-solid:hover {
+        opacity: 0.85;
+        background: var(--tx);
+      }
+      .btn-ghost {
+        color: var(--tx-3);
+        border-color: transparent;
+        background: transparent;
+      }
+      .btn-ghost:hover {
+        background: var(--bg-2);
+        border-color: var(--bd-1);
+        color: var(--tx);
+      }
+      .btn-xs {
+        height: 24px;
+        padding: 0 8px;
+        font-size: 11px;
+      }
+      .btn-icon {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        background: var(--bg);
+        border: 0.5px solid var(--bd-1);
+        border-radius: var(--r-lg);
+        padding: 2rem;
+      }
+      .hdr {
+        margin-bottom: 1.5rem;
+      }
+      .hdr-eye {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--tx-3);
+        margin-bottom: 4px;
+      }
+      .hdr-h1 {
+        font-size: 22px;
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+      }
+      .hdr-title-input {
+        display: block;
+        width: 100%;
+        font: inherit;
+        color: inherit;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid transparent;
+        border-radius: 0;
+        padding: 0;
+        margin-bottom: 0.3rem;
+      }
+      .hdr-title-input:focus {
+        outline: none;
+        border-bottom-color: var(--bd-2);
+      }
+      .hdr-desc {
+        font-size: 14px;
+        color: var(--tx-2);
+        line-height: 1.6;
+        margin-bottom: 0.85rem;
+      }
+      .hdr-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .hdr-row > span {
+        font-size: 12px;
+        color: var(--tx-3);
+      }
+      .tier-toggle {
+        display: inline-flex;
+        gap: 4px;
+        padding: 2px;
+        background: var(--bg-2);
+        border: 0.5px solid var(--bd-1);
+        border-radius: var(--r);
+      }
+      .tier-toggle button {
+        height: 28px;
+        border: none;
+        background: transparent;
+        color: var(--tx-3);
+      }
+      .tier-toggle button:hover {
+        background: var(--bg);
+        color: var(--tx);
+        border: none;
+      }
+      .tier-toggle button.is-active {
+        background: var(--bg);
+        color: var(--tx);
+        box-shadow: 0 0 0 0.5px var(--bd-2);
+      }
+      .tier-toggle button.is-active.tier-t1 {
+        color: var(--t1);
+      }
+      .tier-toggle button.is-active.tier-t2 {
+        color: var(--t2);
+      }
+      .cat-type-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+        min-width: 0;
+      }
+      .cat-type-wrap label {
+        font-size: 11px;
+        color: var(--tx-3);
+        white-space: nowrap;
+      }
+      .cat-type-select {
+        max-width: 160px;
+        width: auto;
+        flex: 1;
+        min-width: 120px;
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      .cat-type-hint {
+        font-size: 10px;
+        color: var(--tx-3);
+        white-space: nowrap;
+      }
+      @media (max-width: 720px) {
+        .cat-type-hint {
+          display: none;
+        }
+        .cat-head {
+          flex-wrap: wrap;
+        }
+        .cat-type-wrap {
+          flex-basis: 100%;
+          order: 3;
+        }
+        .cat-type-select {
+          max-width: none;
+        }
+      }
+
+      .step {
+        margin-bottom: 1.75rem;
+      }
+      .step-hdr {
+        display: flex;
+        align-items: baseline;
+        flex-direction: column;
+        margin-bottom: 4px;
+      }
+      .step-num {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--tx-3);
+        min-width: 60px;
+      }
+      .step-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--tx);
+      }
+      .step-hint {
+        font-size: 12px;
+        color: var(--tx-3);
+        line-height: 1.55;
+        margin: 4px 0 12px;
+      }
+
+      @media (max-width: 760px) {
+        .step-hint,
+        .step-body {
+          padding-left: 0;
+          margin-left: 0;
+        }
+      }
+
+      /* axis rows */
+      .axis-row {
+        display: grid;
+        grid-template-columns: 28px 1fr 150px 80px;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .axis-handle {
+        font-size: 12px;
+        color: var(--tx-3);
+        text-align: center;
+        cursor: default;
+      }
+      .axis-locked {
+        font-size: 11px;
+        color: var(--tx-3);
+        padding: 0 9px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        background: var(--bg-2);
+        border-radius: var(--r);
+        border: 0.5px solid var(--bd-1);
+      }
+      .axis-add-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .axis-add-row input {
+        flex: 1;
+      }
+
+      /* category cards */
+      .cat-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .cat-card {
+        border: 0.5px solid var(--bd-1);
+        border-radius: var(--r);
+        overflow: hidden;
+      }
+      .cat-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 12px;
+        background: var(--bg-2);
+        border-bottom: 0.5px solid var(--bd-1);
+      }
+      .cat-head input[type="text"] {
+        max-width: 160px;
+        font-weight: 500;
+      }
+      .cat-body {
+        padding: 12px;
+        display: grid;
+        gap: 10px;
+      }
+      .axis-config {
+        border: 0.5px solid var(--bd-1);
+        border-radius: var(--r);
+        padding: 10px;
+      }
+      .axis-config-hdr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .axis-config-name {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--tx-3);
+      }
+      .gen-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .gen-row select {
+        width: auto;
+        min-width: 110px;
+      }
+      .gen-row input[type="text"],
+      .gen-row input[type="number"] {
+        width: 70px;
+        flex: none;
+      }
+      .gen-row input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+      .gen-row input[type="number"]::-webkit-outer-spin-button,
+      .gen-row input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      .gen-row label {
+        font-size: 11px;
+        color: var(--tx-3);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .values-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 6px;
+      }
+      .val-chip {
+        font-size: 11px;
+        font-family: var(--mono);
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: var(--bg-2);
+        border: 0.5px solid var(--bd-1);
+        color: var(--tx-2);
+      }
+      .cl {
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--tx-3);
+        margin-bottom: 4px;
+      }
+      .cat-mode-toggle {
+        display: none;
+      }
+      .branch-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .branch-card {
+        border: 0.5px solid var(--bd-1);
+        border-radius: var(--r);
+        padding: 10px;
+        background: var(--bg);
+      }
+      .branch-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .branch-head input {
+        max-width: 180px;
+        font-weight: 500;
+      }
+      .branch-head span {
+        font-size: 11px;
+        color: var(--tx-3);
+        flex: 1;
+      }
+      .axis-nest {
+        margin-left: 12px;
+        padding-left: 12px;
+        border-left: 2px solid var(--bd-1);
+        display: grid;
+        gap: 8px;
+      }
+      .axis-branch-meta {
+        font-size: 11px;
+        color: var(--tx-3);
+        margin-bottom: 6px;
+      }
+      .axis-branch-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .unused-note {
+        font-size: 11px;
+        color: var(--tx-3);
+        font-style: italic;
+        margin: 4px 0;
+      }
+
+      /* layout */
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr min(380px, 36%);
+        gap: 2rem;
+        align-items: start;
+      }
+      .layout-sidebar {
+        position: sticky;
+        top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      @media (max-width: 960px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .layout-sidebar {
+          position: static;
+        }
+      }
+      .sidebar-step-hdr {
+        margin-bottom: 0;
+      }
+      .sidebar-step-hdr .step-hint {
+        margin-left: 0;
+        margin-bottom: 0;
+      }
+
+      /* preview panel */
+      .panel {
+        border: 0.5px solid var(--bd-1);
+        border-radius: var(--r);
+        overflow: hidden;
+      }
+      .panel-head {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--tx-3);
+        padding: 8px 14px;
+        border-bottom: 0.5px solid var(--bd-1);
+        background: var(--bg-2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .panel-body {
+        padding: 14px;
+        background: var(--bg);
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+
+      .formula-line {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--t1);
+        background: var(--t1-bg);
+        border: 0.5px solid var(--t1-bd);
+        border-radius: var(--r);
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        word-break: break-all;
+      }
+      .formula-line .sep {
+        color: var(--tx-3);
+      }
+
+      .cat-preview {
+        margin-bottom: 14px;
+        padding-bottom: 14px;
+        border-bottom: 0.5px solid var(--bd-1);
+      }
+      .cat-preview:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      .cp-name {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--tx);
+        margin-bottom: 4px;
+      }
+      .cp-tok {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--t1);
+        margin-bottom: 2px;
+        word-break: break-all;
+      }
+      .cp-tok .seg-cat {
+        color: var(--t1);
+      }
+      .cp-tok .seg-ns {
+        color: #6b4fa0;
+      }
+      .cp-tok .seg-fam {
+        color: var(--t2);
+      }
+      .cp-tok .seg-scale {
+        color: #854f0b;
+      }
+      .cp-tok .sep {
+        color: var(--tx-3);
+      }
+      .cp-tok .seg-prefix {
+        color: var(--tx-3);
+      }
+      .cp-formula {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--tx-3);
+        margin-bottom: 6px;
+      }
+      .cp-formula .sep {
+        color: var(--tx-3);
+      }
+      .cp-count {
+        font-size: 10px;
+        color: var(--tx-3);
+        margin-top: 4px;
+      }
+      .cp-empty {
+        font-size: 11px;
+        color: var(--tx-3);
+        font-style: italic;
+      }
+
+      .empty-msg {
+        font-size: 12px;
+        color: var(--tx-3);
+        font-style: italic;
+        text-align: center;
+        padding: 1.5rem 0;
+      }
+
+      .legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 10.5px;
+        color: var(--tx-3);
+        margin-bottom: 10px;
+      }
+      .legend span.dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 4px;
+        vertical-align: middle;
+      }
+      .dot-cat {
+        background: var(--t1);
+      }
+      .dot-ns {
+        background: #6b4fa0;
+      }
+      .dot-fam {
+        background: var(--t2);
+      }
+      .dot-scale {
+        background: #854f0b;
+      }
+
+      .export-area {
+        margin-top: 10px;
+      }
+      .export-area textarea {
+        width: 100%;
+        height: 160px;
+        font-size: 11px;
+      }
+      .warn {
+        font-size: 11px;
+        color: #854f0b;
+        background: #fdf3e0;
+        border: 0.5px solid #fcd34d;
+        border-radius: var(--r);
+        padding: 6px 10px;
+        margin-top: 6px;
+      }
+      .ns-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--tx-2);
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+      .ns-toggle input {
+        width: auto;
+        height: auto;
+        accent-color: var(--t1);
+      }
+      .restore-banner {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        z-index: 1000;
+        font-size: 12px;
+        color: var(--tx);
+        background: var(--t1-bg);
+        border: 0.5px solid var(--t1-bd);
+        border-left: 3px solid var(--t1);
+        border-radius: var(--r-lg);
+        padding: 10px 10px 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: min(520px, calc(100vw - 3rem));
+        box-shadow:
+          0 4px 8px -1px rgba(24, 95, 165, 0.12),
+          0 12px 24px -4px rgba(0, 0, 0, 0.12);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateX(-50%) translateY(10px);
+        transition:
+          opacity 0.45s ease,
+          visibility 0.45s ease,
+          transform 0.45s ease;
+      }
+      .restore-banner.is-visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateX(-50%) translateY(0);
+      }
+      .restore-banner[hidden] {
+        display: none;
+      }
+      .restore-banner-text {
+        flex: 1;
+        min-width: 0;
+        font-weight: 500;
+      }
+      .restore-banner-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .restore-banner-dismiss {
+        color: var(--tx-3);
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="hdr">
+        <p class="hdr-eye" id="hdr-eye">Token Naming Building · Axis Cartesian Mapping</p>
+        <input
+          id="project-title"
+          class="hdr-h1 hdr-title-input"
+          type="text"
+          value="Tier 1 Tokens"
+          maxlength="80"
+          onfocus="historyOnFieldFocus('projectTitle')"
+          onblur="historyOnFieldBlur('projectTitle')"
+          oninput="setProjectTitle(this.value)"
+        />
+        <p class="hdr-desc" id="hdr-desc">
+          Define the axes that make up your token names, then populate each
+          category with axis values. Export a naming convention reference and
+          DTCG-shaped JSON (names and types only — values are added elsewhere).
+        </p>
+        <div class="hdr-row" style="margin-bottom: 10px">
+          <span>Tier:</span>
+          <div class="tier-toggle" role="group" aria-label="Token tier">
+            <button
+              type="button"
+              id="tier-btn-1"
+              class="tier-t1 is-active"
+              onclick="setTierMode('tier1')"
+            >
+              Tier 1 · Primitive
+            </button>
+            <button
+              type="button"
+              id="tier-btn-2"
+              class="tier-t2"
+              onclick="setTierMode('tier2')"
+            >
+              Tier 2 · Semantic
+            </button>
+          </div>
+        </div>
+        <div class="hdr-row" id="preset-row">
+          <span>Load example:</span>
+          <button type="button" data-preset="basic" onclick="loadPreset('basic')">
+            Basic (category + scale)
+          </button>
+          <button type="button" data-preset="full" onclick="loadPreset('full')">
+            Category + family + scale
+          </button>
+          <button
+            type="button"
+            data-preset="families"
+            onclick="loadPreset('families')"
+          >
+            Branched axes (border)
+          </button>
+          <button
+            type="button"
+            data-preset="semantic-color"
+            onclick="loadPreset('semantic-color')"
+            hidden
+          >
+            Semantic color
+          </button>
+          <button
+            type="button"
+            data-preset="typography-compound"
+            onclick="loadPreset('typography-compound')"
+            hidden
+          >
+            Typography compound
+          </button>
+          <button class="btn-ghost" onclick="clearAll()">Clear</button>
+        </div>
+        <div class="hdr-row">
+          <span>Edit:</span>
+          <button id="undo-btn" onclick="undo()" disabled title="Undo (⌘Z)">
+            Undo
+          </button>
+          <button id="redo-btn" onclick="redo()" disabled title="Redo (⇧⌘Z)">
+            Redo
+          </button>
+        </div>
+        <div class="hdr-row">
+          <span>Save:</span>
+          <button onclick="downloadProject()">Export project</button>
+          <button onclick="triggerImportProject()">Import project</button>
+          <button id="copy-share-link-btn" onclick="copyShareLink()">
+            Copy share link
+          </button>
+          <input
+            type="file"
+            id="import-project-input"
+            accept=".json,application/json"
+            hidden
+            onchange="handleImportProject(event)"
+          />
+        </div>
+      </div>
+
+      <div class="layout">
+        <div class="layout-main">
+          <!-- STEP 1: Axes -->
+          <div class="step">
+            <div class="step-hdr">
+              <span class="step-num">Step 1</span>
+              <span class="step-title">Define your axes</span>
+            </div>
+            <p class="step-hint" id="step1-hint">
+              Token names follow a fixed structure:
+              <strong style="font-weight: 500">category</strong> and
+              <strong style="font-weight: 500">scale</strong> are required.
+              <strong style="font-weight: 500">Namespace</strong> is optional and
+              comes first when enabled. Add other axes (e.g.
+              <strong style="font-weight: 500">family</strong>) between category
+              and scale.
+            </p>
+            <div class="step-body">
+              <label class="ns-toggle">
+                <input
+                  type="checkbox"
+                  id="namespace-toggle"
+                  onchange="toggleNamespace(this.checked)"
+                />
+                Include namespace axis (before category)
+              </label>
+              <div id="axis-list"></div>
+              <div class="axis-add-row">
+                <input
+                  type="text"
+                  id="new-axis-name"
+                  placeholder="e.g. family, variant — comma-separated OK"
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();addAxis()}"
+                />
+                <button onclick="addAxis()">+ Add axis</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Categories -->
+          <div class="step">
+            <div class="step-hdr">
+              <span class="step-num">Step 2</span>
+              <span class="step-title"
+                >Add categories &amp; populate axis values</span
+              >
+            </div>
+            <p class="step-hint" id="step2-hint">
+              Each category (color, space, font-size…) gets its own values for
+              each axis and a DTCG <code style="font-family: var(--mono)">$type</code>
+              (category name ≠ type — e.g. space → dimension).
+              <strong style="font-weight: 500">Category</strong> and
+              <strong style="font-weight: 500">scale</strong> are always
+              configured here. Namespace is set once in Step 1 and applies to
+              all tokens. Set an axis to
+              <strong style="font-weight: 500">Unused</strong> when it doesn't
+              apply — e.g.
+              <code style="font-family: var(--mono)">space</code> usually has no
+              family axis. Use
+              <strong style="font-weight: 500">Branch this axis</strong> when
+              sibling paths need different scales (e.g. border-radius vs
+              border-width).
+            </p>
+            <div class="step-body">
+              <div class="cat-list" id="cat-list"></div>
+              <div class="axis-add-row">
+                <input
+                  type="text"
+                  id="new-cat-name"
+                  placeholder="e.g. color, space, font-size — comma-separated OK"
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();addCategory()}"
+                />
+                <button onclick="addCategory()">+ Add category</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="layout-sidebar">
+          <div class="step-hdr sidebar-step-hdr">
+            <span class="step-num">Step 3</span>
+            <span class="step-title">Review &amp; export</span>
+          </div>
+          <p class="step-hint" id="step3-hint">
+            Preview names live. Export CSS stubs, a markdown convention, or
+            DTCG-shaped JSON (group <code style="font-family: var(--mono)">$type</code>
+            + leaf descriptions — not import-ready values).
+          </p>
+          <div class="panel">
+            <div class="panel-head">
+              <span>Live preview</span>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                <button class="btn-xs" onclick="copyCssExport()">Copy CSS</button>
+                <button class="btn-xs btn-solid" onclick="downloadCssExport()">
+                  Download .css
+                </button>
+              </div>
+            </div>
+            <div class="panel-body" id="preview-body">
+              <div class="empty-msg">
+                Add axes and categories to see your naming formula and example
+                tokens.
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <span>DTCG-shaped JSON</span>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                <button class="btn-xs" onclick="copyDtcgExport()">Copy</button>
+                <button class="btn-xs btn-solid" onclick="downloadDtcgExport()">
+                  Download .tokens.json
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="export-area">
+                <textarea id="dtcg-out" readonly></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <span>Convention export</span>
+              <div style="display: flex; gap: 6px">
+                <button class="btn-xs" onclick="copyExport()">Copy</button>
+                <button class="btn-xs btn-solid" onclick="downloadExport()">
+                  Download .md
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="export-area">
+                <textarea id="export-out" readonly></textarea>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div id="restore-banner" class="restore-banner" hidden role="status">
+      <span class="restore-banner-text">Restored your last session.</span>
+      <div class="restore-banner-actions">
+        <button type="button" class="btn-xs btn-ghost" onclick="startFresh()">
+          Start fresh
+        </button>
+        <button
+          type="button"
+          class="btn-icon btn-ghost restore-banner-dismiss"
+          onclick="hideRestoreBanner()"
+          aria-label="Dismiss"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <script>
+      /* ── State ──────────────────────────────────────────── */
+      const DEFAULT_PROJECT_TITLE_T1 = "Tier 1 Tokens";
+      const DEFAULT_PROJECT_TITLE_T2 = "Tier 2 Tokens";
+      let tierMode = "tier1"; // "tier1" | "tier2"
+      let projectTitle = DEFAULT_PROJECT_TITLE_T1;
+      let namespaceEnabled = false;
+      let namespaceValue = "";
+      let axes = [
+        { id: "category", name: "category", locked: true, slot: "category" },
+        { id: "scale", name: "scale", locked: true, slot: "scale" },
+      ];
+      let categories = []; // {id, name, dtcgType, values:{axisId: flat|branched}}
+      let axisSeq = 0,
+        catSeq = 0,
+        brSeq = 0;
+
+      const RESERVED_AXIS_NAMES = new Set(["category", "namespace"]);
+
+      const DTCG_FUNDAMENTAL_TYPES = [
+        "color",
+        "dimension",
+        "fontFamily",
+        "fontWeight",
+        "duration",
+        "cubicBezier",
+        "number",
+      ];
+      const DTCG_COMPOSITE_TYPES = [
+        "strokeStyle",
+        "border",
+        "transition",
+        "shadow",
+        "gradient",
+        "typography",
+      ];
+      const DTCG_TYPES = new Set([
+        ...DTCG_FUNDAMENTAL_TYPES,
+        ...DTCG_COMPOSITE_TYPES,
+      ]);
+      const DTCG_LEAF_DESCRIPTION = "Naming placeholder — value TBD";
+
+      const TIER1_PRESETS = new Set(["basic", "full", "families"]);
+      const TIER2_PRESETS = new Set(["semantic-color", "typography-compound"]);
+
+      function defaultTitleForTier(mode) {
+        return mode === "tier2"
+          ? DEFAULT_PROJECT_TITLE_T2
+          : DEFAULT_PROJECT_TITLE_T1;
+      }
+
+      function isDefaultProjectTitle(title) {
+        return (
+          title === DEFAULT_PROJECT_TITLE_T1 ||
+          title === DEFAULT_PROJECT_TITLE_T2
+        );
+      }
+
+      function scaleAxisIndex() {
+        return axes.findIndex((a) => a.slot === "scale");
+      }
+
+      function categoryAxisIndex() {
+        return axes.findIndex((a) => a.slot === "category");
+      }
+
+      function syncScaleAxisForTier() {
+        if (tierMode === "tier2") {
+          axes.forEach((a) => {
+            if (a.slot === "scale") {
+              a.slot = "middle";
+              a.locked = false;
+            }
+          });
+          return;
+        }
+
+        let scaleAx = axes.find((a) => a.slot === "scale");
+        if (!scaleAx) {
+          scaleAx = axes.find((a) => a.name === "scale" && a.slot === "middle");
+        }
+        if (!scaleAx) {
+          scaleAx = {
+            id: "scale",
+            name: "scale",
+            locked: true,
+            slot: "scale",
+          };
+          axes.push(scaleAx);
+        } else {
+          scaleAx.slot = "scale";
+          scaleAx.locked = true;
+          scaleAx.name = "scale";
+        }
+        axes = axes.filter((a) => a.id !== scaleAx.id);
+        axes.push(scaleAx);
+        categories.forEach((c) => {
+          normalizeCategory(c);
+          initCategoryValues(c);
+        });
+      }
+
+      function setTierMode(mode) {
+        if (mode !== "tier1" && mode !== "tier2") return;
+        if (mode === tierMode) return;
+        pushHistory();
+        const prevTitle = projectTitle;
+        tierMode = mode;
+        if (isDefaultProjectTitle(prevTitle)) {
+          projectTitle = defaultTitleForTier(mode);
+        }
+        syncScaleAxisForTier();
+        renderAll();
+      }
+
+      function updateTierModeUI() {
+        const btn1 = id("tier-btn-1");
+        const btn2 = id("tier-btn-2");
+        if (btn1) btn1.classList.toggle("is-active", tierMode === "tier1");
+        if (btn2) btn2.classList.toggle("is-active", tierMode === "tier2");
+
+        const eye = id("hdr-eye");
+        if (eye) {
+          eye.textContent =
+            tierMode === "tier2"
+              ? "Workshop tool · Tier 2 · Semantic naming"
+              : "Workshop tool · Tier 1 · Primitive naming";
+        }
+
+        const step1 = id("step1-hint");
+        if (step1) {
+          step1.innerHTML =
+            tierMode === "tier2"
+              ? `Token names follow a fixed structure:
+              <strong style="font-weight: 500">category</strong> is required.
+              Other axes (role, emphasis, hierarchy, state, scale, …) are optional —
+              add, reorder, or remove them like any middle axis.
+              <strong style="font-weight: 500">Namespace</strong> is optional and comes first when enabled.`
+              : `Token names follow a fixed structure:
+              <strong style="font-weight: 500">category</strong> and
+              <strong style="font-weight: 500">scale</strong> are required.
+              <strong style="font-weight: 500">Namespace</strong> is optional and
+              comes first when enabled. Add other axes (e.g.
+              <strong style="font-weight: 500">family</strong>) between category
+              and scale.`;
+        }
+
+        const step2 = id("step2-hint");
+        if (step2) {
+          step2.innerHTML =
+            tierMode === "tier2"
+              ? `Each category gets axis values and a DTCG
+              <code style="font-family: var(--mono)">$type</code>
+              (category name ≠ type — e.g. space → dimension).
+              Set any axis to <strong style="font-weight: 500">Unused</strong>
+              when it does not apply, or remove the axis entirely in Step 1.
+              Use axes for compound names such as
+              <code style="font-family: var(--mono)">typography-heading-xl</code>.`
+              : `Each category (color, space, font-size…) gets its own values for
+              each axis and a DTCG <code style="font-family: var(--mono)">$type</code>
+              (category name ≠ type — e.g. space → dimension).
+              <strong style="font-weight: 500">Category</strong> and
+              <strong style="font-weight: 500">scale</strong> are always
+              configured here. Namespace is set once in Step 1 and applies to
+              all tokens. Set an axis to
+              <strong style="font-weight: 500">Unused</strong> when it doesn't
+              apply — e.g.
+              <code style="font-family: var(--mono)">space</code> usually has no
+              family axis. Use
+              <strong style="font-weight: 500">Branch this axis</strong> when
+              sibling paths need different scales (e.g. border-radius vs
+              border-width).`;
+        }
+
+        document.querySelectorAll("#preset-row [data-preset]").forEach((btn) => {
+          const key = btn.getAttribute("data-preset");
+          const show =
+            (tierMode === "tier1" && TIER1_PRESETS.has(key)) ||
+            (tierMode === "tier2" && TIER2_PRESETS.has(key));
+          btn.hidden = !show;
+        });
+      }
+
+      /* ── Axis management ───────────────────────────────── */
+      function toggleNamespace(enabled) {
+        pushHistory();
+        namespaceEnabled = enabled;
+        if (enabled) {
+          axes.unshift({
+            id: "namespace",
+            name: "namespace",
+            locked: true,
+            slot: "namespace",
+          });
+        } else {
+          axes = axes.filter((a) => a.slot !== "namespace");
+          namespaceValue = "";
+        }
+        renderAll();
+      }
+
+      function setNamespaceValue(val) {
+        namespaceValue = val.trim().toLowerCase().replace(/\s+/g, "-");
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+
+      function initCategoryValues(c) {
+        axes.forEach((ax) => {
+          if (ax.slot !== "category" && ax.slot !== "namespace") {
+            if (!c.values[ax.id]) c.values[ax.id] = mkAxisVal();
+          }
+        });
+      }
+
+      function seedDefaultCategory() {
+        if (categories.length) return;
+        categories.push({
+          id: "cat" + ++catSeq,
+          name: "color",
+          dtcgType: "color",
+          values: {},
+        });
+        initCategoryValues(categories[0]);
+      }
+
+      function addAxis() {
+        const inp = id("new-axis-name");
+        const names = parseCustomList(inp.value)
+          .map((s) => s.trim().toLowerCase().replace(/\s+/g, "-"))
+          .filter(Boolean);
+        const existing = new Set(axes.map((a) => a.name));
+        const seen = new Set();
+        const toAdd = [];
+        for (const name of names) {
+          if (
+            !name ||
+            RESERVED_AXIS_NAMES.has(name) ||
+            seen.has(name) ||
+            existing.has(name)
+          )
+            continue;
+          seen.add(name);
+          toAdd.push(name);
+        }
+        if (!toAdd.length) {
+          inp.focus();
+          return;
+        }
+        pushHistory();
+        let insertAt = scaleAxisIndex();
+        if (insertAt < 0) insertAt = axes.length;
+        toAdd.forEach((name) => {
+          const newAx = {
+            id: "ax" + ++axisSeq,
+            name,
+            locked: false,
+            slot: "middle",
+          };
+          axes.splice(insertAt, 0, newAx);
+          categories.forEach((c) => (c.values[newAx.id] = mkAxisVal()));
+          insertAt++;
+        });
+        inp.value = "";
+        renderAll();
+        inp.focus();
+      }
+      function removeAxis(axId) {
+        const ax = axes.find((a) => a.id === axId);
+        if (!ax || ax.slot !== "middle") return;
+        pushHistory();
+        axes = axes.filter((a) => a.id !== axId);
+        categories.forEach((c) => {
+          walkBranchedValues(c.values, (values) => {
+            delete values[axId];
+          });
+        });
+        renderAll();
+      }
+      function renameAxis(axId, val) {
+        const ax = axes.find((a) => a.id === axId);
+        if (!ax || ax.slot !== "middle") return;
+        const next = val.trim().toLowerCase().replace(/\s+/g, "-") || ax.name;
+        if (
+          RESERVED_AXIS_NAMES.has(next) ||
+          axes.some((a) => a.id !== axId && a.name === next)
+        )
+          return;
+        ax.name = next;
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+      function moveAxis(axId, dir) {
+        const ax = axes.find((a) => a.id === axId);
+        if (!ax || ax.slot !== "middle") return;
+        const i = axes.findIndex((a) => a.id === axId);
+        const j = i + dir;
+        const catIdx = categoryAxisIndex();
+        const scaleIdx = scaleAxisIndex();
+        const maxIdx = scaleIdx >= 0 ? scaleIdx : axes.length;
+        if (j <= catIdx || j >= maxIdx) return;
+        pushHistory();
+        [axes[i], axes[j]] = [axes[j], axes[i]];
+        renderAll();
+      }
+
+      const SCALE_TYPES = {
+        unused: { label: "Unused", desc: "Skip this axis for this category" },
+        numeric: { label: "Numeric range", desc: "e.g. 4, 8, 12, 16…" },
+        ordinal: { label: "Ordinal (100–900)", desc: "e.g. 100, 200…900" },
+        tshirt: { label: "T-shirt sizes", desc: "e.g. xs, sm, md, lg, xl" },
+        custom: { label: "Custom list", desc: "comma-separated values; use [default], [base], etc. to omit that segment from the name" },
+      };
+      const TSHIRT_BASE = ["xs", "sm", "md", "lg", "xl"];
+
+      /* ── Category management ──────────────────────────── */
+      function mkAxisVal() {
+        return { type: "custom", config: {}, list: [] };
+      }
+
+      function mkBranchId() {
+        return "br" + ++brSeq;
+      }
+
+      function mkBranch(value) {
+        return { id: mkBranchId(), value, values: {} };
+      }
+
+      function isBranched(av) {
+        return av && av.mode === "branched";
+      }
+
+      function parseBranchPath(str) {
+        return str ? String(str).split("|").filter(Boolean) : [];
+      }
+
+      function encodeBranchPath(path) {
+        return path.length ? path.join("|") : "";
+      }
+
+      function axisIndexById(axId) {
+        return axes.findIndex((a) => a.id === axId);
+      }
+
+      function configurableAxesFrom(startIdx) {
+        return axes
+          .slice(startIdx)
+          .filter((a) => a.slot !== "namespace" && a.slot !== "category");
+      }
+
+      function initSubtreeValues(fromAxId) {
+        const vals = {};
+        const fromIdx = axisIndexById(fromAxId);
+        configurableAxesFrom(fromIdx + 1).forEach((ax) => {
+          vals[ax.id] = mkAxisVal();
+        });
+        return vals;
+      }
+
+      function shadowSubsequentAxes(values, branchedAxId) {
+        const fromIdx = axisIndexById(branchedAxId);
+        configurableAxesFrom(fromIdx + 1).forEach((ax) => {
+          values[ax.id] = { type: "unused", config: {}, list: [] };
+        });
+      }
+
+      function getValuesMap(category, branchPath) {
+        if (!branchPath.length) return category.values;
+        let values = category.values;
+        for (const brId of branchPath) {
+          const found = findBranchInValues(values, brId);
+          if (!found) return values;
+          if (!found.branch.values) found.branch.values = {};
+          values = found.branch.values;
+        }
+        return values;
+      }
+
+      function findBranchInValues(values, branchId) {
+        for (const ax of axes) {
+          if (ax.slot === "namespace" || ax.slot === "category") continue;
+          const av = values[ax.id];
+          if (isBranched(av)) {
+            const br = av.branches.find((b) => b.id === branchId);
+            if (br) return { ax, av, branch: br };
+          }
+        }
+        return null;
+      }
+
+      function isShadowedAtLevel(values, axId) {
+        const axIdx = axisIndexById(axId);
+        for (let i = 0; i < axIdx; i++) {
+          const earlier = axes[i];
+          if (earlier.slot === "namespace" || earlier.slot === "category")
+            continue;
+          const av = values[earlier.id];
+          if (isBranched(av)) return true;
+        }
+        return false;
+      }
+
+      function pruneValuesScope(values, startAxisIdx) {
+        Object.keys(values).forEach((key) => {
+          const ax = axes.find((a) => a.id === key);
+          if (!ax) return;
+          if (ax.slot === "namespace" || ax.slot === "category") return;
+          if (axisIndexById(ax.id) < startAxisIdx) delete values[key];
+        });
+      }
+
+      function normalizeValuesScope(values, startAxisIdx) {
+        pruneValuesScope(values, startAxisIdx);
+        for (let i = startAxisIdx; i < axes.length; i++) {
+          const ax = axes[i];
+          if (ax.slot === "namespace" || ax.slot === "category") continue;
+          if (!values[ax.id]) values[ax.id] = mkAxisVal();
+          const av = values[ax.id];
+          if (isBranched(av)) {
+            shadowSubsequentAxes(values, ax.id);
+            av.branches.forEach((br) => {
+              if (!br.values) br.values = {};
+              normalizeValuesScope(br.values, i + 1);
+            });
+            break;
+          }
+        }
+      }
+
+      function migrateFamiliesMode(c) {
+        if (c.mode !== "families" || !Array.isArray(c.families) || !c.families.length)
+          return;
+        let familyAx =
+          axes.find((a) => a.slot === "middle" && a.name === "family") ||
+          axes.find((a) => a.slot === "middle");
+        if (!familyAx) {
+          const insertAt = scaleAxisIndex();
+          familyAx = {
+            id: "ax" + ++axisSeq,
+            name: "family",
+            locked: false,
+            slot: "middle",
+          };
+          axes.splice(insertAt < 0 ? axes.length : insertAt, 0, familyAx);
+        }
+        if (!c.values) c.values = {};
+        c.values[familyAx.id] = {
+          mode: "branched",
+          branches: c.families.map((f) => ({
+            id: f.id && /^br\d+$/.test(f.id) ? f.id : mkBranchId(),
+            value: f.name,
+            values: { scale: f.scale || mkAxisVal() },
+          })),
+        };
+        shadowSubsequentAxes(c.values, familyAx.id);
+        delete c.mode;
+        delete c.families;
+      }
+
+      function normalizeCategory(c) {
+        if (!c.values) c.values = {};
+        if (typeof c.dtcgType !== "string" || !DTCG_TYPES.has(c.dtcgType)) {
+          c.dtcgType = "";
+        }
+        migrateFamiliesMode(c);
+        delete c.mode;
+        delete c.families;
+        normalizeValuesScope(c.values, firstConfigurableAxisIndex());
+      }
+
+      function walkBranchedValues(values, fn) {
+        fn(values);
+        for (const ax of axes) {
+          if (ax.slot === "namespace" || ax.slot === "category") continue;
+          const av = values[ax.id];
+          if (!isBranched(av)) continue;
+          av.branches.forEach((br) => {
+            if (!br.values) br.values = {};
+            walkBranchedValues(br.values, fn);
+          });
+        }
+      }
+
+      function branchAxis(catId, axId, branchPathStr) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const ax = axes.find((a) => a.id === axId);
+        if (!ax || ax.slot !== "middle") return;
+        const branchPath = parseBranchPath(branchPathStr);
+        const values = getValuesMap(c, branchPath);
+        const av = values[axId] || (values[axId] = mkAxisVal());
+        const existing = genValues(av);
+        pushHistory();
+        const firstBranch = mkBranch(existing[0] || "branch1");
+        firstBranch.values = initSubtreeValues(axId);
+        if (existing.length > 1 && firstBranch.values) {
+          const nextAxes = configurableAxesFrom(axisIndexById(axId) + 1);
+          const firstNext = nextAxes[0];
+          if (firstNext && firstBranch.values[firstNext.id]) {
+            const target = firstBranch.values[firstNext.id];
+            target.type = "custom";
+            target.list = existing.slice(1);
+            target.listText = target.list.join(", ");
+          }
+        }
+        values[axId] = { mode: "branched", branches: [firstBranch] };
+        shadowSubsequentAxes(values, axId);
+        pruneValuesScope(firstBranch.values, axisIndexById(axId) + 1);
+        renderAll();
+      }
+
+      function addBranchSibling(catId, axId, branchPathStr) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const branchPath = parseBranchPath(branchPathStr);
+        const values = getValuesMap(c, branchPath);
+        const av = values[axId];
+        if (!isBranched(av)) return;
+        const ax = axes.find((a) => a.id === axId);
+        const existing = new Set(av.branches.map((b) => b.value));
+        let n = av.branches.length + 1;
+        let name = (ax ? ax.name : "branch") + n;
+        while (existing.has(name)) {
+          n++;
+          name = (ax ? ax.name : "branch") + n;
+        }
+        pushHistory();
+        const br = mkBranch(name);
+        br.values = initSubtreeValues(axId);
+        pruneValuesScope(br.values, axisIndexById(axId) + 1);
+        av.branches.push(br);
+        renderAll();
+      }
+
+      function removeBranch(catId, axId, branchPathStr, branchId) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const branchPath = parseBranchPath(branchPathStr);
+        const values = getValuesMap(c, branchPath);
+        const av = values[axId];
+        if (!isBranched(av) || av.branches.length <= 1) return;
+        pushHistory();
+        av.branches = av.branches.filter((b) => b.id !== branchId);
+        renderAll();
+      }
+
+      function renameBranchValue(catId, axId, branchPathStr, branchId, val) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const branchPath = parseBranchPath(branchPathStr);
+        const values = getValuesMap(c, branchPath);
+        const av = values[axId];
+        if (!isBranched(av)) return;
+        const br = av.branches.find((b) => b.id === branchId);
+        if (!br) return;
+        br.value = val.trim().toLowerCase().replace(/\s+/g, "-") || br.value;
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+
+      function collapseBranchedAxis(catId, axId, branchPathStr) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const branchPath = parseBranchPath(branchPathStr);
+        const values = getValuesMap(c, branchPath);
+        const av = values[axId];
+        if (!isBranched(av)) return;
+        if (
+          av.branches.length > 1 &&
+          !confirm(
+            "Collapse to flat? Only the first branch will be kept as a custom list.",
+          )
+        )
+          return;
+        pushHistory();
+        const first = av.branches[0];
+        const flatVals = av.branches.map((b) => b.value).filter(Boolean);
+        values[axId] = {
+          type: "custom",
+          config: {},
+          list: flatVals,
+          listText: flatVals.join(", "),
+        };
+        const fromIdx = axisIndexById(axId);
+        configurableAxesFrom(fromIdx + 1).forEach((ax) => {
+          if (!values[ax.id] || values[ax.id].type === "unused") {
+            values[ax.id] = mkAxisVal();
+          }
+        });
+        if (first && first.values) {
+          const nextAxes = configurableAxesFrom(fromIdx + 1);
+          nextAxes.forEach((ax) => {
+            if (first.values[ax.id]) values[ax.id] = JSON.parse(JSON.stringify(first.values[ax.id]));
+          });
+        }
+        renderAll();
+      }
+
+      function getAxisVal(category, axId, branchPathStr) {
+        const values = getValuesMap(category, parseBranchPath(branchPathStr));
+        return values[axId] || (values[axId] = mkAxisVal());
+      }
+
+      function addCategory() {
+        const inp = id("new-cat-name");
+        const names = parseCustomList(inp.value)
+          .map((s) => s.trim().toLowerCase().replace(/\s+/g, "-"))
+          .filter(Boolean);
+        const existing = new Set(categories.map((c) => c.name));
+        const seen = new Set();
+        const toAdd = [];
+        for (const name of names) {
+          if (seen.has(name) || existing.has(name)) continue;
+          seen.add(name);
+          toAdd.push(name);
+        }
+        if (!toAdd.length) {
+          inp.focus();
+          return;
+        }
+        pushHistory();
+        toAdd.forEach((name) => {
+          const c = { id: "cat" + ++catSeq, name, dtcgType: "", values: {} };
+          initCategoryValues(c);
+          categories.push(c);
+        });
+        inp.value = "";
+        renderAll();
+        inp.focus();
+      }
+      function removeCategory(catId) {
+        pushHistory();
+        categories = categories.filter((c) => c.id !== catId);
+        renderAll();
+      }
+      function renameCategory(catId, val) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        c.name = val.trim().toLowerCase().replace(/\s+/g, "-") || c.name;
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+
+      function setCategoryDtcgType(catId, val) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        c.dtcgType = DTCG_TYPES.has(val) ? val : "";
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+
+      function dtcgTypeSelectHtml(cat) {
+        const cur = cat.dtcgType || "";
+        const fundOpts = DTCG_FUNDAMENTAL_TYPES.map(
+          (t) =>
+            `<option value="${t}"${cur === t ? " selected" : ""}>${t}</option>`,
+        ).join("");
+        const compOpts = DTCG_COMPOSITE_TYPES.map(
+          (t) =>
+            `<option value="${t}"${cur === t ? " selected" : ""}>${t}</option>`,
+        ).join("");
+        return `<select id="dtcg-type-${esc(cat.id)}" class="cat-type-select" aria-label="DTCG $type for ${esc(cat.name)}" ${historyFieldAttrs("dtcg:" + cat.id)} onchange="setCategoryDtcgType('${cat.id}',this.value)">
+          <option value=""${cur === "" ? " selected" : ""}>Select $type…</option>
+          <optgroup label="Fundamental Types">${fundOpts}</optgroup>
+          <optgroup label="Composite Types">${compOpts}</optgroup>
+        </select>`;
+      }
+
+      /* ── Scale generation ─────────────────────────────── */
+      function genValues(axisVal) {
+        const cfg = axisVal.config || {};
+        switch (axisVal.type) {
+          case "numeric": {
+            const start = parseFloat(cfg.start ?? 4),
+              end = parseFloat(cfg.end ?? 64),
+              step = parseFloat(cfg.step ?? 4);
+            const out = [];
+            if (step > 0)
+              for (let v = start; v <= end + 1e-9; v += step)
+                out.push(String(Math.round(v * 100) / 100));
+            return out;
+          }
+          case "ordinal": {
+            const start = parseInt(cfg.start ?? 100),
+              end = parseInt(cfg.end ?? 900),
+              step = parseInt(cfg.step ?? 100);
+            const out = [];
+            if (step > 0)
+              for (let v = start; v <= end; v += step) out.push(String(v));
+            return out;
+          }
+          case "tshirt": {
+            const extra = normalizeTshirtExtra(cfg.extra ?? 0);
+            const extrasBelow = [];
+            const extrasAbove = [];
+            for (let i = extra; i >= 2; i--) extrasBelow.push(i + "xs");
+            for (let i = 2; i <= extra; i++) extrasAbove.push(i + "xl");
+            return [...extrasBelow, ...TSHIRT_BASE, ...extrasAbove];
+          }
+          case "unused":
+            return [];
+          case "custom":
+          default:
+            return axisVal.list && axisVal.list.length ? axisVal.list : [];
+        }
+      }
+
+      function parseCustomList(str) {
+        return str
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+
+      const OMITTED_AXIS_VALUE_RE = /^\[[^\]]+\]$/;
+
+      function isOmittedAxisValue(val) {
+        return OMITTED_AXIS_VALUE_RE.test(String(val).trim());
+      }
+
+      function tokenPart(val) {
+        return isOmittedAxisValue(val) ? "" : val;
+      }
+
+      function joinTokenParts(parts) {
+        return parts.filter(Boolean).join("-");
+      }
+
+      /* ── Render: Axis list (Step 1) ───────────────────── */
+      function renderLockedAxisRow(ax, i, note) {
+        return `
+        <div class="axis-row">
+          <span class="axis-handle">${i + 1}</span>
+          <div class="axis-locked">${esc(ax.name)} <span style="color:var(--tx-3);margin-left:6px;font-size:10px">(${note})</span></div>
+          <div class="axis-locked" style="justify-content:center;color:var(--tx-3)">—</div>
+          <div></div>
+        </div>`;
+      }
+
+      function renderAxisList() {
+        const el = id("axis-list");
+        const nsToggle = id("namespace-toggle");
+        if (nsToggle) nsToggle.checked = namespaceEnabled;
+
+        const parts = [];
+
+        axes.forEach((ax, i) => {
+          if (ax.slot === "namespace") {
+            parts.push(`
+        <div class="axis-row">
+          <span class="axis-handle">${i + 1}</span>
+          <div class="axis-locked">namespace <span style="color:var(--tx-3);margin-left:6px;font-size:10px">(optional)</span></div>
+          <input type="text" id="namespace-value" placeholder="e.g. ds" value="${esc(namespaceValue)}" ${historyFieldAttrs("namespace")} oninput="setNamespaceValue(this.value)" />
+          <div></div>
+        </div>`);
+            return;
+          }
+          if (ax.slot === "category") {
+            parts.push(renderLockedAxisRow(ax, i, "required — Step 2"));
+            return;
+          }
+          if (ax.slot === "scale") {
+            const scaleNote =
+              tierMode === "tier2"
+                ? "optional — Step 2"
+                : "required — Step 2";
+            parts.push(renderLockedAxisRow(ax, i, scaleNote));
+            return;
+          }
+          if (ax.slot === "middle") {
+            parts.push(`
+      <div class="axis-row">
+        <span class="axis-handle">${i + 1}</span>
+        <input type="text" value="${esc(ax.name)}" ${historyFieldAttrs("axis:" + ax.id)} oninput="renameAxis('${ax.id}',this.value)" />
+        <div style="display:flex;gap:4px">
+          <button class="btn-icon btn-ghost" onclick="moveAxis('${ax.id}',-1)" title="Move up">↑</button>
+          <button class="btn-icon btn-ghost" onclick="moveAxis('${ax.id}',1)" title="Move down">↓</button>
+        </div>
+        <button class="btn-icon btn-ghost" onclick="removeAxis('${ax.id}')" title="Remove axis">✕</button>
+      </div>`);
+          }
+        });
+
+        el.innerHTML = parts.join("");
+      }
+
+      /* ── Render: Category cards (Step 2) ──────────────── */
+      function renderCategories() {
+        const el = id("cat-list");
+        if (!categories.length) {
+          el.innerHTML = `<div class="empty-msg">No categories yet — add one below. Each category includes a name, DTCG <code style="font-family:var(--mono)">$type</code>, and axis values.</div>`;
+          return;
+        }
+        el.innerHTML = categories
+          .map((c) => {
+            const body = renderAxisSubtree(
+              c,
+              c.values,
+              "",
+              0,
+              firstConfigurableAxisIndex(),
+            );
+            return `
+      <div class="cat-card">
+        <div class="cat-head">
+          <input type="text" value="${esc(c.name)}" ${historyFieldAttrs("cat:" + c.id)} oninput="renameCategory('${c.id}',this.value)" />
+          <div class="cat-type-wrap">
+            <label for="dtcg-type-${esc(c.id)}">$type</label>
+            ${dtcgTypeSelectHtml(c)}
+            <span class="cat-type-hint">name ≠ type</span>
+          </div>
+          <button class="btn-icon btn-ghost" onclick="removeCategory('${c.id}')" title="Remove category">✕</button>
+        </div>
+        <div class="cat-body">
+          ${body}
+        </div>
+      </div>`;
+          })
+          .join("");
+      }
+
+      function renderAxisSubtree(cat, values, branchPathStr, nestDepth, startAxisIdx) {
+        const parts = [];
+        for (let i = startAxisIdx; i < axes.length; i++) {
+          const ax = axes[i];
+          if (ax.slot === "namespace" || ax.slot === "category") continue;
+          if (nestDepth === 0 && isShadowedAtLevel(values, ax.id)) continue;
+          parts.push(renderAxisNode(cat, ax, values, branchPathStr, nestDepth));
+          const av = values[ax.id];
+          if (isBranched(av)) break;
+        }
+        return parts.join("");
+      }
+
+      function renderAxisNode(cat, ax, values, branchPathStr, nestDepth) {
+        const av = values[ax.id] || (values[ax.id] = mkAxisVal());
+        const pathArg = esc(branchPathStr);
+        const nestClass = nestDepth > 0 ? " axis-nest" : "";
+
+        if (isBranched(av)) {
+          const axIdx = axisIndexById(ax.id);
+          const hasFollowing = configurableAxesFrom(axIdx + 1).length > 0;
+          return `
+    <div class="axis-config${nestClass}">
+      <div class="axis-config-hdr">
+        <span class="axis-config-name">${esc(ax.name)}</span>
+        <span class="axis-branch-meta">branched · ${av.branches.length} branch${av.branches.length !== 1 ? "es" : ""}</span>
+      </div>
+      <div class="branch-list">
+        ${av.branches
+          .map((br) => {
+            const childPath = encodeBranchPath([
+              ...parseBranchPath(branchPathStr),
+              br.id,
+            ]);
+            const childValues = br.values || (br.values = {});
+            const subtree = hasFollowing
+              ? renderAxisSubtree(
+                  cat,
+                  childValues,
+                  childPath,
+                  nestDepth + 1,
+                  axIdx + 1,
+                )
+              : "";
+            return `
+        <div class="branch-card">
+          <div class="branch-head">
+            <input type="text" value="${esc(br.value)}" ${historyFieldAttrs("branch:" + cat.id + "|" + ax.id + "|" + branchPathStr + "|" + br.id)} oninput="renameBranchValue('${cat.id}','${ax.id}','${pathArg}','${br.id}',this.value)" />
+            <span>${esc(ax.name)}</span>
+            <button class="btn-icon btn-ghost" onclick="removeBranch('${cat.id}','${ax.id}','${pathArg}','${br.id}')" title="Remove branch" ${av.branches.length <= 1 ? "disabled" : ""}>✕</button>
+          </div>
+          ${subtree}
+        </div>`;
+          })
+          .join("")}
+      </div>
+      <div class="axis-branch-actions">
+        <button class="btn-xs" onclick="addBranchSibling('${cat.id}','${ax.id}','${pathArg}')">+ Add ${esc(ax.name)}</button>
+        <button class="btn-xs btn-ghost" onclick="collapseBranchedAxis('${cat.id}','${ax.id}','${pathArg}')">Collapse to flat</button>
+      </div>
+    </div>`;
+        }
+
+        const axIdx = axisIndexById(ax.id);
+        const canBranch =
+          ax.slot === "middle" && configurableAxesFrom(axIdx + 1).length > 0;
+        const flatConfig = renderScaleConfig({
+          scaleVal: av,
+          label: ax.name,
+          fieldKeyPrefix: `${cat.id}|${branchPathStr || "root"}|${ax.id}`,
+          typeOptions: SCALE_TYPES,
+          countId: axisUIKey(cat.id, ax.id, branchPathStr, "count"),
+          previewId: axisUIKey(cat.id, ax.id, branchPathStr, "preview"),
+          warnId: axisUIKey(cat.id, ax.id, branchPathStr, "warn"),
+          tooManyId: axisUIKey(cat.id, ax.id, branchPathStr, "too-many"),
+          customInputId: axisUIKey(cat.id, ax.id, branchPathStr, "custom"),
+          onTypeChange: `setAxisType('${cat.id}','${ax.id}','${pathArg}',this.value)`,
+          onCfg: (key) =>
+            `setCfg('${cat.id}','${ax.id}','${pathArg}','${key}',this.value)`,
+          onTshirtExtra: `setTshirtExtra('${cat.id}','${ax.id}','${pathArg}',this.value)`,
+          onCustomList: `setCustomList('${cat.id}','${ax.id}','${pathArg}',this.value)`,
+          emptyWarn:
+            "No values yet — configure this axis or remove it for this category.",
+        });
+        const branchBtn = canBranch
+          ? `<div class="axis-branch-actions"><button class="btn-xs btn-ghost" onclick="branchAxis('${cat.id}','${ax.id}','${pathArg}')">Branch this axis</button></div>`
+          : "";
+        return `<div class="${nestClass ? "axis-nest" : ""}">${flatConfig}${branchBtn}</div>`;
+      }
+
+      function axisUIKey(catId, axId, branchPathStr, suffix) {
+        const path = branchPathStr || "root";
+        return `axis-${suffix}-${catId}-${path.replace(/\|/g, "-")}-${axId}`;
+      }
+
+      function renderScaleConfig(opts) {
+        const av = opts.scaleVal;
+        const cfg = av.config || {};
+        const values = genValues(av);
+        const isUnused = av.type === "unused";
+        const fk = opts.fieldKeyPrefix || "root";
+
+        let genControls = "";
+        if (!isUnused) {
+          if (av.type === "numeric") {
+            genControls = `
+      <label>start <input type="text" value="${esc(cfg.start ?? "4")}" ${historyFieldAttrs("cfg:" + fk + "|start")} oninput="${opts.onCfg("start")}"></label>
+      <label>end <input type="text" value="${esc(cfg.end ?? "64")}" ${historyFieldAttrs("cfg:" + fk + "|end")} oninput="${opts.onCfg("end")}"></label>
+      <label>step <input type="text" value="${esc(cfg.step ?? "4")}" ${historyFieldAttrs("cfg:" + fk + "|step")} oninput="${opts.onCfg("step")}"></label>`;
+          } else if (av.type === "ordinal") {
+            genControls = `
+      <label>start <input type="text" value="${esc(cfg.start ?? "100")}" ${historyFieldAttrs("cfg:" + fk + "|start")} oninput="${opts.onCfg("start")}"></label>
+      <label>end <input type="text" value="${esc(cfg.end ?? "900")}" ${historyFieldAttrs("cfg:" + fk + "|end")} oninput="${opts.onCfg("end")}"></label>
+      <label>step <input type="text" value="${esc(cfg.step ?? "100")}" ${historyFieldAttrs("cfg:" + fk + "|step")} oninput="${opts.onCfg("step")}"></label>`;
+          } else if (av.type === "tshirt") {
+            genControls = `
+      <label>extra sizes <input type="number" min="0" step="1" value="${esc(cfg.extra ?? "0")}" ${historyFieldAttrs("cfg:" + fk + "|extra")} oninput="${opts.onTshirtExtra}"></label>
+      <span style="font-size:10.5px;color:var(--tx-3)">→ adds 3xs, 2xs … 2xl, 3xl</span>`;
+          } else if (av.type === "custom") {
+            const customDisplay =
+              av.listText != null ? av.listText : (av.list || []).join(", ");
+            genControls = `<input type="text" id="${opts.customInputId}" style="flex:1;min-width:200px" placeholder="comma-separated, e.g. light, dark, [default], [base]"
+      value="${esc(customDisplay)}" ${historyFieldAttrs("custom:" + fk)} oninput="${opts.onCustomList}">`;
+          }
+        }
+
+        const warn =
+          !isUnused && values.length === 0
+            ? `<div class="warn" id="${opts.warnId}">${opts.emptyWarn}</div>`
+            : `<div class="warn" id="${opts.warnId}" style="display:none"></div>`;
+        const tooMany =
+          values.length > 14
+            ? `<div class="warn" id="${opts.tooManyId}">${values.length} values — that's a lot for one axis. Consider narrowing the range.</div>`
+            : `<div class="warn" id="${opts.tooManyId}" style="display:none"></div>`;
+        const unusedNote = isUnused
+          ? `<div class="unused-note">This axis is unused for this category.</div>`
+          : "";
+
+        return `
+    <div class="axis-config">
+      <div class="axis-config-hdr">
+        <span class="axis-config-name">${esc(opts.label)}</span>
+        <select onchange="${opts.onTypeChange}" style="width:auto;min-width:140px">
+          ${Object.entries(opts.typeOptions)
+            .map(
+              ([k, v]) =>
+                `<option value="${k}" ${av.type === k ? "selected" : ""}>${v.label}</option>`,
+            )
+            .join("")}
+        </select>
+      </div>
+      ${isUnused ? unusedNote : `<div class="gen-row">${genControls}</div>`}
+      ${warn}${tooMany}
+      ${isUnused ? "" : `<div class="cl" id="${opts.countId}" style="margin-top:6px">Generated values (${values.length})</div>
+      <div class="values-preview" id="${opts.previewId}">
+        ${values.length ? values.map((v) => `<span class="val-chip">${esc(v)}</span>`).join("") : `<span class="cp-empty">none</span>`}
+      </div>`}
+    </div>`;
+      }
+
+      function setAxisType(catId, axId, branchPathStr, type) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        pushHistory();
+        const av = getAxisVal(c, axId, branchPathStr);
+        av.type = type;
+        delete av.mode;
+        delete av.branches;
+        if (type === "unused") {
+          av.config = {};
+          av.list = [];
+          delete av.listText;
+        } else if (type === "custom" && !av.list) {
+          av.list = [];
+        } else if (type !== "custom") {
+          delete av.listText;
+        }
+        renderAll();
+      }
+      function setCfg(catId, axId, branchPathStr, key, val) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const av = getAxisVal(c, axId, branchPathStr);
+        av.config = av.config || {};
+        av.config[key] = val;
+        refreshAxisValuesUI(catId, axId, branchPathStr);
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+      function normalizeTshirtExtra(val) {
+        const n = parseInt(val, 10);
+        if (!Number.isFinite(n) || n <= 0) return 0;
+        if (n === 1) return 2;
+        return n;
+      }
+      function setTshirtExtra(catId, axId, branchPathStr, val) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const av = getAxisVal(c, axId, branchPathStr);
+        av.config = av.config || {};
+        av.config.extra = val;
+        refreshAxisValuesUI(catId, axId, branchPathStr);
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+      function refreshAxisValuesUI(catId, axId, branchPathStr) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const av = getAxisVal(c, axId, branchPathStr);
+        const values = genValues(av);
+        const countEl = id(axisUIKey(catId, axId, branchPathStr, "count"));
+        const previewEl = id(axisUIKey(catId, axId, branchPathStr, "preview"));
+        const warnEl = id(axisUIKey(catId, axId, branchPathStr, "warn"));
+        const tooManyEl = id(axisUIKey(catId, axId, branchPathStr, "too-many"));
+        if (countEl)
+          countEl.textContent = `Generated values (${values.length})`;
+        if (previewEl) {
+          previewEl.innerHTML = values.length
+            ? values.map((v) => `<span class="val-chip">${esc(v)}</span>`).join("")
+            : `<span class="cp-empty">none</span>`;
+        }
+        if (warnEl) {
+          if (av.type === "unused") {
+            warnEl.style.display = "none";
+          } else if (values.length === 0) {
+            warnEl.style.display = "";
+            warnEl.textContent =
+              "No values yet — configure this axis or remove it for this category.";
+          } else {
+            warnEl.style.display = "none";
+          }
+        }
+        if (tooManyEl) {
+          if (values.length > 14) {
+            tooManyEl.style.display = "";
+            tooManyEl.textContent = `${values.length} values — that's a lot for one axis. Consider narrowing the range.`;
+          } else {
+            tooManyEl.style.display = "none";
+          }
+        }
+      }
+      function setCustomList(catId, axId, branchPathStr, val) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const av = getAxisVal(c, axId, branchPathStr);
+        av.listText = val;
+        av.list = parseCustomList(val);
+        refreshAxisValuesUI(catId, axId, branchPathStr);
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+
+      /* ── Token helpers ─────────────────────────────────── */
+      function firstConfigurableAxisIndex() {
+        return axes.findIndex(
+          (a) => a.slot !== "namespace" && a.slot !== "category",
+        );
+      }
+
+      function walkTokenPaths(category, values, prefixParts, axisIdx) {
+        if (axisIdx >= axes.length) {
+          const token = joinTokenParts(prefixParts);
+          return token ? [token] : [];
+        }
+
+        const ax = axes[axisIdx];
+        if (ax.slot === "namespace" || ax.slot === "category") {
+          return walkTokenPaths(category, values, prefixParts, axisIdx + 1);
+        }
+
+        const av = values[ax.id];
+        if (!av || av.type === "unused") {
+          return walkTokenPaths(category, values, prefixParts, axisIdx + 1);
+        }
+
+        if (isBranched(av)) {
+          let out = [];
+          for (const br of av.branches) {
+            const seg = tokenPart(br.value);
+            const childValues = br.values || {};
+            const nextPrefix = seg ? [...prefixParts, seg] : prefixParts;
+            out = out.concat(
+              walkTokenPaths(category, childValues, nextPrefix, axisIdx + 1),
+            );
+          }
+          return out;
+        }
+
+        const rawVals = genValues(av);
+        if (!rawVals.length) {
+          return walkTokenPaths(category, values, prefixParts, axisIdx + 1);
+        }
+
+        let out = [];
+        for (const raw of rawVals) {
+          const seg = tokenPart(raw);
+          const nextPrefix = seg ? [...prefixParts, seg] : prefixParts;
+          out = out.concat(
+            walkTokenPaths(category, values, nextPrefix, axisIdx + 1),
+          );
+        }
+        return out;
+      }
+
+      function walkTokenSegments(category, values, prefixSegments, axisIdx) {
+        if (axisIdx >= axes.length) {
+          return prefixSegments.length ? [prefixSegments] : [];
+        }
+
+        const ax = axes[axisIdx];
+        if (ax.slot === "namespace" || ax.slot === "category") {
+          return walkTokenSegments(category, values, prefixSegments, axisIdx + 1);
+        }
+
+        const av = values[ax.id];
+        if (!av || av.type === "unused") {
+          return walkTokenSegments(category, values, prefixSegments, axisIdx + 1);
+        }
+
+        if (isBranched(av)) {
+          let out = [];
+          for (const br of av.branches) {
+            const seg = tokenPart(br.value);
+            const childValues = br.values || {};
+            const nextPrefix = seg
+              ? [...prefixSegments, { ax, val: seg }]
+              : prefixSegments;
+            out = out.concat(
+              walkTokenSegments(category, childValues, nextPrefix, axisIdx + 1),
+            );
+          }
+          return out;
+        }
+
+        const rawVals = genValues(av);
+        if (!rawVals.length) {
+          return walkTokenSegments(category, values, prefixSegments, axisIdx + 1);
+        }
+
+        let out = [];
+        for (const raw of rawVals) {
+          const seg = tokenPart(raw);
+          const nextPrefix = seg
+            ? [...prefixSegments, { ax, val: seg }]
+            : prefixSegments;
+          out = out.concat(
+            walkTokenSegments(category, values, nextPrefix, axisIdx + 1),
+          );
+        }
+        return out;
+      }
+
+      function hasBranchedAxes() {
+        return categories.some((c) => {
+          let found = false;
+          walkBranchedValues(c.values, (values) => {
+            for (const ax of axes) {
+              if (ax.slot === "namespace" || ax.slot === "category") continue;
+              if (isBranched(values[ax.id])) found = true;
+            }
+          });
+          return found;
+        });
+      }
+
+      function getActiveAxisData(category) {
+        const parts = [];
+        if (namespaceEnabled && namespaceValue) {
+          parts.push({
+            ax: axes.find((a) => a.slot === "namespace") || {
+              slot: "namespace",
+              name: "namespace",
+            },
+            vals: [namespaceValue],
+          });
+        }
+        parts.push({
+          ax: axes.find((a) => a.slot === "category") || {
+            slot: "category",
+            name: "category",
+          },
+          vals: [category.name],
+        });
+
+        function collect(values, axisIdx) {
+          if (axisIdx >= axes.length) return;
+          const ax = axes[axisIdx];
+          if (ax.slot === "namespace" || ax.slot === "category") {
+            collect(values, axisIdx + 1);
+            return;
+          }
+          if (isShadowedAtLevel(values, ax.id)) return;
+          const av = values[ax.id];
+          if (!av || av.type === "unused") {
+            collect(values, axisIdx + 1);
+            return;
+          }
+          if (isBranched(av)) {
+            const vals = av.branches.map((b) => b.value).filter(Boolean);
+            if (vals.length) parts.push({ ax, vals });
+            return;
+          }
+          const flatVals = genValues(av).filter((v) => !isOmittedAxisValue(v));
+          if (flatVals.length) parts.push({ ax, vals: flatVals });
+          collect(values, axisIdx + 1);
+        }
+
+        collect(category.values, firstConfigurableAxisIndex());
+        return parts;
+      }
+
+      function segClass(ax) {
+        if (ax.slot === "namespace") return "seg-ns";
+        if (ax.slot === "category") return "seg-cat";
+        if (ax.name === "family") return "seg-fam";
+        if (ax.slot === "scale" || ax.name === "scale") return "seg-scale";
+        return "seg-scale";
+      }
+
+      function cssVarPrefix() {
+        return '<span class="seg-prefix">--</span>';
+      }
+
+      function buildColoredTokenFromSegments(segments) {
+        const rendered = segments
+          .filter(({ val }) => !isOmittedAxisValue(val))
+          .map(({ ax, val }) => `<span class="${segClass(ax)}">${esc(val)}</span>`);
+        return (
+          cssVarPrefix() +
+          rendered
+            .map((span, idx) => (idx > 0 ? `<span class="sep">-</span>${span}` : span))
+            .join("")
+        );
+      }
+
+      function buildColoredToken(activeData, pickFn) {
+        const segments = [];
+        activeData.forEach(({ ax, vals }) => {
+          const val = pickFn(vals);
+          if (isOmittedAxisValue(val)) return;
+          segments.push(`<span class="${segClass(ax)}">${esc(val)}</span>`);
+        });
+        return (
+          cssVarPrefix() +
+          segments
+            .map((span, idx) => (idx > 0 ? `<span class="sep">-</span>${span}` : span))
+            .join("")
+        );
+      }
+
+      function buildToken(activeData, pickFn) {
+        return joinTokenParts(
+          activeData.map(({ vals }) => tokenPart(pickFn(vals))),
+        );
+      }
+
+      function countTokensForCategory(category) {
+        return allTokensForCategory(category).length;
+      }
+
+      function countTokens(activeData) {
+        return activeData.reduce(
+          (acc, { ax, vals }) =>
+            ax.slot === "category" || ax.slot === "namespace"
+              ? acc
+              : acc * vals.length,
+          1,
+        );
+      }
+
+      function allTokensForCategory(category) {
+        const prefix = [];
+        if (namespaceEnabled && namespaceValue) prefix.push(namespaceValue);
+        prefix.push(category.name);
+        const start = firstConfigurableAxisIndex();
+        if (start < 0) return [];
+        return walkTokenPaths(category, category.values, prefix, start);
+      }
+
+      function buildCategoryFormula(activeData) {
+        return activeData
+          .map(({ ax }) => `[${ax.name}]`)
+          .join('<span class="sep">-</span>');
+      }
+
+      function previewExamplesForCategory(category) {
+        const start = firstConfigurableAxisIndex();
+        if (start < 0) return [];
+        const paths = walkTokenSegments(category, category.values, [], start);
+        if (!paths.length) return [];
+
+        const nsSeg = [];
+        if (namespaceEnabled && namespaceValue) {
+          nsSeg.push({
+            ax: axes.find((a) => a.slot === "namespace") || {
+              slot: "namespace",
+              name: "namespace",
+            },
+            val: namespaceValue,
+          });
+        }
+        const catSeg = {
+          ax: axes.find((a) => a.slot === "category") || {
+            slot: "category",
+            name: "category",
+          },
+          val: category.name,
+        };
+
+        const examples = [];
+        const toColored = (path) =>
+          buildColoredTokenFromSegments([...nsSeg, catSeg, ...path]);
+
+        examples.push(toColored(paths[0]));
+        if (paths.length > 1) {
+          const mid = toColored(paths[Math.floor(paths.length / 2)]);
+          if (mid !== examples[0]) examples.push(mid);
+        }
+        if (paths.length > 2) {
+          const last = toColored(paths[paths.length - 1]);
+          if (!examples.includes(last)) examples.push(last);
+        }
+        return examples;
+      }
+
+      /* ── Render: Preview ───────────────────────────────── */
+      function renderPreview() {
+        const el = id("preview-body");
+
+        const legend = `
+    <div class="legend">
+      ${namespaceEnabled ? `<span><span class="dot dot-ns"></span>namespace</span>` : ""}
+      <span><span class="dot dot-cat"></span>category</span>
+      ${axes.some((a) => a.name === "family") || hasBranchedAxes() ? `<span><span class="dot dot-fam"></span>family</span>` : ""}
+      <span><span class="dot dot-scale"></span>scale</span>
+    </div>`;
+
+        const formula = `<div class="formula-line">${axes
+          .map((a) => `[${a.name}]`)
+          .join('<span class="sep">-</span>')}</div>`;
+
+        if (!categories.length) {
+          el.innerHTML =
+            legend +
+            formula +
+            `<div class="empty-msg">Add a category to generate example tokens.</div>`;
+          return;
+        }
+
+        const blocks = categories
+          .map((c) => {
+            const activeData = getActiveAxisData(c);
+            const catFormula = `<div class="cp-formula">${buildCategoryFormula(activeData)}</div>`;
+            const examples = previewExamplesForCategory(c);
+
+            if (!examples.length) {
+              return `
+      <div class="cat-preview">
+        <div class="cp-name">${esc(c.name)}</div>
+        ${catFormula}
+        <div class="cp-empty">No values configured for this category yet.</div>
+      </div>`;
+            }
+
+            const total = countTokensForCategory(c);
+
+            return `
+      <div class="cat-preview">
+        <div class="cp-name">${esc(c.name)}</div>
+        ${catFormula}
+        ${examples.map((ex) => `<div class="cp-tok">${ex}</div>`).join("")}
+        <div class="cp-count">${total} possible token${total !== 1 ? "s" : ""} in this category</div>
+      </div>`;
+          })
+          .join("");
+
+        el.innerHTML = legend + formula + blocks;
+      }
+
+      function buildCssExport() {
+        const tierLabel =
+          tierMode === "tier2" ? "Tier 2" : "Tier 1";
+        let out = `/* ${tierLabel} token names only — values added elsewhere */\n:root {\n`;
+        categories.forEach((c) => {
+          allTokensForCategory(c).forEach((token) => {
+            out += `  --${token}: ;\n`;
+          });
+        });
+        out += "}\n";
+        return out;
+      }
+
+      async function copyCssExport() {
+        const css = buildCssExport();
+        if (!css.includes("--")) return;
+        try {
+          await navigator.clipboard.writeText(css);
+        } catch (e) {}
+      }
+
+      function setProjectTitle(value) {
+        const trimmed = String(value).trim();
+        projectTitle = trimmed || defaultTitleForTier(tierMode);
+        const el = id("project-title");
+        if (el && !trimmed) el.value = projectTitle;
+        scheduleAutoSave();
+      }
+
+      function syncProjectTitleUI() {
+        const el = id("project-title");
+        if (
+          el &&
+          document.activeElement !== el &&
+          el.value !== projectTitle
+        ) {
+          el.value = projectTitle;
+        }
+      }
+
+      function projectTitleToFilename(title, ext) {
+        const fallback = defaultTitleForTier(tierMode);
+        const trimmed = (title || fallback).trim() || fallback;
+        const base =
+          trimmed
+            .toLowerCase()
+            .replace(/[/\\?%*:|"<>]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-+|-+$/g, "") || "tier-tokens";
+        const cleanExt = String(ext || "").replace(/^\./, "");
+        return cleanExt ? `${base}.${cleanExt}` : base;
+      }
+
+      async function downloadFile({ blob, extension, description }) {
+        const suggestedName = projectTitleToFilename(projectTitle, extension);
+        const acceptExt =
+          "." + String(extension || "bin").replace(/^\./, "").split(".").pop();
+
+        if (window.showSaveFilePicker) {
+          try {
+            const handle = await window.showSaveFilePicker({
+              suggestedName,
+              types: [
+                {
+                  description,
+                  accept: { [blob.type]: [acceptExt] },
+                },
+              ],
+            });
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            return;
+          } catch (e) {
+            if (e.name === "AbortError") return;
+          }
+        }
+
+        const entered = prompt("Save as:", suggestedName);
+        if (entered === null) return;
+        let base = entered.trim();
+        const ext = String(extension || "").replace(/^\./, "");
+        if (ext && base.toLowerCase().endsWith("." + ext.toLowerCase())) {
+          base = base.slice(0, -(ext.length + 1));
+        } else {
+          base = base.replace(/\.[^.]+$/, "");
+        }
+        const filename = projectTitleToFilename(base, extension);
+        const url = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement("a"), {
+          href: url,
+          download: filename,
+        });
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      async function downloadCssExport() {
+        const css = buildCssExport();
+        if (!css.includes("--")) return;
+        await downloadFile({
+          blob: new Blob([css], { type: "text/css" }),
+          extension: "css",
+          description: "CSS token name stubs",
+        });
+      }
+
+      function dtcgHasNonMetaKeys(obj) {
+        return Object.keys(obj).some((k) => !k.startsWith("$"));
+      }
+
+      function applyDtcgLeafPlaceholders(node) {
+        node.$description = DTCG_LEAF_DESCRIPTION;
+        node.$value = "";
+      }
+
+      function clearDtcgLeafPlaceholders(node) {
+        delete node.$description;
+        delete node.$value;
+      }
+
+      function dtcgEnsurePath(root, parts) {
+        if (!parts.length) {
+          applyDtcgLeafPlaceholders(root);
+          return;
+        }
+        let node = root;
+        for (let i = 0; i < parts.length; i++) {
+          const key = parts[i];
+          const isLeaf = i === parts.length - 1;
+          if (!node[key]) {
+            node[key] = {};
+            if (isLeaf) applyDtcgLeafPlaceholders(node[key]);
+          } else if (isLeaf) {
+            if (!dtcgHasNonMetaKeys(node[key])) {
+              applyDtcgLeafPlaceholders(node[key]);
+            }
+          } else if (!dtcgHasNonMetaKeys(node[key])) {
+            clearDtcgLeafPlaceholders(node[key]);
+          }
+          node = node[key];
+        }
+      }
+
+      function buildDtcgExport() {
+        const tierLabel =
+          tierMode === "tier2" ? "Tier 2 · Semantic" : "Tier 1 · Primitive";
+        const root = {
+          $description: `Naming convention export (${tierLabel}) — values TBD`,
+        };
+
+        let nestRoot = root;
+        if (namespaceEnabled && namespaceValue) {
+          root[namespaceValue] = {};
+          nestRoot = root[namespaceValue];
+        }
+
+        categories.forEach((c) => {
+          const group = {};
+          if (c.dtcgType && DTCG_TYPES.has(c.dtcgType)) {
+            group.$type = c.dtcgType;
+          }
+
+          const start = firstConfigurableAxisIndex();
+          const paths =
+            start < 0
+              ? []
+              : walkTokenSegments(c, c.values, [], start);
+
+          if (!paths.length) {
+            applyDtcgLeafPlaceholders(group);
+          } else {
+            let anyParts = false;
+            paths.forEach((segs) => {
+              const parts = segs.map((s) => s.val).filter(Boolean);
+              if (!parts.length) return;
+              anyParts = true;
+              dtcgEnsurePath(group, parts);
+            });
+            if (!anyParts) {
+              applyDtcgLeafPlaceholders(group);
+            }
+          }
+
+          nestRoot[c.name] = group;
+        });
+
+        return JSON.stringify(root, null, 2) + "\n";
+      }
+
+      async function copyDtcgExport() {
+        try {
+          await navigator.clipboard.writeText(buildDtcgExport());
+        } catch (e) {}
+      }
+
+      async function downloadDtcgExport() {
+        await downloadFile({
+          blob: new Blob([buildDtcgExport()], { type: "application/json" }),
+          extension: "tokens.json",
+          description: "DTCG-shaped naming tokens",
+        });
+      }
+
+      /* ── Export ────────────────────────────────────────── */
+      function buildExport() {
+        const tierLabel =
+          tierMode === "tier2" ? "Tier 2 · Semantic" : "Tier 1 · Primitive";
+        let out = "";
+        out += `# ${tierLabel} Naming Convention\n\n`;
+        out += "## Axes\n\n";
+        out += axes
+          .map((a, i) => {
+            let note = "";
+            if (a.slot === "namespace") note = " (optional)";
+            else if (a.slot === "category") note = " (required)";
+            else if (a.slot === "scale") note = " (required — final axis)";
+            else if (a.name === "scale" && tierMode === "tier2")
+              note = " (optional)";
+            return `${i + 1}. **${a.name}**${note}`;
+          })
+          .join("\n");
+        out += "\n\n";
+        out +=
+          "## Formula\n\n```\n" +
+          axes.map((a) => `[${a.name}]`).join("-") +
+          "\n```\n\n";
+
+        if (namespaceEnabled) {
+          out += "## Namespace\n\n";
+          out += namespaceValue
+            ? `**${namespaceValue}** (global — applies to all tokens)\n\n`
+            : "_Not set — enter a value in Step 1._\n\n";
+        }
+
+        if (!categories.length) {
+          out += "_No categories defined yet._\n";
+        } else {
+          out += "## Categories\n\n";
+          categories.forEach((c) => {
+            out += `### ${c.name}\n\n`;
+            out += `- **DTCG $type**: ${c.dtcgType ? `\`${c.dtcgType}\`` : "_not set_"}\n`;
+            out += exportAxisValues(c, c.values, 0, firstConfigurableAxisIndex());
+            out += "\n";
+          });
+        }
+
+        out +=
+          "---\n\n*Generated with the Tier 1/2 Naming Builder — Design System Workshop*\n";
+        return out;
+      }
+
+      function exportAxisValues(category, values, depth, startAxisIdx) {
+        let out = "";
+        const pad = "  ".repeat(depth);
+        for (let i = startAxisIdx; i < axes.length; i++) {
+          const ax = axes[i];
+          if (ax.slot === "namespace" || ax.slot === "category") continue;
+          if (depth === 0 && isShadowedAtLevel(values, ax.id)) continue;
+          const av = values[ax.id];
+          if (!av) continue;
+          if (isBranched(av)) {
+            out += `${pad}- **${ax.name}** (branched)\n`;
+            av.branches.forEach((br) => {
+              out += `${pad}  - **${br.value}**\n`;
+              if (br.values) {
+                out += exportAxisValues(category, br.values, depth + 2, i + 1);
+              }
+            });
+            break;
+          }
+          if (av.type === "unused") {
+            out += `${pad}- **${ax.name}** (Unused): _skipped_\n`;
+            continue;
+          }
+          const vals = genValues(av);
+          const typeLbl = SCALE_TYPES[av.type]?.label || av.type;
+          out += `${pad}- **${ax.name}** (${typeLbl}): ${vals.length ? vals.join(", ") : "_none_"}\n`;
+        }
+        return out;
+      }
+
+      function renderExport() {
+        id("export-out").value = buildExport();
+        const dtcgEl = id("dtcg-out");
+        if (dtcgEl) dtcgEl.value = buildDtcgExport();
+      }
+
+      async function copyExport() {
+        try {
+          await navigator.clipboard.writeText(buildExport());
+        } catch (e) {}
+      }
+      async function downloadExport() {
+        await downloadFile({
+          blob: new Blob([buildExport()], { type: "text/markdown" }),
+          extension: "md",
+          description: "Naming convention",
+        });
+      }
+
+      /* ── Master render ─────────────────────────────────── */
+      function renderAll() {
+        syncProjectTitleUI();
+        updateTierModeUI();
+        renderAxisList();
+        renderCategories();
+        renderPreviewAndExport();
+        scheduleAutoSave();
+        updateShareLinkButton();
+      }
+      function renderPreviewAndExport() {
+        renderPreview();
+        renderExport();
+      }
+
+      /* ── Persistence ───────────────────────────────────── */
+      const STORAGE_KEY = "tier-naming-builder:v2";
+      const STORAGE_KEY_LEGACY = "tier1-axis-builder:v1";
+      const STATE_VERSION = 2;
+      const SHARE_HASH_MAX = 6000;
+      let persistEnabled = false;
+      let autoSaveTimer = null;
+
+      function serializeState() {
+        return {
+          version: STATE_VERSION,
+          tierMode,
+          projectTitle,
+          namespaceEnabled,
+          namespaceValue,
+          axes: JSON.parse(JSON.stringify(axes)),
+          categories: JSON.parse(JSON.stringify(categories)),
+          axisSeq,
+          catSeq,
+          brSeq,
+        };
+      }
+
+      /* ── Undo / redo ───────────────────────────────────── */
+      const MAX_HISTORY = 50;
+      let undoStack = [];
+      let redoStack = [];
+      let isRestoringHistory = false;
+      const historyFieldGuard = new Set();
+
+      function historyFieldAttrs(fieldKey) {
+        const k = String(fieldKey).replace(/'/g, "\\'");
+        return `onfocus="historyOnFieldFocus('${k}')" onblur="historyOnFieldBlur('${k}')"`;
+      }
+
+      function historyOnFieldFocus(fieldKey) {
+        if (isRestoringHistory) return;
+        if (historyFieldGuard.has(fieldKey)) return;
+        historyFieldGuard.add(fieldKey);
+        pushHistory();
+      }
+
+      function historyOnFieldBlur(fieldKey) {
+        historyFieldGuard.delete(fieldKey);
+      }
+
+      function pushHistory() {
+        if (isRestoringHistory) return;
+        undoStack.push(serializeState());
+        if (undoStack.length > MAX_HISTORY) undoStack.shift();
+        redoStack.length = 0;
+        updateUndoRedoUI();
+      }
+
+      function restoreSnapshot(data) {
+        isRestoringHistory = true;
+        historyFieldGuard.clear();
+        applyState(data);
+        isRestoringHistory = false;
+        updateUndoRedoUI();
+      }
+
+      function undo() {
+        if (!undoStack.length) return;
+        redoStack.push(serializeState());
+        restoreSnapshot(undoStack.pop());
+      }
+
+      function redo() {
+        if (!redoStack.length) return;
+        undoStack.push(serializeState());
+        restoreSnapshot(redoStack.pop());
+      }
+
+      function clearHistory() {
+        undoStack.length = 0;
+        redoStack.length = 0;
+        historyFieldGuard.clear();
+        updateUndoRedoUI();
+      }
+
+      function updateUndoRedoUI() {
+        const undoBtn = id("undo-btn");
+        const redoBtn = id("redo-btn");
+        if (undoBtn) undoBtn.disabled = undoStack.length === 0;
+        if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+      }
+
+      function recomputeSeqCounters() {
+        axisSeq = axes.reduce((max, a) => {
+          const m = /^ax(\d+)$/.exec(a.id);
+          return m ? Math.max(max, +m[1]) : max;
+        }, 0);
+        catSeq = categories.reduce((max, c) => {
+          const m = /^cat(\d+)$/.exec(c.id);
+          return m ? Math.max(max, +m[1]) : max;
+        }, 0);
+        brSeq = 0;
+        categories.forEach((c) => {
+          walkBranchedValues(c.values, (values) => {
+            for (const ax of axes) {
+              if (ax.slot === "namespace" || ax.slot === "category") continue;
+              const av = values[ax.id];
+              if (!isBranched(av)) continue;
+              av.branches.forEach((br) => {
+                const m = /^br(\d+)$/.exec(br.id);
+                if (m) brSeq = Math.max(brSeq, +m[1]);
+              });
+            }
+          });
+        });
+      }
+
+      function validateBranchedAxis(av, axisName, categoryName) {
+        if (!isBranched(av)) return null;
+        if (!av.branches.length)
+          return `Branched axis "${axisName}" in category "${categoryName}" has no branches.`;
+        const names = new Set();
+        for (const br of av.branches) {
+          if (!br.value)
+            return `A branch on "${axisName}" in category "${categoryName}" is missing a value.`;
+          if (names.has(br.value))
+            return `Duplicate branch "${br.value}" on "${axisName}" in category "${categoryName}".`;
+          names.add(br.value);
+        }
+        return null;
+      }
+
+      function validateCategoryValues(values, categoryName, startAxisIdx) {
+        if (startAxisIdx == null) startAxisIdx = firstConfigurableAxisIndex();
+        for (let i = startAxisIdx; i < axes.length; i++) {
+          const ax = axes[i];
+          if (ax.slot === "namespace" || ax.slot === "category") continue;
+          if (startAxisIdx === firstConfigurableAxisIndex() && isShadowedAtLevel(values, ax.id))
+            continue;
+          const av = values[ax.id];
+          if (!av) continue;
+          const err = validateBranchedAxis(av, ax.name, categoryName);
+          if (err) return err;
+          if (isBranched(av)) {
+            for (const br of av.branches) {
+              if (br.values) {
+                const nested = validateCategoryValues(
+                  br.values,
+                  categoryName,
+                  i + 1,
+                );
+                if (nested) return nested;
+              }
+            }
+            break;
+          }
+        }
+        return null;
+      }
+
+      function migrateState(data) {
+        if (!data || typeof data !== "object") return data;
+        const migrated = JSON.parse(JSON.stringify(data));
+        if (migrated.version === 1) {
+          migrated.version = 2;
+          if (migrated.tierMode !== "tier1" && migrated.tierMode !== "tier2") {
+            migrated.tierMode = "tier1";
+          }
+          if (Array.isArray(migrated.categories)) {
+            migrated.categories.forEach((c) => {
+              if (typeof c.dtcgType !== "string") c.dtcgType = "";
+            });
+          }
+        }
+        return migrated;
+      }
+
+      function validateState(data) {
+        if (!data || typeof data !== "object") return "Invalid project data.";
+        if (data.version !== 1 && data.version !== STATE_VERSION)
+          return "Incompatible file version — expected version 1 or 2.";
+        if (data.tierMode != null && data.tierMode !== "tier1" && data.tierMode !== "tier2")
+          return "Invalid tier mode.";
+        if (!Array.isArray(data.axes) || data.axes.length < 1)
+          return "Project is missing axis definitions.";
+        if (!data.axes.some((a) => a.slot === "category"))
+          return "Project must include a category axis.";
+        const mode = data.tierMode === "tier2" ? "tier2" : "tier1";
+        if (
+          mode === "tier1" &&
+          !data.axes.some((a) => a.slot === "scale" || a.name === "scale")
+        )
+          return "Project must include a scale axis.";
+        if (
+          data.namespaceEnabled &&
+          !data.axes.some((a) => a.slot === "namespace")
+        )
+          return "Project has namespace enabled but no namespace axis.";
+        if (!Array.isArray(data.categories))
+          return "Project is missing categories.";
+        for (const c of data.categories) {
+          if (
+            c.dtcgType != null &&
+            c.dtcgType !== "" &&
+            !DTCG_TYPES.has(c.dtcgType)
+          )
+            return `Unknown DTCG $type "${c.dtcgType}" in category "${c.name || "?"}".`;
+          const err = validateCategoryValues(c.values || {}, c.name || "?");
+          if (err) return err;
+        }
+        return null;
+      }
+
+      function showPersistenceError(msg) {
+        alert(msg);
+      }
+
+      function applyState(data) {
+        const migrated = migrateState(data);
+        const err = validateState(migrated);
+        if (err) {
+          showPersistenceError(err);
+          return false;
+        }
+        tierMode = migrated.tierMode === "tier2" ? "tier2" : "tier1";
+        namespaceEnabled = !!migrated.namespaceEnabled;
+        namespaceValue = String(migrated.namespaceValue || "");
+        projectTitle =
+          String(migrated.projectTitle || defaultTitleForTier(tierMode)).trim() ||
+          defaultTitleForTier(tierMode);
+        axes = JSON.parse(JSON.stringify(migrated.axes));
+        categories = JSON.parse(JSON.stringify(migrated.categories));
+        recomputeSeqCounters();
+        if (typeof migrated.axisSeq === "number")
+          axisSeq = Math.max(axisSeq, migrated.axisSeq);
+        if (typeof migrated.catSeq === "number")
+          catSeq = Math.max(catSeq, migrated.catSeq);
+        if (typeof migrated.brSeq === "number")
+          brSeq = Math.max(brSeq, migrated.brSeq);
+        if (typeof migrated.famSeq === "number")
+          brSeq = Math.max(brSeq, migrated.famSeq);
+        categories.forEach((c) => {
+          normalizeCategory(c);
+          initCategoryValues(c);
+        });
+        syncScaleAxisForTier();
+        const postErr = categories
+          .map((c) => validateCategoryValues(c.values, c.name))
+          .find(Boolean);
+        if (postErr) {
+          showPersistenceError(postErr);
+          return false;
+        }
+        const nsToggle = id("namespace-toggle");
+        if (nsToggle) nsToggle.checked = namespaceEnabled;
+        hideRestoreBanner();
+        renderAll();
+        return true;
+      }
+
+      function saveToStorage() {
+        if (!persistEnabled) return;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState()));
+        } catch (e) {}
+      }
+
+      function loadFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) return JSON.parse(raw);
+          const legacy = localStorage.getItem(STORAGE_KEY_LEGACY);
+          if (legacy) return JSON.parse(legacy);
+          return null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function clearSavedState() {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(STORAGE_KEY_LEGACY);
+        } catch (e) {}
+      }
+
+      function scheduleAutoSave() {
+        if (!persistEnabled) return;
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(saveToStorage, 300);
+      }
+
+      let restoreBannerTimer = null;
+
+      function showRestoreBanner() {
+        const el = id("restore-banner");
+        if (!el) return;
+        clearTimeout(restoreBannerTimer);
+        el.hidden = false;
+        el.classList.remove("is-visible");
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => el.classList.add("is-visible"));
+        });
+        restoreBannerTimer = setTimeout(hideRestoreBanner, 10000);
+      }
+
+      function hideRestoreBanner() {
+        const el = id("restore-banner");
+        if (!el || el.hidden) return;
+        clearTimeout(restoreBannerTimer);
+        restoreBannerTimer = null;
+        el.classList.remove("is-visible");
+        const finishHide = () => {
+          el.hidden = true;
+        };
+        el.addEventListener(
+          "transitionend",
+          (evt) => {
+            if (evt.target === el && evt.propertyName === "opacity") finishHide();
+          },
+          { once: true },
+        );
+        setTimeout(finishHide, 500);
+      }
+
+      function startFresh() {
+        clearAll();
+      }
+
+      async function downloadProject() {
+        const json = JSON.stringify(serializeState(), null, 2);
+        await downloadFile({
+          blob: new Blob([json], { type: "application/json" }),
+          extension: "json",
+          description: "Naming builder project",
+        });
+      }
+
+      function triggerImportProject() {
+        id("import-project-input").click();
+      }
+
+      function handleImportProject(evt) {
+        const file = evt.target.files && evt.target.files[0];
+        evt.target.value = "";
+        if (!file) return;
+        if (
+          !confirm("Import this project? Your current work will be replaced.")
+        )
+          return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(reader.result);
+            if (applyState(data)) {
+              clearSavedState();
+              saveToStorage();
+              clearHistory();
+            }
+          } catch (e) {
+            showPersistenceError(
+              "Could not read project file — invalid JSON.",
+            );
+          }
+        };
+        reader.onerror = () =>
+          showPersistenceError("Could not read project file.");
+        reader.readAsText(file);
+      }
+
+      function encodeShareHash(state) {
+        const json = JSON.stringify(state);
+        const bytes = new TextEncoder().encode(json);
+        let binary = "";
+        bytes.forEach((b) => (binary += String.fromCharCode(b)));
+        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      }
+
+      function decodeShareHash(encoded) {
+        const b64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
+        const pad = b64.length % 4 ? "=".repeat(4 - (b64.length % 4)) : "";
+        const binary = atob(b64 + pad);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++)
+          bytes[i] = binary.charCodeAt(i);
+        return JSON.parse(new TextDecoder().decode(bytes));
+      }
+
+      function parseShareHash() {
+        const m = /^#s=(.+)$/.exec(location.hash);
+        if (!m) return null;
+        try {
+          return decodeShareHash(m[1]);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function getShareHashLength() {
+        return encodeShareHash(serializeState()).length;
+      }
+
+      function updateShareLinkButton() {
+        const btn = id("copy-share-link-btn");
+        if (!btn) return;
+        const tooLong = getShareHashLength() > SHARE_HASH_MAX;
+        btn.disabled = tooLong;
+        btn.title = tooLong
+          ? "Config too large to share via URL — use Export project instead."
+          : "Copy a link that restores this configuration";
+      }
+
+      async function copyShareLink() {
+        const encoded = encodeShareHash(serializeState());
+        if (encoded.length > SHARE_HASH_MAX) {
+          showPersistenceError(
+            "Config too large to share via URL — use Export project instead.",
+          );
+          return;
+        }
+        history.replaceState(null, "", "#s=" + encoded);
+        try {
+          await navigator.clipboard.writeText(location.href);
+        } catch (e) {
+          showPersistenceError(
+            "Could not copy link — copy the URL from the address bar.",
+          );
+        }
+      }
+
+      function initApp() {
+        const hashData = parseShareHash();
+        if (hashData) {
+          if (applyState(hashData)) {
+            persistEnabled = true;
+            clearHistory();
+            return;
+          }
+          showPersistenceError(
+            "Could not load shared link — link may be invalid or truncated.",
+          );
+        }
+
+        const stored = loadFromStorage();
+        if (stored) {
+          const err = validateState(stored);
+          if (!err && applyState(stored)) {
+            showRestoreBanner();
+            persistEnabled = true;
+            clearHistory();
+            return;
+          }
+          clearSavedState();
+        }
+
+        seedDefaultCategory();
+        renderAll();
+        persistEnabled = true;
+        clearHistory();
+      }
+
+      /* ── Presets ───────────────────────────────────────── */
+      function loadPreset(key) {
+        axisSeq = 0;
+        catSeq = 0;
+        brSeq = 0;
+        namespaceEnabled = false;
+        namespaceValue = "";
+
+        if (TIER2_PRESETS.has(key)) {
+          tierMode = "tier2";
+          projectTitle = DEFAULT_PROJECT_TITLE_T2;
+        } else {
+          tierMode = "tier1";
+          projectTitle = DEFAULT_PROJECT_TITLE_T1;
+        }
+
+        if (key === "basic") {
+          axes = [
+            { id: "category", name: "category", locked: true, slot: "category" },
+            { id: "scale", name: "scale", locked: true, slot: "scale" },
+          ];
+          categories = [
+            {
+              id: "cat1",
+              name: "space",
+              dtcgType: "dimension",
+              values: {
+                scale: {
+                  type: "numeric",
+                  config: { start: "4", end: "64", step: "4" },
+                  list: [],
+                },
+              },
+            },
+            {
+              id: "cat2",
+              name: "border-radius",
+              dtcgType: "dimension",
+              values: {
+                scale: { type: "tshirt", config: { extra: "0" }, list: [] },
+              },
+            },
+          ];
+          catSeq = 2;
+        } else if (key === "full") {
+          axes = [
+            { id: "category", name: "category", locked: true, slot: "category" },
+            { id: "ax1", name: "family", locked: false, slot: "middle" },
+            { id: "scale", name: "scale", locked: true, slot: "scale" },
+          ];
+          axisSeq = 1;
+          categories = [
+            {
+              id: "cat1",
+              name: "color",
+              dtcgType: "color",
+              values: {
+                ax1: {
+                  type: "custom",
+                  config: {},
+                  list: ["blue", "red", "green", "gray"],
+                },
+                scale: {
+                  type: "ordinal",
+                  config: { start: "100", end: "900", step: "100" },
+                  list: [],
+                },
+              },
+            },
+            {
+              id: "cat2",
+              name: "space",
+              dtcgType: "dimension",
+              values: {
+                ax1: { type: "unused", config: {}, list: [] },
+                scale: {
+                  type: "numeric",
+                  config: { start: "4", end: "64", step: "4" },
+                  list: [],
+                },
+              },
+            },
+          ];
+          catSeq = 2;
+        } else if (key === "families") {
+          namespaceEnabled = true;
+          namespaceValue = "ds";
+          axes = [
+            {
+              id: "namespace",
+              name: "namespace",
+              locked: true,
+              slot: "namespace",
+            },
+            { id: "category", name: "category", locked: true, slot: "category" },
+            { id: "ax1", name: "family", locked: false, slot: "middle" },
+            { id: "scale", name: "scale", locked: true, slot: "scale" },
+          ];
+          axisSeq = 1;
+          categories = [
+            {
+              id: "cat1",
+              name: "border",
+              dtcgType: "dimension",
+              values: {
+                ax1: {
+                  mode: "branched",
+                  branches: [
+                    {
+                      id: "br1",
+                      value: "radius",
+                      values: {
+                        scale: {
+                          type: "tshirt",
+                          config: { extra: "0" },
+                          list: [],
+                        },
+                      },
+                    },
+                    {
+                      id: "br2",
+                      value: "width",
+                      values: {
+                        scale: {
+                          type: "numeric",
+                          config: { start: "1", end: "4", step: "1" },
+                          list: [],
+                        },
+                      },
+                    },
+                  ],
+                },
+                scale: { type: "unused", config: {}, list: [] },
+              },
+            },
+          ];
+          catSeq = 1;
+          brSeq = 2;
+        } else if (key === "semantic-color") {
+          axes = [
+            { id: "category", name: "category", locked: true, slot: "category" },
+            { id: "ax1", name: "role", locked: false, slot: "middle" },
+            { id: "ax2", name: "emphasis", locked: false, slot: "middle" },
+            { id: "scale", name: "scale", locked: true, slot: "scale" },
+          ];
+          axisSeq = 2;
+          categories = [
+            {
+              id: "cat1",
+              name: "color",
+              dtcgType: "color",
+              values: {
+                ax1: {
+                  type: "custom",
+                  config: {},
+                  list: ["action", "text", "surface"],
+                },
+                ax2: {
+                  type: "custom",
+                  config: {},
+                  list: ["primary", "secondary", "subtle"],
+                },
+                scale: { type: "unused", config: {}, list: [] },
+              },
+            },
+          ];
+          catSeq = 1;
+        } else if (key === "typography-compound") {
+          axes = [
+            { id: "category", name: "category", locked: true, slot: "category" },
+            { id: "ax1", name: "hierarchy", locked: false, slot: "middle" },
+            { id: "scale", name: "scale", locked: true, slot: "scale" },
+          ];
+          axisSeq = 1;
+          categories = [
+            {
+              id: "cat1",
+              name: "typography",
+              dtcgType: "typography",
+              values: {
+                ax1: {
+                  type: "custom",
+                  config: {},
+                  list: ["display", "heading", "body", "caption"],
+                },
+                scale: { type: "tshirt", config: { extra: "0" }, list: [] },
+              },
+            },
+          ];
+          catSeq = 1;
+        } else {
+          return;
+        }
+
+        syncScaleAxisForTier();
+        clearSavedState();
+        hideRestoreBanner();
+        renderAll();
+        clearHistory();
+      }
+
+      function clearAll() {
+        projectTitle = defaultTitleForTier(tierMode);
+        namespaceEnabled = false;
+        namespaceValue = "";
+        axes = [
+          { id: "category", name: "category", locked: true, slot: "category" },
+          { id: "scale", name: "scale", locked: true, slot: "scale" },
+        ];
+        categories = [];
+        axisSeq = 0;
+        catSeq = 0;
+        brSeq = 0;
+        syncScaleAxisForTier();
+        clearSavedState();
+        hideRestoreBanner();
+        seedDefaultCategory();
+        renderAll();
+        clearHistory();
+      }
+
+      /* ── Helpers ───────────────────────────────────────── */
+      const id = (i) => document.getElementById(i);
+      const esc = (s) =>
+        String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+
+      /* ── Init ──────────────────────────────────────────── */
+      document.addEventListener(
+        "keydown",
+        (e) => {
+          if (!(e.metaKey || e.ctrlKey)) return;
+          const key = e.key.toLowerCase();
+          if (key === "z" && !e.shiftKey) {
+            if (undoStack.length) {
+              e.preventDefault();
+              undo();
+            }
+          } else if ((key === "z" && e.shiftKey) || key === "y") {
+            if (redoStack.length) {
+              e.preventDefault();
+              redo();
+            }
+          }
+        },
+        true,
+      );
+      initApp();
+    </script>
+  </body>
+</html>

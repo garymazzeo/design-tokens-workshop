@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Anatomy Mapper — Design System Token Naming</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    /* ── Design tokens: light mode ───────────────────────── */
+    :root {
+      --bg-primary:    #ffffff;
+      --bg-secondary:  #f4f3ef;
+      --bg-tertiary:   #eceae4;
+      --bg-info:       #e6f1fb;
+      --bg-danger:     #fcebeb;
+      --bg-success:    #eaf3de;
+      --bg-warning:    #faeeda;
+      --text-primary:  #1a1a18;
+      --text-secondary:#56564f;
+      --text-tertiary: #8a8a82;
+      --text-info:     #185fa5;
+      --text-danger:   #a32d2d;
+      --text-success:  #3b6d11;
+      --text-warning:  #854f0b;
+      --border-sub:    rgba(26,26,24,0.10);
+      --border-mid:    rgba(26,26,24,0.22);
+      --border-top:    rgba(26,26,24,0.38);
+      --radius-md:     8px;
+      --radius-lg:     12px;
+      --font-sans:     -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-mono:     'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, 'Liberation Mono', monospace;
+    }
+
+    /* ── Design tokens: dark mode ────────────────────────── */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary:    #1e1e1b;
+        --bg-secondary:  #292926;
+        --bg-tertiary:   #323230;
+        --bg-info:       #042c53;
+        --bg-danger:     #501313;
+        --bg-success:    #173404;
+        --bg-warning:    #412402;
+        --text-primary:  #f0ede5;
+        --text-secondary:#aeaba2;
+        --text-tertiary: #76736c;
+        --text-info:     #85b7eb;
+        --text-danger:   #f09595;
+        --text-success:  #97c459;
+        --text-warning:  #ef9f27;
+        --border-sub:    rgba(240,237,229,0.10);
+        --border-mid:    rgba(240,237,229,0.22);
+        --border-top:    rgba(240,237,229,0.38);
+      }
+    }
+
+    /* ── Reset ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* ── Base inputs ─────────────────────────────────────── */
+    input[type="text"] {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-mid);
+      border-radius: var(--radius-md);
+      padding: 0 10px;
+      height: 36px;
+      width: 100%;
+      outline: none;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    input[type="text"]::placeholder { color: var(--text-tertiary); }
+    input[type="text"]:hover  { border-color: var(--border-top); }
+    input[type="text"]:focus  { border-color: var(--border-top); box-shadow: 0 0 0 3px rgba(26,26,24,.06); }
+    @media (prefers-color-scheme: dark) {
+      input[type="text"]:focus { box-shadow: 0 0 0 3px rgba(240,237,229,.06); }
+    }
+
+    /* ── Base buttons ────────────────────────────────────── */
+    button {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-mid);
+      border-radius: var(--radius-md);
+      padding: 0 12px;
+      height: 36px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .1s, border-color .1s;
+    }
+    button:hover  { background: var(--bg-secondary); border-color: var(--border-top); }
+    button:active { transform: scale(0.98); }
+
+    /* ── Page chrome ─────────────────────────────────────── */
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-sub);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+    }
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+    .page-title {
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: .35rem;
+    }
+    .page-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .mono { font-family: var(--font-mono); font-size: 13px; }
+
+    /* ── Shared utilities ────────────────────────────────── */
+    .step-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+    .panel-head {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      padding-bottom: 8px;
+      border-bottom: 0.5px solid var(--border-sub);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-count { font-weight: 400; }
+    .cl {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 5px;
+    }
+
+    /* ── Type selector ───────────────────────────────────── */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 620px) {
+      .type-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .type-card {
+      border: 0.5px solid var(--border-sub);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      cursor: pointer;
+      background: var(--bg-primary);
+      transition: border-color .1s, background .1s;
+    }
+    .type-card:hover  { border-color: var(--border-mid); background: var(--bg-secondary); }
+    .type-card.active { border: 1.5px solid var(--border-top); background: var(--bg-secondary); }
+    .type-card h3 { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 3px; }
+    .type-card p  { font-size: 11px; color: var(--text-tertiary); line-height: 1.5; }
+
+    /* ── Name section ────────────────────────────────────── */
+    .name-section  { margin-bottom: 1.5rem; }
+    .name-row      { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .name-row input{ max-width: 280px; }
+    .eg-label      { font-size: 11px; color: var(--text-tertiary); margin-bottom: 6px; }
+
+    .sug-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+    .sug-pill {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 0.5px solid var(--border-mid);
+      color: var(--text-secondary);
+      background: var(--bg-primary);
+      cursor: pointer;
+      transition: all .1s;
+    }
+    .sug-pill:hover  { background: var(--bg-secondary); color: var(--text-primary); }
+    .sug-pill.active { background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-top); font-weight: 500; }
+    .preset-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: var(--bg-info);
+      color: var(--text-info);
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    /* ── Main two-column layout ──────────────────────────── */
+    .main-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 720px) {
+      .main-cols { grid-template-columns: 1fr; }
+    }
+
+    /* ── Chips ───────────────────────────────────────────── */
+    .chip-row { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 0.5px solid var(--border-sub);
+      color: var(--text-secondary);
+      cursor: pointer;
+      background: var(--bg-primary);
+      user-select: none;
+      line-height: 1.7;
+      transition: all .1s;
+    }
+    .chip:hover { border-color: var(--border-mid); color: var(--text-primary); }
+    .chip.on    { background: var(--bg-secondary); border-color: var(--border-top); color: var(--text-primary); font-weight: 500; }
+
+    /* ── Anatomy panel ───────────────────────────────────── */
+    .sugg-parts { margin-bottom: 12px; }
+
+    .part-card {
+      border: 0.5px solid var(--border-sub);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: var(--bg-primary);
+    }
+    .part-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .pname {
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+    }
+    .pdel {
+      font-size: 15px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 2px 4px;
+      height: auto;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+      transition: color .1s, background .1s;
+    }
+    .pdel:hover { color: var(--text-danger); background: var(--bg-danger); }
+
+    .pp       { margin-bottom: 6px; }
+    .add-row  { display: flex; gap: 6px; margin-top: 10px; }
+    .add-row input  { font-family: var(--font-mono); font-size: 12px; }
+    .add-row button { flex-shrink: 0; }
+    .empty-msg { font-size: 12px; color: var(--text-tertiary); padding: 8px 0; line-height: 1.6; }
+
+    /* ── Token panel ─────────────────────────────────────── */
+    .tok-panel { position: sticky; top: 1.5rem; }
+    .copy-all-btn { font-size: 11px; padding: 0 10px; height: 28px; }
+
+    .tok-group { margin-bottom: 14px; }
+    .tok-glabel {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+      padding-bottom: 4px;
+      border-bottom: 0.5px solid var(--border-sub);
+    }
+    .tok-item {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 4px 6px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      line-height: 1.6;
+      word-break: break-all;
+      transition: background .1s;
+    }
+    .tok-item:hover       { background: var(--bg-secondary); color: var(--text-primary); }
+    .tok-item .ci         { opacity: 0; font-size: 12px; flex-shrink: 0; margin-left: 4px; }
+    .tok-item:hover .ci   { opacity: 1; color: var(--text-tertiary); }
+    .tok-copied           { background: var(--bg-success) !important; }
+    .tok-copied .tok-text { color: var(--text-success) !important; }
+    .tok-empty {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      padding: 24px 0;
+      text-align: center;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <p class="page-eyebrow">Workshop tool · Layer 2</p>
+  <h1 class="page-title">Component anatomy mapper</h1>
+  <p class="page-desc">
+    Map a component's parts, properties, and states —
+    then watch token names generate live from the formula
+    <span class="mono">[component]-[part]-[property]-[state]</span>.
+    Click any token to copy it.
+  </p>
+
+  <p class="step-label">1 · Choose component type</p>
+  <div class="type-grid" id="type-grid"></div>
+
+  <div class="name-section">
+    <p class="step-label">2 · Name your component</p>
+    <div class="name-row">
+      <input type="text" id="comp-name" placeholder="e.g. button, input, card…" />
+    </div>
+    <div id="eg-row" style="display:none">
+      <p class="eg-label">Load an example — <strong style="font-weight:500;">preset</strong> badges include anatomy:</p>
+      <div class="sug-pills" id="sug-pills"></div>
+    </div>
+  </div>
+
+  <div class="main-cols">
+
+    <!-- Left: anatomy builder -->
+    <div>
+      <div class="panel-head">
+        <span>Anatomy</span>
+        <span class="panel-count" id="part-count"></span>
+      </div>
+      <div id="sugg-row" style="display:none">
+        <div class="sugg-parts">
+          <p class="cl">Suggested parts — click to add or remove</p>
+          <div class="chip-row" id="sugg-chips"></div>
+        </div>
+      </div>
+      <div id="parts-list"></div>
+      <div class="add-row">
+        <input type="text" id="custom-inp" placeholder="add custom part name…" />
+        <button id="add-btn">Add</button>
+      </div>
+    </div>
+
+    <!-- Right: token output -->
+    <div class="tok-panel">
+      <div class="panel-head">
+        <span>Generated tokens</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="panel-count" id="tok-count"></span>
+          <button id="copy-all-btn" class="copy-all-btn">Copy all</button>
+        </div>
+      </div>
+      <div id="tok-list"></div>
+    </div>
+
+  </div>
+</div><!-- /page -->
+
+<script>
+const TYPES = {
+  simple: {
+    label: 'Simple', desc: 'Single-purpose, minimal parts',
+    examples: ['badge','avatar','tag','chip','icon'],
+    parts: ['container','label','icon','indicator','overlay']
+  },
+  sophisticated: {
+    label: 'Sophisticated', desc: 'Richer anatomy, one unit',
+    examples: ['button','input','toggle','checkbox','select'],
+    parts: ['container','label','description','icon','leading','trailing','track','thumb','indicator','placeholder']
+  },
+  compound: {
+    label: 'Compound', desc: 'Assembled from components',
+    examples: ['card','modal','nav','form','alert'],
+    parts: ['container','header','body','footer','title','description','icon','action','media','overlay']
+  },
+  composed: {
+    label: 'Composed', desc: 'Full interface patterns',
+    examples: ['hero','data-table','settings','sidebar','onboarding'],
+    parts: ['container','header','sidebar','body','footer','title','description','action','media']
+  }
+};
+
+const PRESETS = {
+  button: { type: 'sophisticated', parts: [
+    { name: 'container',  props: ['background','border','shadow'],  states: ['default','hover','active','focus','disabled'] },
+    { name: 'label',      props: ['text'],                          states: ['default','disabled'] },
+    { name: 'icon',       props: ['foreground'],                    states: ['default','disabled'] }
+  ]},
+  input: { type: 'sophisticated', parts: [
+    { name: 'container',  props: ['background','border'],           states: ['default','focus','error','disabled'] },
+    { name: 'label',      props: ['text'],                          states: ['default','disabled'] },
+    { name: 'placeholder',props: ['text'],                          states: ['default'] },
+    { name: 'description',props: ['text'],                          states: ['default','error'] },
+    { name: 'leading',    props: ['foreground'],                    states: ['default','disabled'] },
+    { name: 'trailing',   props: ['foreground'],                    states: ['default','disabled'] }
+  ]},
+  badge: { type: 'simple', parts: [
+    { name: 'container',  props: ['background','border'],           states: ['default'] },
+    { name: 'label',      props: ['text'],                          states: ['default'] },
+    { name: 'icon',       props: ['foreground'],                    states: ['default'] }
+  ]},
+  avatar: { type: 'simple', parts: [
+    { name: 'container',  props: ['background','border'],           states: ['default'] },
+    { name: 'label',      props: ['text'],                          states: ['default'] },
+    { name: 'indicator',  props: ['background','border'],           states: ['default'] }
+  ]},
+  toggle: { type: 'sophisticated', parts: [
+    { name: 'track',      props: ['background','border'],           states: ['default','checked','disabled'] },
+    { name: 'thumb',      props: ['background','shadow'],           states: ['default','checked','disabled'] },
+    { name: 'label',      props: ['text'],                          states: ['default','disabled'] }
+  ]},
+  checkbox: { type: 'sophisticated', parts: [
+    { name: 'container',  props: ['background','border'],           states: ['default','hover','checked','focus','disabled'] },
+    { name: 'indicator',  props: ['foreground'],                    states: ['checked','disabled'] },
+    { name: 'label',      props: ['text'],                          states: ['default','disabled'] }
+  ]},
+  card: { type: 'compound', parts: [
+    { name: 'container',  props: ['background','border','shadow'],  states: ['default','hover'] },
+    { name: 'header',     props: ['background','border'],           states: ['default'] },
+    { name: 'title',      props: ['text'],                          states: ['default'] },
+    { name: 'description',props: ['text'],                          states: ['default'] },
+    { name: 'media',      props: ['background'],                    states: ['default'] },
+    { name: 'action',     props: ['background','border'],           states: ['default','hover'] }
+  ]},
+  modal: { type: 'compound', parts: [
+    { name: 'overlay',    props: ['background','opacity'],          states: ['default'] },
+    { name: 'container',  props: ['background','border','shadow'],  states: ['default'] },
+    { name: 'header',     props: ['background','border'],           states: ['default'] },
+    { name: 'title',      props: ['text'],                          states: ['default'] },
+    { name: 'body',       props: ['background'],                    states: ['default'] },
+    { name: 'footer',     props: ['background','border'],           states: ['default'] }
+  ]},
+  nav: { type: 'compound', parts: [
+    { name: 'container',  props: ['background','border'],           states: ['default'] },
+    { name: 'item',       props: ['background'],                    states: ['default','hover','active','selected'] },
+    { name: 'item-label', props: ['text'],                          states: ['default','active','disabled'] },
+    { name: 'item-icon',  props: ['foreground'],                    states: ['default','active','disabled'] }
+  ]}
+};
+
+const PROPS  = ['background','foreground','text','border','border-width','border-radius','shadow','spacing','size','opacity'];
+const STATES = ['default','hover','active','focus','focus-visible','disabled','selected','checked','error','success','loading','readonly'];
+
+let S   = { type: null, name: '', parts: [] };
+let pid = 0;
+const mkid = () => 'p' + (++pid);
+
+/* ── State mutators ───────────────────────────────────────── */
+function selType(t) { S.type = t; S.parts = []; renderAll(); }
+
+function selExample(name) {
+  document.getElementById('comp-name').value = name;
+  S.name = name;
+  if (PRESETS[name]) {
+    const pr = PRESETS[name];
+    S.type   = pr.type;
+    S.parts  = pr.parts.map(x => ({ id: mkid(), name: x.name, props: new Set(x.props), states: new Set(x.states) }));
+  } else {
+    S.parts = [];
+  }
+  renderAll();
+}
+
+function onName(val) {
+  S.name = val.trim().toLowerCase().replace(/\s+/g, '-');
+  renderTokens();
+  renderSugPills();
+}
+
+function isActive(n) { return S.parts.some(p => p.name === n); }
+
+function togSugg(n) {
+  if (isActive(n)) { S.parts = S.parts.filter(p => p.name !== n); }
+  else             { S.parts.push({ id: mkid(), name: n, props: new Set(['background']), states: new Set(['default']) }); }
+  renderSugChips(); renderParts(); renderTokens();
+}
+
+function addCustom() {
+  const inp = document.getElementById('custom-inp');
+  const n   = inp.value.trim().toLowerCase().replace(/\s+/g, '-');
+  if (!n || S.parts.some(p => p.name === n)) { inp.value = ''; return; }
+  S.parts.push({ id: mkid(), name: n, props: new Set(['background']), states: new Set(['default']) });
+  inp.value = '';
+  renderSugChips(); renderParts(); renderTokens();
+}
+
+function delPart(id) {
+  S.parts = S.parts.filter(p => p.id !== id);
+  renderSugChips(); renderParts(); renderTokens();
+}
+
+function togProp(id, prop) {
+  const p = S.parts.find(x => x.id === id); if (!p) return;
+  p.props.has(prop) ? p.props.delete(prop) : p.props.add(prop);
+  rerenderChips(id); renderTokens();
+}
+
+function togState(id, st) {
+  const p = S.parts.find(x => x.id === id); if (!p) return;
+  p.states.has(st) ? p.states.delete(st) : p.states.add(st);
+  rerenderChips(id); renderTokens();
+}
+
+function rerenderChips(id) {
+  const el = document.getElementById('pc-' + id); if (!el) return;
+  const p  = S.parts.find(x => x.id === id);      if (!p)  return;
+  const pc = el.querySelector('.pc');
+  const sc = el.querySelector('.sc');
+  if (pc) pc.innerHTML = PROPS.map(pr  => `<span class="chip${p.props.has(pr) ? ' on' : ''}" onclick="togProp('${id}','${pr}')">${pr}</span>`).join('');
+  if (sc) sc.innerHTML = STATES.map(st => `<span class="chip${p.states.has(st) ? ' on' : ''}" onclick="togState('${id}','${st}')">${st}</span>`).join('');
+}
+
+/* ── Token generation ─────────────────────────────────────── */
+function genTokens() {
+  if (!S.name) return [];
+  const out = [];
+  for (const p of S.parts)
+    for (const pr of p.props)
+      for (const st of p.states)
+        out.push({ part: p.name, token: `${S.name}-${p.name}-${pr}-${st}` });
+  return out;
+}
+
+/* ── Copy helpers ─────────────────────────────────────────── */
+async function copyTok(tok, el) {
+  try { await navigator.clipboard.writeText(tok); } catch (e) {}
+  el.classList.add('tok-copied');
+  setTimeout(() => el.classList.remove('tok-copied'), 900);
+}
+
+async function copyAll() {
+  const text = genTokens().map(t => t.token).join('\n');
+  try { await navigator.clipboard.writeText(text); } catch (e) {}
+  const btn  = document.getElementById('copy-all-btn');
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = orig, 1400);
+}
+
+/* ── Renderers ────────────────────────────────────────────── */
+function renderTypeGrid() {
+  document.getElementById('type-grid').innerHTML = Object.entries(TYPES).map(([k, t]) =>
+    `<div class="type-card${S.type === k ? ' active' : ''}" onclick="selType('${k}')">
+       <h3>${t.label}</h3><p>${t.desc}</p>
+     </div>`
+  ).join('');
+}
+
+function renderSugPills() {
+  const row = document.getElementById('eg-row');
+  if (!S.type) { row.style.display = 'none'; return; }
+  row.style.display = 'block';
+  document.getElementById('sug-pills').innerHTML = TYPES[S.type].examples.map(e =>
+    `<span class="sug-pill${S.name === e ? ' active' : ''}" onclick="selExample('${e}')">
+       ${e}${PRESETS[e] ? '<span class="preset-badge">preset</span>' : ''}
+     </span>`
+  ).join('');
+}
+
+function renderSugChips() {
+  const row = document.getElementById('sugg-row');
+  if (!S.type) { row.style.display = 'none'; return; }
+  row.style.display = 'block';
+  document.getElementById('sugg-chips').innerHTML = TYPES[S.type].parts.map(p =>
+    `<span class="chip${isActive(p) ? ' on' : ''}" onclick="togSugg('${p}')">${p}</span>`
+  ).join('');
+}
+
+function renderParts() {
+  const list = document.getElementById('parts-list');
+  document.getElementById('part-count').textContent = S.parts.length
+    ? `${S.parts.length} part${S.parts.length !== 1 ? 's' : ''}` : '';
+
+  if (!S.parts.length) {
+    list.innerHTML = `<p class="empty-msg">${
+      S.type ? 'Select suggested parts above, or add a custom part below.'
+             : 'Select a component type to begin.'
+    }</p>`;
+    return;
+  }
+
+  list.innerHTML = S.parts.map(p => `
+    <div class="part-card" id="pc-${p.id}">
+      <div class="part-head">
+        <span class="pname">${p.name}</span>
+        <button class="pdel" onclick="delPart('${p.id}')" aria-label="Remove ${p.name}">
+          <i class="ti ti-x" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="pp">
+        <p class="cl">Properties</p>
+        <div class="chip-row pc">
+          ${PROPS.map(pr => `<span class="chip${p.props.has(pr) ? ' on' : ''}" onclick="togProp('${p.id}','${pr}')">${pr}</span>`).join('')}
+        </div>
+      </div>
+      <div>
+        <p class="cl">States</p>
+        <div class="chip-row sc">
+          ${STATES.map(st => `<span class="chip${p.states.has(st) ? ' on' : ''}" onclick="togState('${p.id}','${st}')">${st}</span>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTokens() {
+  const list = document.getElementById('tok-list');
+  const toks = genTokens();
+  document.getElementById('tok-count').textContent = toks.length
+    ? `${toks.length} token${toks.length !== 1 ? 's' : ''}` : '';
+
+  if (!S.name) {
+    list.innerHTML = `<div class="tok-empty">Enter a component name<br>to see generated tokens.</div>`;
+    return;
+  }
+  if (!toks.length) {
+    list.innerHTML = `<div class="tok-empty">Add parts, then toggle<br>properties and states.</div>`;
+    return;
+  }
+
+  const grouped = {};
+  for (const t of toks) {
+    if (!grouped[t.part]) grouped[t.part] = [];
+    grouped[t.part].push(t.token);
+  }
+
+  list.innerHTML = Object.entries(grouped).map(([part, ts]) => `
+    <div class="tok-group">
+      <div class="tok-glabel">${part}</div>
+      ${ts.map(tok =>
+        `<div class="tok-item" onclick="copyTok('${tok}',this)" title="Click to copy">
+           <span class="tok-text">${tok}</span>
+           <i class="ti ti-copy ci" aria-hidden="true"></i>
+         </div>`
+      ).join('')}
+    </div>`).join('');
+}
+
+function renderAll() {
+  renderTypeGrid();
+  renderSugPills();
+  renderSugChips();
+  renderParts();
+  renderTokens();
+}
+
+/* ── Init ─────────────────────────────────────────────────── */
+renderAll();
+document.getElementById('comp-name').addEventListener('input',  e => onName(e.target.value));
+document.getElementById('add-btn').addEventListener('click',    addCustom);
+document.getElementById('custom-inp').addEventListener('keydown', e => { if (e.key === 'Enter') addCustom(); });
+document.getElementById('copy-all-btn').addEventListener('click', copyAll);
+</script>
+</body>
+</html>
