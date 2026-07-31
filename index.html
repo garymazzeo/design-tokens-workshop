@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Systems Thinking and Token Naming — Design Tokens Workshop</title>
+  <meta name="description" content="A six-layer workshop on design-token naming: handbook, reference card, and interactive tools for systematic naming.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #ffffff;
+      --bg-2:       #f4f3ef;
+      --bg-3:       #eceae4;
+      --bg-info:    #e6f1fb;
+      --bg-success: #eaf3de;
+      --tx:         #1a1a18;
+      --tx-2:       #56564f;
+      --tx-3:       #8a8a82;
+      --tx-info:    #185fa5;
+      --tx-success: #3b6d11;
+      --bd-1:       rgba(26,26,24,.09);
+      --bd-2:       rgba(26,26,24,.20);
+      --bd-3:       rgba(26,26,24,.38);
+      --t1:         #185fa5;
+      --t1-bg:      #e6f1fb;
+      --t1-bd:      rgba(24,95,165,.30);
+      --t2:         #3b6d11;
+      --t2-bg:      #eaf3de;
+      --t2-bd:      rgba(59,109,11,.30);
+      --t3:         #534ab7;
+      --t3-bg:      #eeedfe;
+      --t3-bd:      rgba(83,74,183,.30);
+      --r:          8px;
+      --r-lg:       12px;
+      --display:    "Fraunces", Georgia, "Times New Roman", serif;
+      --sans:       "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+      --mono:       "IBM Plex Mono", "SF Mono", Consolas, monospace;
+      --max:        720px;
+      --wide:       880px;
+      --tear-h:     36px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:         #1e1e1b;
+        --bg-2:       #292926;
+        --bg-3:       #323230;
+        --bg-info:    #042c53;
+        --bg-success: #173404;
+        --tx:         #f0ede5;
+        --tx-2:       #aeaba2;
+        --tx-3:       #76736c;
+        --tx-info:    #85b7eb;
+        --tx-success: #97c459;
+        --bd-1:       rgba(240,237,229,.09);
+        --bd-2:       rgba(240,237,229,.20);
+        --bd-3:       rgba(240,237,229,.38);
+        --t1:         #85b7eb;
+        --t1-bg:      #042c53;
+        --t1-bd:      rgba(133,183,235,.30);
+        --t2:         #97c459;
+        --t2-bg:      #173404;
+        --t2-bd:      rgba(151,196,89,.30);
+        --t3:         #afa9ec;
+        --t3-bg:      #1e1a4a;
+        --t3-bd:      rgba(175,169,236,.30);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--tx);
+      line-height: 1.55;
+      min-height: 100vh;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: var(--wide);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Motion ─────────────────────────────────────────── */
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .rise {
+      opacity: 0;
+      animation: rise .7s cubic-bezier(.22,1,.36,1) forwards;
+    }
+
+    .rise-1 { animation-delay: .05s; }
+    .rise-2 { animation-delay: .15s; }
+    .rise-3 { animation-delay: .28s; }
+    .rise-4 { animation-delay: .4s; }
+    .rise-5 { animation-delay: .52s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rise { opacity: 1; animation: none; }
+      html { scroll-behavior: auto; }
+    }
+
+    /* ── Torn paper edges ───────────────────────────────── */
+    .tear {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: var(--tear-h);
+      line-height: 0;
+      pointer-events: none;
+      z-index: 2;
+      color: var(--bg-3);
+      filter: drop-shadow(-1px 4px 2px var(--tx-3));
+    }
+
+    .tear svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .tear-bottom {
+      bottom: calc(var(--tear-h) * -1 + 1px);
+    }
+
+    .tear-top {
+      top: 0;
+      transform: scaleY(-1);
+      rotate: 180deg;
+      color: var(--bg);
+    }
+
+    /* ── Hero ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      background: var(--bg-3);
+      min-height: min(100vh, 820px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3.5rem 0 calc(4rem + var(--tear-h));
+      --mx: 72%;
+      --my: 38%;
+      --lens: clamp(120px, 22vw, 200px);
+    }
+
+    .hero-fx {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      opacity: .55;
+      background-image:
+        linear-gradient(var(--bd-2) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bd-2) 1px, transparent 1px);
+      background-size: 28px 28px;
+      background-position: center;
+      -webkit-mask-image: radial-gradient(
+        circle calc(var(--lens) * .55) at var(--mx) var(--my),
+        #000 0%,
+        #000 42%,
+        transparent 72%
+      );
+      mask-image: radial-gradient(
+        circle calc(var(--lens) * .55) at var(--mx) var(--my),
+        #000 0%,
+        #000 42%,
+        transparent 72%
+      );
+    }
+
+    .hero-lens {
+      position: absolute;
+      width: var(--lens);
+      height: var(--lens);
+      left: var(--mx);
+      top: var(--my);
+      translate: -50% -50%;
+      border: 1.5px solid var(--t1);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 7px color-mix(in srgb, var(--t1) 16%, transparent),
+        inset 0 0 0 1px color-mix(in srgb, var(--t1) 20%, transparent);
+      opacity: .9;
+    }
+
+    .hero .wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      margin-bottom: .85rem;
+    }
+
+    .brand {
+      font-family: var(--display);
+      font-optical-sizing: auto;
+      font-weight: 600;
+      font-size: clamp(2.35rem, 6.2vw, 3.65rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--tx);
+      max-width: 14ch;
+      margin-bottom: 1.15rem;
+    }
+
+    .lede {
+      font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+      color: var(--tx-2);
+      max-width: 38ch;
+      line-height: 1.55;
+      margin-bottom: 1.75rem;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem .75rem;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: .7rem 1.15rem;
+      border-radius: var(--r);
+      border: 0.5px solid transparent;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--tx);
+      color: var(--bg);
+      border-color: var(--tx);
+    }
+
+    .btn-primary:hover {
+      background: transparent;
+      color: var(--tx);
+      border-color: var(--bd-3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--tx);
+      border-color: var(--bd-2);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg);
+      border-color: var(--bd-3);
+    }
+
+    /* ── Main ───────────────────────────────────────────── */
+    .main {
+      background: var(--bg);
+      padding: 1.5rem 0 3.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      padding: 3.25rem 0;
+      border-bottom: 0.5px solid var(--bd-1);
+      max-width: var(--max);
+    }
+
+    section.wide { max-width: var(--wide); }
+
+    section:last-of-type { border-bottom: none; }
+
+    .sec-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      margin-bottom: .65rem;
+    }
+
+    .sec-title {
+      font-family: var(--display);
+      font-optical-sizing: auto;
+      font-weight: 600;
+      font-size: clamp(1.55rem, 3.2vw, 1.9rem);
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      margin-bottom: .75rem;
+    }
+
+    .sec-body {
+      color: var(--tx-2);
+      font-size: 1.02rem;
+      max-width: 52ch;
+    }
+
+    .sec-body + .sec-body { margin-top: .85rem; }
+
+    /* How to use — numbered path */
+    .path {
+      list-style: none;
+      margin-top: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-left: 0.5px solid var(--bd-2);
+      padding-left: 0;
+    }
+
+    .path li {
+      position: relative;
+      padding: .9rem 0 .9rem 1.5rem;
+      border-bottom: 0.5px solid var(--bd-1);
+    }
+
+    .path li:last-child { border-bottom: none; }
+
+    .path li::before {
+      content: attr(data-step);
+      position: absolute;
+      left: -0.55rem;
+      top: 1.05rem;
+      width: 1.05rem;
+      height: 1.05rem;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 0.5px solid var(--bd-2);
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--tx-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path strong {
+      display: block;
+      font-weight: 600;
+      color: var(--tx);
+      margin-bottom: .15rem;
+      font-size: .98rem;
+    }
+
+    .path span {
+      color: var(--tx-2);
+      font-size: .95rem;
+    }
+
+    .path a {
+      color: var(--tx-info);
+      text-decoration: none;
+      border-bottom: 0.5px solid color-mix(in srgb, var(--tx-info) 35%, transparent);
+      transition: border-color .15s ease;
+    }
+
+    .path a:hover { border-bottom-color: var(--tx-info); }
+
+    /* Layers */
+    .layers {
+      list-style: none;
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .55rem;
+    }
+
+    .layer {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr auto;
+      gap: .75rem 1rem;
+      align-items: baseline;
+      padding: .85rem 0;
+      border-bottom: 0.5px solid var(--bd-1);
+    }
+
+    .layer:last-child { border-bottom: none; }
+
+    .layer-num {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--tx-3);
+      letter-spacing: .02em;
+    }
+
+    .layer-name {
+      font-weight: 600;
+      color: var(--tx);
+      font-size: 1rem;
+    }
+
+    .layer-desc {
+      grid-column: 2;
+      color: var(--tx-2);
+      font-size: .92rem;
+      margin-top: .15rem;
+    }
+
+    .layer-tool {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+      align-self: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--tx-info);
+      text-decoration: none;
+      white-space: nowrap;
+      padding: .35rem .55rem;
+      border-radius: 6px;
+      border: 0.5px solid transparent;
+      transition: background .15s ease, border-color .15s ease;
+    }
+
+    .layer-tool:hover {
+      background: var(--bg-info);
+      border-color: var(--t1-bd);
+    }
+
+    @media (max-width: 560px) {
+      .layer {
+        grid-template-columns: 2.25rem 1fr;
+      }
+      .layer-tool {
+        grid-column: 2;
+        grid-row: auto;
+        justify-self: start;
+        margin-top: .35rem;
+        padding-left: 0;
+      }
+      .layer-desc { grid-column: 2; }
+    }
+
+    /* Tools list */
+    .tools {
+      list-style: none;
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .65rem;
+    }
+
+    .tool {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--bg-2);
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r-lg);
+      padding: 1.1rem 1.2rem;
+      transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .tool:hover {
+      background: var(--bg);
+      border-color: var(--bd-2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(26,26,24,.06);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .tool:hover { box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+    }
+
+    .tool-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .45rem .65rem;
+      margin-bottom: .35rem;
+    }
+
+    .tool-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+    }
+
+    .tool-layer {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      padding: .15rem .4rem;
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--tx-2);
+      border: 0.5px solid var(--bd-1);
+    }
+
+    .tool-layer.t2 { background: var(--t2-bg); color: var(--t2); border-color: var(--t2-bd); }
+    .tool-layer.t3 { background: var(--t3-bg); color: var(--t3); border-color: var(--t3-bd); }
+    .tool-layer.t1 { background: var(--t1-bg); color: var(--t1); border-color: var(--t1-bd); }
+
+    .tool-title {
+      font-family: var(--display);
+      font-optical-sizing: auto;
+      font-weight: 600;
+      font-size: 1.2rem;
+      letter-spacing: -0.01em;
+      color: var(--tx);
+      margin-bottom: .3rem;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .tool-arrow {
+      font-family: var(--sans);
+      font-size: 1rem;
+      color: var(--tx-3);
+      transition: transform .18s ease, color .18s ease;
+      flex-shrink: 0;
+    }
+
+    .tool:hover .tool-arrow {
+      color: var(--tx-info);
+      transform: translateX(3px);
+    }
+
+    .tool-desc {
+      color: var(--tx-2);
+      font-size: .95rem;
+      max-width: 58ch;
+    }
+
+    /* Handbook */
+    .handbook-links {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .55rem;
+    }
+
+    .handbook-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      text-decoration: none;
+      color: var(--tx);
+      padding: .95rem 1.1rem;
+      background: var(--bg-2);
+      border: 0.5px solid var(--bd-1);
+      border-radius: var(--r);
+      transition: border-color .15s ease, background .15s ease;
+    }
+
+    .handbook-link:hover {
+      border-color: var(--bd-2);
+      background: var(--bg);
+    }
+
+    .handbook-link strong {
+      display: block;
+      font-weight: 600;
+      font-size: .98rem;
+      margin-bottom: .1rem;
+    }
+
+    .handbook-link span {
+      font-size: .88rem;
+      color: var(--tx-2);
+    }
+
+    .handbook-link .arrow {
+      color: var(--tx-3);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .handbook-link:hover .arrow { color: var(--tx-info); }
+
+    /* ── Footer ─────────────────────────────────────────── */
+    .site-footer {
+      position: relative;
+      background: var(--bg-3);
+      padding: calc(2.5rem + var(--tear-h)) 0 2.5rem;
+      color: var(--tx-3);
+      font-size: .9rem;
+      z-index: 0;
+    }
+
+    .site-footer .wrap {
+      max-width: var(--max);
+    }
+
+    .site-footer a {
+      color: var(--tx-2);
+      text-decoration: none;
+      border-bottom: 0.5px solid var(--bd-2);
+    }
+
+    .site-footer a:hover { color: var(--tx-info); border-bottom-color: var(--tx-info); }
+
+    .site-footer p + p { margin-top: .4rem; }
+  </style>
+</head>
+<body>
+  <header class="hero" id="hero">
+    <div class="hero-fx" aria-hidden="true">
+      <div class="hero-grid" id="hero-grid"></div>
+      <div class="hero-lens" id="hero-lens"></div>
+    </div>
+    <div class="wrap">
+      <p class="eyebrow rise rise-1">Design Tokens Workshop</p>
+      <h1 class="brand rise rise-2">Systems Thinking and Token Naming</h1>
+      <p class="lede rise rise-3">A six-layer framework and set of tools for naming design tokens as rules in a system — not labels in isolation.</p>
+      <div class="cta-row rise rise-4">
+        <a class="btn btn-primary" href="https://github.com/garymazzeo/design-tokens-workshop/blob/main/handbook/Systems%20Thinking%20and%20Token%20Naming.md">Read the handbook</a>
+        <a class="btn btn-secondary" href="#tools">Explore the tools</a>
+      </div>
+    </div>
+    <div class="tear tear-bottom" aria-hidden="true">
+      <svg viewBox="0 0 1200 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill="currentColor" d="M0 0 L0 20 L22 12 L46 24 L59 12 L88 6 L111 16 L124 24 L142 8 L156 12 L181 6 L200 6 L229 10 L242 28 L272 16 L291 28 L323 38 L336 38 L366 38 L379 30 L392 38 L408 32 L433 22 L462 10 L492 6 L521 24 L538 12 L568 22 L600 14 L623 6 L652 20 L666 30 L679 38 L697 38 L726 38 L748 38 L778 38 L801 32 L820 38 L837 38 L856 26 L886 20 L914 26 L936 38 L962 32 L993 20 L1008 28 L1033 18 L1055 8 L1082 12 L1095 24 L1109 38 L1138 38 L1160 34 L1183 38 L1200 34 L1200 0 Z"/>
+      </svg>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="wrap">
+      <section id="about" class="rise rise-5">
+        <p class="sec-label">What this is</p>
+        <h2 class="sec-title">A workshop collection for systematic token naming</h2>
+        <p class="sec-body">This site gathers a written handbook and interactive HTML tools that teach the same idea: token names should encode where something lives, what it does, and how it relates to everything else.</p>
+        <p class="sec-body">Built for designers, engineers, and design-system leads who want naming decisions that scale — and stay legible to both humans and LLMs.</p>
+      </section>
+
+      <section id="how">
+        <p class="sec-label">How to use it</p>
+        <h2 class="sec-title">Read first, practice in layer order</h2>
+        <p class="sec-body">Work through the material as a path, not a grab-bag. Keep the reference card open while you exercise.</p>
+        <ol class="path">
+          <li data-step="1">
+            <strong>Read the handbook</strong>
+            <span>Start with <a href="https://github.com/garymazzeo/design-tokens-workshop/blob/main/handbook/Systems%20Thinking%20and%20Token%20Naming.md">Systems Thinking and Token Naming</a> — or <a href="handbook/Systems%20Thinking%20and%20Token%20Naming.pdf">download the PDF</a>.</span>
+          </li>
+          <li data-step="2">
+            <strong>Keep the reference card nearby</strong>
+            <span>Open the <a href="tools/design_system_naming_reference_card.html">naming reference card</a> for mental models, tiers, domains, and failure modes.</span>
+          </li>
+          <li data-step="3">
+            <strong>Practice Layer 2 → 4</strong>
+            <span>Use the <a href="tools/component-anatomy-mapper.html">anatomy mapper</a>, then the <a href="tools/three-tier-chain-builder.html">three-tier chain builder</a>, then the <a href="tools/token-naming-worksheet.html">naming worksheet</a>.</span>
+          </li>
+          <li data-step="4">
+            <strong>Build your convention</strong>
+            <span>Define axes and export stubs with the <a href="tools/token-naming-builder.html">token naming builder</a>.</span>
+          </li>
+        </ol>
+      </section>
+
+      <section id="layers" class="wide">
+        <p class="sec-label">Six layers</p>
+        <h2 class="sec-title">The framework at a glance</h2>
+        <p class="sec-body">Each layer builds on the one before it. Layers with a matching exercise link to their tool.</p>
+        <ul class="layers">
+          <li class="layer">
+            <span class="layer-num">01</span>
+            <div>
+              <p class="layer-name">Systems thinking</p>
+              <p class="layer-desc">Names as rules and coordinates — interconnectedness, hierarchy, and feedback.</p>
+            </div>
+          </li>
+          <li class="layer">
+            <span class="layer-num">02</span>
+            <div>
+              <p class="layer-name">Component anatomy and naming</p>
+              <p class="layer-desc">Decompose parts, properties, and states into consistent name formulas.</p>
+            </div>
+            <a class="layer-tool" href="tools/component-anatomy-mapper.html">Anatomy mapper →</a>
+          </li>
+          <li class="layer">
+            <span class="layer-num">03</span>
+            <div>
+              <p class="layer-name">Three-tier token structure</p>
+              <p class="layer-desc">Primitive → semantic → component chains that survive value change.</p>
+            </div>
+            <a class="layer-tool" href="tools/three-tier-chain-builder.html">Chain builder →</a>
+          </li>
+          <li class="layer">
+            <span class="layer-num">04</span>
+            <div>
+              <p class="layer-name">Naming templates</p>
+              <p class="layer-desc">Decision records and templates so every name answers the right questions.</p>
+            </div>
+            <a class="layer-tool" href="tools/token-naming-worksheet.html">Worksheet →</a>
+          </li>
+          <li class="layer">
+            <span class="layer-num">05</span>
+            <div>
+              <p class="layer-name">Documentation workflows</p>
+              <p class="layer-desc">Keep naming decisions findable and current as the system evolves.</p>
+            </div>
+          </li>
+          <li class="layer">
+            <span class="layer-num">06</span>
+            <div>
+              <p class="layer-name">LLM-assisted workflows</p>
+              <p class="layer-desc">Use systematic naming so humans and models can locate and extend tokens.</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section id="tools" class="wide">
+        <p class="sec-label">Tools</p>
+        <h2 class="sec-title">Hands-on workshop exercises</h2>
+        <p class="sec-body">Self-contained HTML tools — open any of them directly in the browser.</p>
+        <ul class="tools">
+          <li>
+            <a class="tool" href="tools/design_system_naming_reference_card.html">
+              <div class="tool-meta">
+                <span class="tool-tag">Workshop reference</span>
+              </div>
+              <div class="tool-title">
+                Design system naming reference card
+                <span class="tool-arrow" aria-hidden="true">→</span>
+              </div>
+              <p class="tool-desc">Complete reference covering all six workshop layers — mental models, tiers, domains, anatomy, questions, and failure modes.</p>
+            </a>
+          </li>
+          <li>
+            <a class="tool" href="tools/component-anatomy-mapper.html">
+              <div class="tool-meta">
+                <span class="tool-tag">Workshop tool</span>
+                <span class="tool-layer t2">Layer 2</span>
+              </div>
+              <div class="tool-title">
+                Component anatomy mapper
+                <span class="tool-arrow" aria-hidden="true">→</span>
+              </div>
+              <p class="tool-desc">Map a component’s parts, properties, and states — then watch token names generate live from <span style="font-family:var(--mono);font-size:.88em">[component]-[part]-[property]-[state]</span>.</p>
+            </a>
+          </li>
+          <li>
+            <a class="tool" href="tools/three-tier-chain-builder.html">
+              <div class="tool-meta">
+                <span class="tool-tag">Workshop tool</span>
+                <span class="tool-layer t3">Layer 3</span>
+              </div>
+              <div class="tool-title">
+                Three-tier token chain builder
+                <span class="tool-arrow" aria-hidden="true">→</span>
+              </div>
+              <p class="tool-desc">Build a complete token chain from primitive → semantic → component, with live visualization and tier validation.</p>
+            </a>
+          </li>
+          <li>
+            <a class="tool" href="tools/token-naming-worksheet.html">
+              <div class="tool-meta">
+                <span class="tool-tag">Workshop tool</span>
+                <span class="tool-layer t1">Layer 4</span>
+              </div>
+              <div class="tool-title">
+                Token naming worksheet
+                <span class="tool-arrow" aria-hidden="true">→</span>
+              </div>
+              <p class="tool-desc">Answer six questions for any token. The decision record assembles as you type — copy or download it into your docs.</p>
+            </a>
+          </li>
+          <li>
+            <a class="tool" href="tools/token-naming-builder.html">
+              <div class="tool-meta">
+                <span class="tool-tag">Workshop tool</span>
+                <span class="tool-layer">Axis builder</span>
+              </div>
+              <div class="tool-title">
+                Token naming builder
+                <span class="tool-arrow" aria-hidden="true">→</span>
+              </div>
+              <p class="tool-desc">Define the axes that make up your token names, populate categories, and export a naming convention reference plus DTCG-shaped JSON and CSS stubs.</p>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <section id="handbook">
+        <p class="sec-label">Handbook</p>
+        <h2 class="sec-title">Systems Thinking and Token Naming</h2>
+        <p class="sec-body">The full curriculum for layers 1–6. Read it on GitHub, or download the printable PDF from this site.</p>
+        <div class="handbook-links">
+          <a class="handbook-link" href="https://github.com/garymazzeo/design-tokens-workshop/blob/main/handbook/Systems%20Thinking%20and%20Token%20Naming.md">
+            <div>
+              <strong>Read on GitHub</strong>
+              <span>Rendered Markdown on github.com</span>
+            </div>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="handbook-link" href="handbook/Systems%20Thinking%20and%20Token%20Naming.pdf">
+            <div>
+              <strong>Download PDF</strong>
+              <span>Printable companion from this site</span>
+            </div>
+            <span class="arrow" aria-hidden="true">↓</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="tear tear-top" aria-hidden="true">
+      <svg viewBox="0 0 1200 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill="currentColor" d="M0 0 L0 20 L22 12 L46 24 L59 12 L88 6 L111 16 L124 24 L142 8 L156 12 L181 6 L200 6 L229 10 L242 28 L272 16 L291 28 L323 38 L336 38 L366 38 L379 30 L392 38 L408 32 L433 22 L462 10 L492 6 L521 24 L538 12 L568 22 L600 14 L623 6 L652 20 L666 30 L679 38 L697 38 L726 38 L748 38 L778 38 L801 32 L820 38 L837 38 L856 26 L886 20 L914 26 L936 38 L962 32 L993 20 L1008 28 L1033 18 L1055 8 L1082 12 L1095 24 L1109 38 L1138 38 L1160 34 L1183 38 L1200 34 L1200 0 Z"/>
+      </svg>
+    </div>
+    <div class="wrap">
+      <p>MIT License · Copyright © 2026 <a href="https://github.com/garymazzeo">Gary Mazzeo</a></p>
+      <p><a href="https://github.com/garymazzeo/design-tokens-workshop">github.com/garymazzeo/design-tokens-workshop</a></p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var hero = document.getElementById("hero");
+      if (!hero) return;
+
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var rect = null;
+
+      var targetX = 0.72;
+      var targetY = 0.38;
+      var curX = targetX;
+      var curY = targetY;
+      var restingX = 0.72;
+      var restingY = 0.38;
+      var hovering = false;
+      var raf = 0;
+
+      function measure() {
+        rect = hero.getBoundingClientRect();
+      }
+
+      function setVars(x, y) {
+        hero.style.setProperty("--mx", (x * 100).toFixed(2) + "%");
+        hero.style.setProperty("--my", (y * 100).toFixed(2) + "%");
+      }
+
+      function tick() {
+        var ease = hovering ? 0.085 : 0.045;
+        curX += (targetX - curX) * ease;
+        curY += (targetY - curY) * ease;
+        setVars(curX, curY);
+
+        var dx = targetX - curX;
+        var dy = targetY - curY;
+        if (Math.abs(dx) > 0.0004 || Math.abs(dy) > 0.0004) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          curX = targetX;
+          curY = targetY;
+          setVars(curX, curY);
+          raf = 0;
+        }
+      }
+
+      function kick() {
+        if (reduce) return;
+        if (!raf) raf = requestAnimationFrame(tick);
+      }
+
+      function onMove(e) {
+        if (reduce) return;
+        if (!rect) measure();
+        var x = (e.clientX - rect.left) / rect.width;
+        var y = (e.clientY - rect.top) / rect.height;
+        targetX = Math.min(1, Math.max(0, x));
+        targetY = Math.min(1, Math.max(0, y));
+        hovering = true;
+        kick();
+      }
+
+      function onLeave() {
+        hovering = false;
+        targetX = restingX;
+        targetY = restingY;
+        kick();
+      }
+
+      measure();
+      setVars(curX, curY);
+
+      if (!reduce) {
+        hero.addEventListener("pointermove", onMove);
+        hero.addEventListener("pointerleave", onLeave);
+        window.addEventListener("resize", measure);
+      }
+    })();
+  </script>
+</body>
+</html>
