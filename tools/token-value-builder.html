@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Token Value Builder</title>
+    <style>
+      :root { --bg:#fff; --bg-2:#f4f3ef; --bg-3:#eceae4; --panel:#fff; --tx:#1a1a18; --tx-2:#56564f; --tx-3:#8a8a82; --bd-1:rgba(26,26,24,.09); --bd-2:rgba(26,26,24,.2); --accent:#185fa5; --warn:#9a6400; --bad:#a33d36; --r:8px; --r-lg:12px; --mono:"SF Mono","Cascadia Code","Fira Code",Consolas,monospace; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+      @media (prefers-color-scheme: dark) { :root { --bg:#1e1e1b; --bg-2:#292926; --bg-3:#323230; --panel:#1e1e1b; --tx:#f0ede5; --tx-2:#aeaba2; --tx-3:#76736c; --bd-1:rgba(240,237,229,.09); --bd-2:rgba(240,237,229,.2); --accent:#85b7eb; --warn:#e5b65c; --bad:#f08a82; } }
+      * { box-sizing:border-box; }
+      body { margin:0; padding:24px; background:var(--bg-3); color:var(--tx); font:14px/1.45 var(--sans); }
+      button,input,select,textarea { font:inherit; color:inherit; }
+      button { border:1px solid var(--bd-2); border-radius:var(--r); background:var(--panel); padding:7px 11px; cursor:pointer; }
+      button:hover { border-color:var(--accent); background:var(--bg-2); }
+      button.primary { background:var(--tx); color:var(--bg); border-color:var(--tx); }
+      input,select,textarea { border:1px solid var(--bd-1); border-radius:var(--r); background:var(--panel); padding:7px 8px; }
+      input:focus,select:focus,textarea:focus { outline:2px solid #b8d0c4; outline-offset:1px; border-color:var(--accent); }
+      textarea { resize:vertical; font-family:var(--mono); font-size:12px; }
+      .page { max-width:1180px; margin:0 auto; background:var(--panel); border:1px solid var(--bd-1); border-radius:var(--r-lg); padding:28px; }
+      .eyebrow { color:var(--tx-3); font-size:11px; letter-spacing:.09em; text-transform:uppercase; }
+      h1 { margin:4px 0 6px; font-size:25px; font-weight:550; }
+      h2 { margin:0; font-size:15px; font-weight:600; }
+      p { color:var(--tx-2); margin:0; }
+      .header { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; margin-bottom:24px; }
+      .header-actions,.toolbar,.button-row { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+      .header-actions { justify-content:flex-end; }
+      .panel { border-top:1px solid var(--bd-1); padding-top:18px; margin-top:20px; }
+      .import-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+      .import-box { background:var(--bg); border:1px solid var(--bd-1); border-radius:var(--r); padding:14px; }
+      .import-box h2 { margin-bottom:8px; }
+      .import-box textarea { width:100%; min-height:112px; margin:8px 0; }
+      .hint { color:var(--tx-3); font-size:12px; }
+      .toolbar { margin:20px 0 12px; }
+      .toolbar input { flex:1; min-width:220px; }
+      .count { color:var(--tx-3); font-size:12px; margin-left:auto; }
+      .token-list { display:grid; gap:9px; }
+      .token-card { border:1px solid var(--bd-1); border-radius:var(--r); background:var(--panel); overflow:hidden; }
+      .token-head { display:flex; align-items:center; gap:10px; padding:11px 13px; background:var(--bg); }
+      .token-path { font-family:var(--mono); font-size:12px; overflow-wrap:anywhere; flex:1; }
+      .type-badge { border:1px solid var(--bd-1); border-radius:99px; padding:3px 8px; color:var(--accent); font:11px var(--mono); background:var(--panel); white-space:nowrap; }
+      .type-badge.inherited { color:var(--tx-3); }
+      .token-body { padding:14px; }
+      .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+      .field { display:grid; gap:4px; }
+      .field.full { grid-column:1/-1; }
+      label { color:var(--tx-2); font-size:12px; }
+      .field input,.field select { width:100%; }
+      .value-mode { display:flex; gap:6px; align-items:center; margin-bottom:9px; }
+      .value-mode button { padding:4px 8px; font-size:11px; }
+      .value-mode button.active { background:var(--tx); color:var(--bg); border-color:var(--tx); }
+      .alias-input { width:100%; font-family:var(--mono); }
+      .subvalue { border:1px solid var(--bd-1); border-radius:var(--r); padding:10px; background:var(--bg); }
+      .subvalue h3 { margin:0 0 8px; font-size:12px; font-weight:600; }
+      .stop-list { display:grid; gap:8px; }
+      .stop-row { display:grid; grid-template-columns:1fr 90px auto; gap:7px; align-items:end; }
+      .icon-btn { padding:5px 8px; }
+      .warning,.error { margin-top:8px; font-size:12px; }
+      .warning { color:var(--warn); }.error { color:var(--bad); }
+      .empty { padding:28px; text-align:center; color:var(--tx-3); border:1px dashed var(--bd-2); border-radius:var(--r); }
+      .preview { width:100%; min-height:260px; margin-top:10px; }
+      .hidden { display:none !important; }
+      @media(max-width:760px) { body{padding:10px}.page{padding:17px}.header{display:block}.header-actions{justify-content:flex-start;margin-top:14px}.import-grid{grid-template-columns:1fr}.field-grid{grid-template-columns:1fr}.stop-row{grid-template-columns:1fr 80px auto}.count{margin-left:0} }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="header">
+        <div><div class="eyebrow">Design System Workshop</div><h1>Token Value Builder</h1><p>Fill in DTCG and Terrazzo token values without changing the naming hierarchy.</p></div>
+        <div class="header-actions"><button onclick="document.getElementById('file-input').click()">Import .tokens.json</button><button class="primary" onclick="downloadTokens()">Download tokens.json</button><input id="file-input" class="hidden" type="file" accept=".json,.tokens.json,application/json" onchange="importFile(this.files[0])" /></div>
+      </header>
+
+      <section class="import-grid">
+        <div class="import-box"><h2>Import a file</h2><p class="hint">Use the DTCG-shaped export from the Token Naming Builder.</p><div class="button-row" style="margin-top:10px"><button onclick="document.getElementById('file-input').click()">Choose JSON file</button><span id="file-name" class="hint">No file loaded</span></div></div>
+        <div class="import-box"><h2>Paste JSON</h2><textarea id="paste-input" placeholder="{ &quot;color&quot;: { ... } }"></textarea><div class="button-row"><button onclick="importPaste()">Load pasted JSON</button><span id="import-message" class="hint"></span></div></div>
+      </section>
+
+      <section id="editor" class="hidden">
+        <div class="toolbar"><input id="search" type="search" placeholder="Search token paths…" oninput="renderTokens()" /><select id="type-filter" onchange="renderTokens()"><option value="">All token types</option></select><span id="token-count" class="count"></span></div>
+        <div id="token-list" class="token-list"></div>
+      </section>
+      <section id="empty-state" class="empty">Import a token JSON file or paste JSON to begin.</section>
+
+      <section id="raw-panel" class="panel hidden"><h2>JSON preview</h2><p class="hint">The imported tree is preserved, including groups and metadata not edited here.</p><textarea id="json-preview" class="preview" readonly></textarea></section>
+    </main>
+    <script>
+      const EXTENSION_TYPES = new Set(["link", "boolean", "string"]);
+      const TYPES = ["color", "dimension", "fontFamily", "fontWeight", "duration", "cubicBezier", "number", "link", "boolean", "string", "strokeStyle", "border", "transition", "shadow", "gradient", "typography"];
+      const COMPOSITE_TYPES = new Set(["strokeStyle", "border", "transition", "shadow", "gradient", "typography"]);
+      let documentValue = null;
+      let leaves = [];
+
+      const $ = (id) => document.getElementById(id);
+      const esc = (v) => String(v ?? "").replace(/[&<>\"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+      const isObject = (v) => v && typeof v === "object" && !Array.isArray(v);
+      const isAlias = (v) => typeof v === "string" && /^\{[^{}]+\}$/.test(v.trim());
+      const pathText = (path) => path.join(".");
+
+      function parseJson(text) {
+        const value = JSON.parse(text);
+        if (!isObject(value)) throw new Error("Expected a JSON object at the root.");
+        return value;
+      }
+      function importPaste() { try { loadDocument(parseJson($("paste-input").value)); showMessage("JSON loaded.", false); } catch (e) { showMessage(e.message, true); } }
+      async function importFile(file) { if (!file) return; try { loadDocument(parseJson(await file.text())); $("file-name").textContent = file.name; showMessage("File loaded.", false); } catch (e) { showMessage(e.message, true); } }
+      function showMessage(text, bad) { const el = $("import-message"); el.textContent = text; el.className = bad ? "error" : "hint"; }
+
+      function flatten(node, path = [], inheritedType = "", inheritedTypePath = null) {
+        if (!isObject(node)) return;
+        const ownType = typeof node.$type === "string" ? node.$type : "";
+        const effectiveType = ownType || inheritedType;
+        const typePath = ownType ? path.slice() : inheritedTypePath;
+        if (Object.prototype.hasOwnProperty.call(node, "$value")) {
+          leaves.push({ path: path.slice(), node, type: effectiveType, ownType: !!ownType, typePath });
+          return;
+        }
+        Object.keys(node).forEach((key) => { if (!key.startsWith("$")) flatten(node[key], [...path, key], effectiveType, typePath); });
+      }
+      function rebuildLeaves() { leaves = []; flatten(documentValue); }
+      function loadDocument(value) { documentValue = structuredClone(value); rebuildLeaves(); populateTypeFilter(); $("editor").classList.remove("hidden"); $("empty-state").classList.add("hidden"); $("raw-panel").classList.remove("hidden"); renderTokens(); renderPreview(); }
+      function populateTypeFilter() { const types = [...new Set(leaves.map((x) => x.type).filter(Boolean))].sort(); $("type-filter").innerHTML = '<option value="">All token types</option>' + types.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join(""); }
+      function renderTokens() {
+        const q = $("search").value.trim().toLowerCase(); const filter = $("type-filter").value;
+        const visible = leaves.filter((leaf) => (!q || pathText(leaf.path).toLowerCase().includes(q)) && (!filter || leaf.type === filter));
+        $("token-count").textContent = `${visible.length} of ${leaves.length} token${leaves.length === 1 ? "" : "s"}`;
+        $("token-list").innerHTML = visible.length ? visible.map(renderToken).join("") : '<div class="empty">No matching tokens.</div>';
+      }
+      function renderToken(leaf) {
+        const id = keyFor(leaf.path); const badge = leaf.type ? `${esc(leaf.type)}${leaf.ownType ? "" : " · inherited"}` : "untyped";
+        const error = validationFor(leaf);
+        return `<article class="token-card"><div class="token-head"><div class="token-path">${esc(pathText(leaf.path))}</div><span class="type-badge${leaf.ownType ? "" : " inherited"}">${badge}</span></div><div class="token-body">${editorFor(leaf, id)}${error ? `<div class="error">${esc(error)}</div>` : ""}</div></article>`;
+      }
+      function keyFor(path) { return "token-" + path.map((x) => encodeURIComponent(x)).join("-"); }
+      function valueMode(value, id, literalHtml) {
+        if (isAlias(value)) return `<div class="value-mode"><button onclick="setAliasMode('${id}',false)">Literal</button><button class="active" onclick="setAliasMode('${id}',true)">Alias</button></div><input class="alias-input" value="${esc(value)}" onchange="setAlias('${id}',this.value)" />`;
+        return `<div class="value-mode"><button class="active" onclick="setAliasMode('${id}',false)">Literal</button><button onclick="setAliasMode('${id}',true)">Alias</button></div>${literalHtml}`;
+      }
+      function editorFor(leaf, id) {
+        if (!TYPES.includes(leaf.type)) return rawEditor(leaf, id, "No specialized editor is available for this token type.");
+        if (!leaf.type) return rawEditor(leaf, id, "This token has no effective type.");
+        if (COMPOSITE_TYPES.has(leaf.type)) return compositeEditor(leaf, id);
+        return valueMode(leaf.node.$value, id, simpleEditor(leaf.type, leaf.node.$value, id));
+      }
+      function simpleEditor(type, value, id) {
+        if (type === "boolean") return `<select onchange="setValue('${id}',this.value === 'true')"><option value="true" ${value === true ? "selected" : ""}>true</option><option value="false" ${value === false ? "selected" : ""}>false</option></select>`;
+        if (type === "number") return `<input type="number" step="any" value="${typeof value === "number" ? esc(value) : ""}" onchange="setValue('${id}',parseNumber(this.value))" />`;
+        if (type === "fontWeight") return `<input value="${esc(value)}" placeholder="400 or bold" onchange="setValue('${id}',parseWeight(this.value))" />`;
+        if (type === "fontFamily") return `<input value="${esc(Array.isArray(value) ? value.join(", ") : value)}" placeholder="Inter, sans-serif" onchange="setValue('${id}',parseFamily(this.value))" />`;
+        if (type === "cubicBezier") return `<input value="${esc(Array.isArray(value) ? value.join(", ") : "")}" placeholder="0.25, 0.1, 0.25, 1" onchange="setValue('${id}',parseNumbers(this.value,4))" />`;
+        if (type === "color") return colorEditor(value, id);
+        if (type === "strokeStyle") return strokeEditor(value, id);
+        return `<input value="${esc(value)}" placeholder="${type === "duration" ? "150ms" : type === "dimension" ? "1rem" : "https://…"}" onchange="setValue('${id}',this.value)" />`;
+      }
+      function colorEditor(value, id) {
+        const v = isObject(value) ? value : {}; const comps = Array.isArray(v.components) ? v.components.join(", ") : "";
+        return `<div class="field-grid"><div class="field"><label>Color space</label><select onchange="setColorSpace('${id}',this.value)"><option value="srgb" ${v.colorSpace === "srgb" || !v.colorSpace ? "selected" : ""}>srgb</option><option value="oklab" ${v.colorSpace === "oklab" ? "selected" : ""}>oklab</option><option value="oklch" ${v.colorSpace === "oklch" ? "selected" : ""}>oklch</option></select></div><div class="field"><label>Components</label><input value="${esc(comps)}" placeholder="0.2, 0.4, 0.8" onchange="setColorComponents('${id}',this.value)" /></div><div class="field"><label>Alpha (optional)</label><input type="number" min="0" max="1" step="any" value="${esc(v.alpha ?? 1)}" onchange="setColorAlpha('${id}',this.value)" /></div><div class="field"><label>Hex convenience (sRGB)</label><input value="${esc(v.hex || (typeof value === "string" ? value : ""))}" placeholder="#3366ff" onchange="setColorHex('${id}',this.value)" /></div></div>`;
+      }
+      function strokeEditor(value, id) { const options = ["solid","dashed","dotted","double","groove","ridge","outset","inset"]; if (typeof value === "string" || value == null) return `<select onchange="setValue('${id}',this.value)">${options.map((x) => `<option ${x === value ? "selected" : ""}>${x}</option>`).join("")}</select>`; return `<div class="field-grid"><div class="field"><label>Line cap</label><select onchange="setObjectField('${id}','lineCap',this.value)">${["round","butt","square"].map((x) => `<option ${x === value.lineCap ? "selected" : ""}>${x}</option>`).join("")}</select></div><div class="field"><label>Dash array (dimensions)</label><input value="${esc((value.dashArray || []).join(", "))}" onchange="setObjectArray('${id}','dashArray',this.value)" /></div></div>`; }
+      function compositeEditor(leaf, id) {
+        const v = isObject(leaf.node.$value) ? leaf.node.$value : {};
+        const fields = { border:["color","width","style"], transition:["duration","delay","timingFunction"], shadow:["offsetX","offsetY","blur","spread","color"], typography:["fontFamily","fontSize","fontStyle","fontWeight","letterSpacing","lineHeight","textTransform"] };
+        if (leaf.type === "gradient") return gradientEditor(v, id);
+        return `<div class="field-grid">${(fields[leaf.type] || []).map((field) => `<div class="field"><label>${field}${["delay","spread","fontStyle","letterSpacing","textTransform"].includes(field) ? " (optional)" : ""}</label>${compositeField(leaf.type, field, v[field], id)}</div>`).join("")}</div><div class="hint" style="margin-top:8px">Required fields are validated when exporting.</div>`;
+      }
+      function compositeField(type, field, value, id) { if (field === "color") return nestedColorEditor(value, id, field); if (field === "timingFunction") return `<input value="${esc(Array.isArray(value) ? value.join(", ") : value)}" placeholder="0.25, 0.1, 0.25, 1" onchange="setObjectArray('${id}','${field}',this.value)" />`; if (field === "fontFamily") return `<input value="${esc(Array.isArray(value) ? value.join(", ") : value)}" onchange="setObjectField('${id}','${field}',parseFamily(this.value))" />`; if (field === "fontWeight") return `<input value="${esc(value)}" onchange="setObjectField('${id}','${field}',parseWeight(this.value))" />`; if (["fontSize","lineHeight","letterSpacing","offsetX","offsetY","blur","spread","width","duration","delay"].includes(field)) return `<input value="${esc(value)}" placeholder="${field === "lineHeight" ? "1.5" : "1rem"}" onchange="setObjectField('${id}','${field}',this.value)" />`; return `<input value="${esc(value)}" onchange="setObjectField('${id}','${field}',this.value)" />`; }
+      function nestedColorEditor(value, id, field) { if (isAlias(value) || typeof value === "string") return `<input value="${esc(value)}" placeholder="{color.blue} or #3366ff" onchange="setObjectField('${id}','${field}',this.value)" />`; const v = isObject(value) ? value : {}; return `<div class="subvalue"><div class="field-grid"><div class="field"><label>Color space</label><select onchange="setNestedColorField('${id}','${field}','colorSpace',this.value)"><option value="srgb" ${v.colorSpace === "srgb" || !v.colorSpace ? "selected" : ""}>srgb</option><option value="oklab" ${v.colorSpace === "oklab" ? "selected" : ""}>oklab</option><option value="oklch" ${v.colorSpace === "oklch" ? "selected" : ""}>oklch</option></select></div><div class="field"><label>Components</label><input value="${esc((v.components || []).join(", "))}" onchange="setNestedColorField('${id}','${field}','components',parseNumbers(this.value,3))" /></div></div></div>`; }
+      function gradientEditor(value, id) { const stops = Array.isArray(value) ? value : []; return `<div class="stop-list">${stops.map((stop, i) => `<div class="stop-row"><div class="field"><label>Color stop ${i + 1}</label><input value="${esc(stop.color)}" placeholder="{color.blue}" onchange="setGradientField('${id}',${i},'color',this.value)" /></div><div class="field"><label>Position</label><input type="number" min="0" max="1" step="any" value="${esc(stop.position)}" onchange="setGradientField('${id}',${i},'position',parseNumber(this.value))" /></div><button class="icon-btn" onclick="removeStop('${id}',${i})" title="Remove stop">✕</button></div>`).join("")}</div><button style="margin-top:9px" onclick="addStop('${id}')">+ Add color stop</button>`; }
+      function rawEditor(leaf, id, message) { return `<div class="warning">${esc(message)}</div><textarea style="width:100%;min-height:90px" onchange="setRawValue('${id}',this.value)">${esc(JSON.stringify(leaf.node.$value, null, 2))}</textarea>`; }
+
+      function findLeaf(id) { return leaves.find((x) => keyFor(x.path) === id); }
+      function mutate(id, fn) { const leaf = findLeaf(id); if (!leaf) return; fn(leaf.node); rebuildLeaves(); renderTokens(); renderPreview(); }
+      function setValue(id, value) { mutate(id, (node) => { node.$value = value; }); }
+      function setAlias(id, value) { if (!isAlias(value)) return alert("Alias must look like {color.blue.500}."); setValue(id, value.trim()); }
+      function setAliasMode(id, alias) { const leaf = findLeaf(id); if (!leaf) return; if (alias) { const ref = prompt("Token path", "{color.blue}"); if (ref && isAlias(ref)) setAlias(id, ref); } else if (isAlias(leaf.node.$value)) { alert("Enter a literal value in the editor after switching from alias mode."); } }
+      function parseNumber(v) { const n = Number(v); return Number.isFinite(n) ? n : v; }
+      function parseNumbers(v, count) { const out = v.split(",").map(Number); return out.length === count && out.every(Number.isFinite) ? out : v; }
+      function parseWeight(v) { const n = Number(v); return Number.isFinite(n) && v.trim() !== "" ? n : v.trim(); }
+      function parseFamily(v) { const out = v.split(",").map((x) => x.trim()).filter(Boolean); return out.length > 1 ? out : out[0] || ""; }
+      function setColorSpace(id, space) { mutate(id, (n) => { const v = isObject(n.$value) ? n.$value : {}; v.colorSpace = space; v.components = v.components || (space === "srgb" ? [0,0,0] : [0,0,0]); n.$value = v; }); }
+      function setColorComponents(id, text) { mutate(id, (n) => { const v = isObject(n.$value) ? n.$value : { colorSpace:"srgb" }; v.components = parseNumbers(text, 3); n.$value = v; }); }
+      function setColorAlpha(id, text) { mutate(id, (n) => { const v = isObject(n.$value) ? n.$value : { colorSpace:"srgb", components:[0,0,0] }; v.alpha = parseNumber(text); n.$value = v; }); }
+      function setColorHex(id, text) { mutate(id, (n) => { const v = isObject(n.$value) ? n.$value : { colorSpace:"srgb", components:[0,0,0] }; v.hex = text.trim(); if (!v.colorSpace) v.colorSpace = "srgb"; n.$value = v; }); }
+      function setObjectField(id, field, value) { mutate(id, (n) => { const v = isObject(n.$value) ? n.$value : {}; if (value === "") delete v[field]; else v[field] = value; n.$value = v; }); }
+      function setNestedColorField(id, field, key, value) { mutate(id, (n) => { const object = isObject(n.$value) ? n.$value : {}; const color = isObject(object[field]) ? object[field] : { colorSpace:"srgb", components:[0,0,0] }; color[key] = value; object[field] = color; n.$value = object; }); }
+      function setObjectArray(id, field, text) { if (!text.trim()) return setObjectField(id, field, ""); setObjectField(id, field, parseNumbers(text, field === "timingFunction" ? 4 : text.split(",").length)); }
+      function setGradientField(id, index, field, value) { mutate(id, (n) => { if (!Array.isArray(n.$value)) n.$value = []; n.$value[index] = { ...(n.$value[index] || {}), [field]: value }; }); }
+      function addStop(id) { mutate(id, (n) => { if (!Array.isArray(n.$value)) n.$value = []; n.$value.push({ color:"", position:n.$value.length ? 1 : 0 }); }); }
+      function removeStop(id, index) { mutate(id, (n) => { if (Array.isArray(n.$value)) n.$value.splice(index, 1); }); }
+      function setRawValue(id, text) { try { setValue(id, JSON.parse(text)); } catch (e) { alert("Value must be valid JSON."); } }
+      function renderPreview() { $("json-preview").value = documentValue ? JSON.stringify(documentValue, null, 2) : ""; }
+      function allowsAlias(value) { return isAlias(value); }
+      function validationFor(leaf) {
+        const v = leaf.node.$value; if (allowsAlias(v)) return ""; if (!leaf.type) return "";
+        if (leaf.type === "boolean") return typeof v === "boolean" ? "" : "Expected true or false.";
+        if (leaf.type === "number") return typeof v === "number" && Number.isFinite(v) ? "" : "Expected a number.";
+        if (leaf.type === "cubicBezier") return Array.isArray(v) && v.length === 4 && v.every((x) => typeof x === "number" && Number.isFinite(x)) ? "" : "Expected four numbers.";
+        if (["dimension","duration","fontFamily","fontWeight","link","string"].includes(leaf.type)) return v !== "" && v != null && (!Array.isArray(v) || v.length) ? "" : "Value is required.";
+        if (leaf.type === "color") return isObject(v) && v.colorSpace && Array.isArray(v.components) && v.components.length === 3 ? "" : "Expected a color object with colorSpace and three components.";
+        if (leaf.type === "strokeStyle") return typeof v === "string" && ["solid","dashed","dotted","double","groove","ridge","outset","inset"].includes(v) || isObject(v) && v.lineCap && Array.isArray(v.dashArray) ? "" : "Expected a stroke style.";
+        if (leaf.type === "border") return v && v.color && v.width && v.style ? "" : "Border requires color, width, and style.";
+        if (leaf.type === "transition") return v && v.duration && v.timingFunction ? "" : "Transition requires duration and timingFunction.";
+        if (leaf.type === "shadow") return v && v.color ? "" : "Shadow requires color.";
+        if (leaf.type === "gradient") return Array.isArray(v) && v.length > 0 && v.every((stop) => stop && stop.color != null && typeof stop.position === "number") ? "" : "Gradient requires color stops with numeric positions.";
+        if (leaf.type === "typography") return isObject(v) && Object.keys(v).length ? "" : "Typography requires at least one property.";
+        return "";
+      }
+      function downloadTokens() { if (!documentValue) return alert("Import tokens before downloading."); const errors = leaves.map((leaf) => validationFor(leaf) ? `${pathText(leaf.path)}: ${validationFor(leaf)}` : "").filter(Boolean); if (errors.length) return alert(`Complete required values before exporting:\n\n${errors.slice(0, 12).join("\n")}${errors.length > 12 ? `\n…and ${errors.length - 12} more.` : ""}`); const blob = new Blob([JSON.stringify(documentValue, null, 2) + "\n"], {type:"application/json"}); const url = URL.createObjectURL(blob); const a = Object.assign(document.createElement("a"), {href:url, download:"tokens.json"}); a.click(); URL.revokeObjectURL(url); }
+    </script>
+  </body>
+</html>
