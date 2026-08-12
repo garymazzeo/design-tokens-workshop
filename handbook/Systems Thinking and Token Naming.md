@@ -1886,13 +1886,3 @@ You've now moved through the full arc of the workshop framework:
 **Layer 6** gave you the acceleration — LLM workflows that extend your system at speed without sacrificing the consistency the earlier layers built.
 
 These layers don't have to be implemented all at once. But they do build on each other. A team that skips to Layer 6 without Layers 1 through 5 will get fast, confident, inconsistent output. A team that builds all six — even at minimum viable scale — has a naming system that can outlast any individual contributor and grow without accumulating confusion.
-
----
-
-## What Comes Next
-
-With all six layers in place, the natural next step is making this material **actionable** — moving from understanding the framework to practicing it in hands-on exercises that simulate the real decisions your team will face.
-
-That's where templates, worksheets, and workshop activities come in: tools that let you apply the framework to concrete scenarios before using it on your live system.
-
-**Ready to build those tools together?**
