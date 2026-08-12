@@ -268,10 +268,44 @@
         font-family: var(--mono);
         font-size: 12px;
       }
+      .branch-type-wrap {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-left: auto;
+      }
+      .branch-type-wrap label {
+        font-size: 10px;
+        color: var(--tx-3);
+        white-space: nowrap;
+      }
+      .branch-type-select {
+        width: 132px;
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+      .dtcg-type-warning-icon {
+        color: var(--warn, #a66b00);
+        font-size: 14px;
+        line-height: 1;
+      }
+      .dtcg-type-warning {
+        margin-top: 6px;
+        color: var(--warn, #a66b00);
+        font-size: 10.5px;
+      }
       .cat-type-hint {
         font-size: 10px;
         color: var(--tx-3);
         white-space: nowrap;
+      }
+      .token-type-extension-note {
+        display: none;
+        color: var(--tx-3);
+        font-size: 10px;
+      }
+      .branch-type-wrap .token-type-extension-note {
+        max-width: 180px;
       }
       @media (max-width: 720px) {
         .cat-type-hint {
@@ -921,7 +955,7 @@
             </div>
             <p class="step-hint" id="step2-hint">
               Each category (color, space, font-size…) gets its own values for
-              each axis and a DTCG <code style="font-family: var(--mono)">$type</code>
+               each axis and a token type
               (category name ≠ type — e.g. space → dimension).
               <strong style="font-weight: 500">Category</strong> and
               <strong style="font-weight: 500">scale</strong> are always
@@ -985,6 +1019,7 @@
                 <button class="btn-xs btn-solid" onclick="downloadDtcgExport()">
                   Download .tokens.json
                 </button>
+                <a class="btn-xs" href="token-value-builder.html" style="text-decoration:none">Fill values →</a>
               </div>
             </div>
             <div class="panel-body">
@@ -1042,7 +1077,7 @@
         { id: "category", name: "category", locked: true, slot: "category" },
         { id: "scale", name: "scale", locked: true, slot: "scale" },
       ];
-      let categories = []; // {id, name, dtcgType, values:{axisId: flat|branched}}
+      let categories = []; // {id, name, dtcgType, values:{axisId: flat|branched}}; branches may have dtcgType
       let axisSeq = 0,
         catSeq = 0,
         brSeq = 0;
@@ -1066,9 +1101,11 @@
         "gradient",
         "typography",
       ];
+      const TERRAZZO_EXTENSION_TYPES = ["link", "boolean", "string"];
       const DTCG_TYPES = new Set([
         ...DTCG_FUNDAMENTAL_TYPES,
         ...DTCG_COMPOSITE_TYPES,
+        ...TERRAZZO_EXTENSION_TYPES,
       ]);
       const DTCG_LEAF_DESCRIPTION = "Naming placeholder — value TBD";
 
@@ -1181,15 +1218,14 @@
         if (step2) {
           step2.innerHTML =
             tierMode === "tier2"
-              ? `Each category gets axis values and a DTCG
-              <code style="font-family: var(--mono)">$type</code>
+              ? `Each category gets axis values and a token type
               (category name ≠ type — e.g. space → dimension).
               Set any axis to <strong style="font-weight: 500">Unused</strong>
               when it does not apply, or remove the axis entirely in Step 1.
               Use axes for compound names such as
               <code style="font-family: var(--mono)">typography-heading-xl</code>.`
               : `Each category (color, space, font-size…) gets its own values for
-              each axis and a DTCG <code style="font-family: var(--mono)">$type</code>
+               each axis and a token type
               (category name ≠ type — e.g. space → dimension).
               <strong style="font-weight: 500">Category</strong> and
               <strong style="font-weight: 500">scale</strong> are always
@@ -1355,7 +1391,7 @@
       }
 
       function mkBranch(value) {
-        return { id: mkBranchId(), value, values: {} };
+        return { id: mkBranchId(), value, dtcgType: "", values: {} };
       }
 
       function isBranched(av) {
@@ -1498,6 +1534,18 @@
         delete c.mode;
         delete c.families;
         normalizeValuesScope(c.values, firstConfigurableAxisIndex());
+        walkBranchedValues(c.values, (values) => {
+          for (const ax of axes) {
+            if (ax.slot === "namespace" || ax.slot === "category") continue;
+            const av = values[ax.id];
+            if (!isBranched(av)) continue;
+            av.branches.forEach((br) => {
+              if (typeof br.dtcgType !== "string" || !DTCG_TYPES.has(br.dtcgType)) {
+                br.dtcgType = "";
+              }
+            });
+          }
+        });
       }
 
       function walkBranchedValues(values, fn) {
@@ -1586,8 +1634,17 @@
         const br = av.branches.find((b) => b.id === branchId);
         if (!br) return;
         br.value = val.trim().toLowerCase().replace(/\s+/g, "-") || br.value;
+        updateBranchDtcgTypeWarning(br);
         renderPreviewAndExport();
         scheduleAutoSave();
+      }
+
+      function updateBranchDtcgTypeWarning(br) {
+        const visible = !!(br.dtcgType && isOmittedAxisValue(br.value));
+        const icon = id("dtcg-branch-warning-icon-" + br.id);
+        const text = id("dtcg-branch-warning-text-" + br.id);
+        if (icon) icon.style.display = visible ? "" : "none";
+        if (text) text.style.display = visible ? "" : "none";
       }
 
       function collapseBranchedAxis(catId, axId, branchPathStr) {
@@ -1600,7 +1657,7 @@
         if (
           av.branches.length > 1 &&
           !confirm(
-            "Collapse to flat? Only the first branch will be kept as a custom list.",
+            "Collapse to flat? Only the first branch will be kept as a custom list, and subcategory token type metadata will be removed.",
           )
         )
           return;
@@ -1677,12 +1734,26 @@
         const c = categories.find((x) => x.id === catId);
         if (!c) return;
         c.dtcgType = DTCG_TYPES.has(val) ? val : "";
+        renderCategories();
         renderPreviewAndExport();
         scheduleAutoSave();
       }
 
-      function dtcgTypeSelectHtml(cat) {
-        const cur = cat.dtcgType || "";
+      function setBranchDtcgType(catId, axId, branchPathStr, branchId, val) {
+        const c = categories.find((x) => x.id === catId);
+        if (!c) return;
+        const values = getValuesMap(c, parseBranchPath(branchPathStr));
+        const av = values[axId];
+        if (!isBranched(av)) return;
+        const br = av.branches.find((x) => x.id === branchId);
+        if (!br) return;
+        br.dtcgType = DTCG_TYPES.has(val) ? val : "";
+        renderCategories();
+        renderPreviewAndExport();
+        scheduleAutoSave();
+      }
+
+      function dtcgTypeOptionsHtml(cur) {
         const fundOpts = DTCG_FUNDAMENTAL_TYPES.map(
           (t) =>
             `<option value="${t}"${cur === t ? " selected" : ""}>${t}</option>`,
@@ -1691,11 +1762,34 @@
           (t) =>
             `<option value="${t}"${cur === t ? " selected" : ""}>${t}</option>`,
         ).join("");
-        return `<select id="dtcg-type-${esc(cat.id)}" class="cat-type-select" aria-label="DTCG $type for ${esc(cat.name)}" ${historyFieldAttrs("dtcg:" + cat.id)} onchange="setCategoryDtcgType('${cat.id}',this.value)">
-          <option value=""${cur === "" ? " selected" : ""}>Select $type…</option>
-          <optgroup label="Fundamental Types">${fundOpts}</optgroup>
-          <optgroup label="Composite Types">${compOpts}</optgroup>
-        </select>`;
+        const extensionOpts = TERRAZZO_EXTENSION_TYPES.map(
+          (t) =>
+            `<option value="${t}"${cur === t ? " selected" : ""}>${t}</option>`,
+        ).join("");
+        return `<option value=""${cur === "" ? " selected" : ""}>Select token type…</option>
+          <optgroup label="DTCG Fundamental Types">${fundOpts}</optgroup>
+          <optgroup label="DTCG Composite Types">${compOpts}</optgroup>
+          <optgroup label="Terrazzo Extensions">${extensionOpts}</optgroup>`;
+      }
+
+      function isTerrazzoExtensionType(type) {
+        return TERRAZZO_EXTENSION_TYPES.includes(type);
+      }
+
+      function tokenTypeExtensionNoteHtml(idSuffix, type) {
+        const visible = isTerrazzoExtensionType(type);
+        return `<span id="token-type-extension-note-${esc(idSuffix)}" class="token-type-extension-note" style="display:${visible ? "" : "none"}">Terrazzo extension; output support may require a custom plugin.</span>`;
+      }
+
+      function dtcgTypeSelectHtml(item, kind, catId, axId, branchPathStr, branchId) {
+        const cur = item.dtcgType || "";
+        if (kind === "branch") {
+          const pathArg = esc(branchPathStr);
+          return `<select id="dtcg-branch-type-${esc(branchId)}" class="branch-type-select" aria-label="Token type for subcategory ${esc(item.value)}" ${historyFieldAttrs("dtcg-branch:" + catId + "|" + axId + "|" + branchPathStr + "|" + branchId)} onchange="setBranchDtcgType('${catId}','${axId}','${pathArg}','${branchId}',this.value)">${dtcgTypeOptionsHtml(cur)}</select>${tokenTypeExtensionNoteHtml(branchId, cur)}`;
+        }
+        return `<select id="dtcg-type-${esc(item.id)}" class="cat-type-select" aria-label="Token type for ${esc(item.name)}" ${historyFieldAttrs("dtcg:" + item.id)} onchange="setCategoryDtcgType('${item.id}',this.value)">
+          ${dtcgTypeOptionsHtml(cur)}
+        </select>${tokenTypeExtensionNoteHtml(item.id, cur)}`;
       }
 
       /* ── Scale generation ─────────────────────────────── */
@@ -1820,7 +1914,7 @@
       function renderCategories() {
         const el = id("cat-list");
         if (!categories.length) {
-          el.innerHTML = `<div class="empty-msg">No categories yet — add one below. Each category includes a name, DTCG <code style="font-family:var(--mono)">$type</code>, and axis values.</div>`;
+          el.innerHTML = `<div class="empty-msg">No categories yet — add one below. Each category includes a name, token type, and axis values.</div>`;
           return;
         }
         el.innerHTML = categories
@@ -1837,7 +1931,7 @@
         <div class="cat-head">
           <input type="text" value="${esc(c.name)}" ${historyFieldAttrs("cat:" + c.id)} oninput="renameCategory('${c.id}',this.value)" />
           <div class="cat-type-wrap">
-            <label for="dtcg-type-${esc(c.id)}">$type</label>
+            <label for="dtcg-type-${esc(c.id)}">Token type</label>
             ${dtcgTypeSelectHtml(c)}
             <span class="cat-type-hint">name ≠ type</span>
           </div>
@@ -1895,14 +1989,23 @@
                   axIdx + 1,
                 )
               : "";
+            const branchType = br.dtcgType || "";
+            const branchTypeWarning = !!(branchType && isOmittedAxisValue(br.value));
+            const branchTypeWarningText = "Token type will be omitted from tokens.json because this subcategory is omitted from token names.";
             return `
         <div class="branch-card">
           <div class="branch-head">
             <input type="text" value="${esc(br.value)}" ${historyFieldAttrs("branch:" + cat.id + "|" + ax.id + "|" + branchPathStr + "|" + br.id)} oninput="renameBranchValue('${cat.id}','${ax.id}','${pathArg}','${br.id}',this.value)" />
             <span>${esc(ax.name)}</span>
+            <div class="branch-type-wrap">
+              <label for="dtcg-branch-type-${esc(br.id)}">Token type</label>
+              ${dtcgTypeSelectHtml(br, "branch", cat.id, ax.id, branchPathStr, br.id)}
+              <span id="dtcg-branch-warning-icon-${esc(br.id)}" class="dtcg-type-warning-icon" role="img" aria-label="${branchTypeWarningText}" title="${branchTypeWarningText}" style="display:${branchTypeWarning ? "" : "none"}">⚠</span>
+            </div>
             <button class="btn-icon btn-ghost" onclick="removeBranch('${cat.id}','${ax.id}','${pathArg}','${br.id}')" title="Remove branch" ${av.branches.length <= 1 ? "disabled" : ""}>✕</button>
           </div>
           ${subtree}
+          <div id="dtcg-branch-warning-text-${esc(br.id)}" class="dtcg-type-warning" style="display:${branchTypeWarning ? "" : "none"}">${branchTypeWarningText}</div>
         </div>`;
           })
           .join("")}
@@ -2176,7 +2279,7 @@
             const seg = tokenPart(br.value);
             const childValues = br.values || {};
             const nextPrefix = seg
-              ? [...prefixSegments, { ax, val: seg }]
+              ? [...prefixSegments, { ax, val: seg, dtcgType: br.dtcgType || "" }]
               : prefixSegments;
             out = out.concat(
               walkTokenSegments(category, childValues, nextPrefix, axisIdx + 1),
@@ -2575,6 +2678,17 @@
         }
       }
 
+      function dtcgApplySegmentTypes(root, segments) {
+        let node = root;
+        segments.forEach((segment) => {
+          if (!segment.val) return;
+          node = node[segment.val];
+          if (segment.dtcgType && DTCG_TYPES.has(segment.dtcgType)) {
+            node.$type = segment.dtcgType;
+          }
+        });
+      }
+
       function buildDtcgExport() {
         const tierLabel =
           tierMode === "tier2" ? "Tier 2 · Semantic" : "Tier 1 · Primitive";
@@ -2609,6 +2723,7 @@
               if (!parts.length) return;
               anyParts = true;
               dtcgEnsurePath(group, parts);
+              dtcgApplySegmentTypes(group, segs);
             });
             if (!anyParts) {
               applyDtcgLeafPlaceholders(group);
@@ -2672,7 +2787,7 @@
           out += "## Categories\n\n";
           categories.forEach((c) => {
             out += `### ${c.name}\n\n`;
-            out += `- **DTCG $type**: ${c.dtcgType ? `\`${c.dtcgType}\`` : "_not set_"}\n`;
+            out += `- **Token type**: ${c.dtcgType ? `\`${c.dtcgType}\`` : "_not set_"}\n`;
             out += exportAxisValues(c, c.values, 0, firstConfigurableAxisIndex());
             out += "\n";
           });
@@ -2696,6 +2811,7 @@
             out += `${pad}- **${ax.name}** (branched)\n`;
             av.branches.forEach((br) => {
               out += `${pad}  - **${br.value}**\n`;
+              out += `${pad}    - **Token type**: ${br.dtcgType ? `\`${br.dtcgType}\`` : "_not set_"}\n`;
               if (br.values) {
                 out += exportAxisValues(category, br.values, depth + 2, i + 1);
               }
@@ -2875,8 +2991,9 @@
         return null;
       }
 
-      function validateCategoryValues(values, categoryName, startAxisIdx) {
+      function validateCategoryValues(values, categoryName, startAxisIdx, branchPath) {
         if (startAxisIdx == null) startAxisIdx = firstConfigurableAxisIndex();
+        if (!branchPath) branchPath = [];
         for (let i = startAxisIdx; i < axes.length; i++) {
           const ax = axes[i];
           if (ax.slot === "namespace" || ax.slot === "category") continue;
@@ -2888,11 +3005,19 @@
           if (err) return err;
           if (isBranched(av)) {
             for (const br of av.branches) {
+              if (
+                br.dtcgType != null &&
+                br.dtcgType !== "" &&
+                !DTCG_TYPES.has(br.dtcgType)
+              ) {
+                return `Unknown token type "${br.dtcgType}" in category "${categoryName}" at subcategory path "${[...branchPath, br.value || "?"].join(" / ")}".`;
+              }
               if (br.values) {
                 const nested = validateCategoryValues(
                   br.values,
                   categoryName,
                   i + 1,
+                  [...branchPath, br.value || "?"],
                 );
                 if (nested) return nested;
               }
@@ -2949,7 +3074,7 @@
             c.dtcgType !== "" &&
             !DTCG_TYPES.has(c.dtcgType)
           )
-            return `Unknown DTCG $type "${c.dtcgType}" in category "${c.name || "?"}".`;
+            return `Unknown token type "${c.dtcgType}" in category "${c.name || "?"}".`;
           const err = validateCategoryValues(c.values || {}, c.name || "?");
           if (err) return err;
         }
