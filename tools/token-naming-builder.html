@@ -28,6 +28,9 @@
         --warn-tx: #b45309;
         --toast-bg: #0f172a;
         --toast-tx: #f8fafc;
+        --code-bg: #0f172a;
+        --code-tx: #e2e8f0;
+        --shadow-dock: 0 -8px 24px -12px rgba(15, 23, 42, 0.18);
         --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
         --shadow-lg: 0 12px 32px -8px rgba(15, 23, 42, 0.25);
         --hue-ns: #c2410c;
@@ -74,6 +77,8 @@
           --warn-tx: #f59e0b;
           --toast-bg: #1e293b;
           --toast-tx: #e2e8f0;
+          --code-bg: #0b0f17;
+          --shadow-dock: 0 -8px 24px -12px rgba(0, 0, 0, 0.6);
           --shadow-sm: none;
           --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
           --hue-ns: #fb923c;
@@ -284,165 +289,9 @@
       .tier-toggle button.is-active.tier-t2 {
         color: var(--t2);
       }
-      /* preview panel */
-      .panel {
-        border: 0.5px solid var(--bd-1);
-        border-radius: var(--r);
-        overflow: hidden;
-      }
-      .panel-head {
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--tx-3);
-        padding: 8px 14px;
-        border-bottom: 0.5px solid var(--bd-1);
-        background: var(--bg-2);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .panel-body {
-        padding: 14px;
-        background: var(--bg);
-        max-height: 70vh;
-        overflow-y: auto;
-      }
-
-      .formula-line {
-        font-family: var(--mono);
-        font-size: 13px;
-        color: var(--t1);
-        background: var(--t1-bg);
-        border: 0.5px solid var(--t1-bd);
-        border-radius: var(--r);
-        padding: 8px 10px;
-        margin-bottom: 10px;
-        word-break: break-all;
-      }
-      .formula-line .sep {
-        color: var(--tx-3);
-      }
-
-      .cat-preview {
-        margin-bottom: 14px;
-        padding-bottom: 14px;
-        border-bottom: 0.5px solid var(--bd-1);
-      }
-      .cat-preview:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
-      }
-      .cp-name {
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--tx);
-        margin-bottom: 4px;
-      }
-      .cp-tok {
-        font-family: var(--mono);
-        font-size: 12px;
-        color: var(--t1);
-        margin-bottom: 2px;
-        word-break: break-all;
-      }
-      .cp-tok .seg-cat {
-        color: var(--t1);
-      }
-      .cp-tok .seg-ns {
-        color: #6b4fa0;
-      }
-      .cp-tok .seg-fam {
-        color: var(--t2);
-      }
-      .cp-tok .seg-scale {
-        color: #854f0b;
-      }
-      .cp-tok .sep {
-        color: var(--tx-3);
-      }
-      .cp-tok .seg-prefix {
-        color: var(--tx-3);
-      }
-      .cp-formula {
-        font-family: var(--mono);
-        font-size: 10.5px;
-        color: var(--tx-3);
-        margin-bottom: 6px;
-      }
-      .cp-formula .sep {
-        color: var(--tx-3);
-      }
-      .cp-count {
-        font-size: 10px;
-        color: var(--tx-3);
-        margin-top: 4px;
-      }
-      .cp-empty {
-        font-size: 11px;
-        color: var(--tx-3);
-        font-style: italic;
-      }
-
-      .empty-msg {
-        font-size: 12px;
-        color: var(--tx-3);
-        font-style: italic;
-        text-align: center;
-        padding: 1.5rem 0;
-      }
-
-      .legend {
-        display: flex;
-        gap: 14px;
-        flex-wrap: wrap;
-        font-size: 10.5px;
-        color: var(--tx-3);
-        margin-bottom: 10px;
-      }
-      .legend span.dot {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        margin-right: 4px;
-        vertical-align: middle;
-      }
-      .dot-cat {
-        background: var(--t1);
-      }
-      .dot-ns {
-        background: #6b4fa0;
-      }
-      .dot-fam {
-        background: var(--t2);
-      }
-      .dot-scale {
-        background: #854f0b;
-      }
-
-      .export-area {
-        margin-top: 10px;
-      }
-      .export-area textarea {
-        width: 100%;
-        height: 160px;
-        font-size: 11px;
-      }
-      .warn {
-        font-size: 11px;
-        color: #854f0b;
-        background: #fdf3e0;
-        border: 0.5px solid #fcd34d;
-        border-radius: var(--r);
-        padding: 6px 10px;
-        margin-top: 6px;
-      }
       .restore-banner {
         position: fixed;
-        bottom: 1.5rem;
+        bottom: calc(var(--out-h, 0px) + 1.5rem);
         left: 50%;
         z-index: 1000;
         font-size: 12px;
@@ -1061,7 +910,7 @@
       .toast {
         position: fixed;
         left: 50%;
-        bottom: 1.5rem;
+        bottom: calc(var(--out-h, 0px) + 1.5rem);
         transform: translateX(-50%);
         z-index: 1000;
         display: flex;
@@ -1084,13 +933,290 @@
         border-color: currentColor;
       }
 
-      /* Outputs (redesigned in the output-panel slice) */
-      .outputs {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 16px;
-        padding: 24px;
+      /* Output panel: docked at the bottom, collapsible and resizable. */
+      .page {
+        padding-bottom: var(--out-h, 0px);
+      }
+      .out {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 800;
+        background: var(--bg);
         border-top: 1px solid var(--bd-1);
+        box-shadow: var(--shadow-dock);
+        display: flex;
+        flex-direction: column;
+      }
+      .out-resize {
+        position: absolute;
+        top: -4px;
+        left: 0;
+        right: 0;
+        height: 8px;
+        cursor: ns-resize;
+        touch-action: none;
+      }
+      .out-resize::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 50%;
+        width: 40px;
+        height: 3px;
+        margin-left: -20px;
+        border-radius: 2px;
+        background: var(--bd-2);
+        transition: background 0.12s;
+      }
+      .out-resize:hover::after,
+      .out-resize:focus-visible::after,
+      .out.is-resizing .out-resize::after {
+        background: var(--accent);
+      }
+      .out-resize:focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: -2px;
+      }
+      .out.is-resizing {
+        user-select: none;
+      }
+      .out-head {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        padding: 8px 20px;
+        background: var(--bg-2);
+        border-bottom: 1px solid var(--bd-1);
+      }
+      .out.is-collapsed .out-head {
+        border-bottom: none;
+      }
+      .out-toggle {
+        border: none;
+        background: transparent;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .out-toggle:hover {
+        border: none;
+      }
+      .out-chevron {
+        display: inline-block;
+        transition: transform 0.15s;
+      }
+      .out.is-collapsed .out-chevron {
+        transform: rotate(-90deg);
+      }
+      .out-count {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent-tx);
+        background: var(--accent-weak);
+        border: 1px solid var(--accent-bd);
+        border-radius: 999px;
+        padding: 1px 9px;
+      }
+      .out-warn {
+        height: 24px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--warn-tx);
+        background: transparent;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        padding: 0 9px;
+      }
+      .out-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .out-tabs {
+        display: flex;
+        gap: 2px;
+        padding: 2px;
+        background: var(--bg-3);
+        border: 1px solid var(--bd-1);
+        border-radius: 8px;
+      }
+      .out-tabs button {
+        height: 26px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--tx-2);
+        font-weight: 500;
+        border-radius: 6px;
+      }
+      .out-tabs button:hover {
+        color: var(--tx);
+        background: transparent;
+        border-color: transparent;
+      }
+      .out-tabs button[aria-selected="true"] {
+        background: var(--bg);
+        color: var(--accent-tx);
+        font-weight: 600;
+        border-color: var(--bd-1);
+        box-shadow: var(--shadow-sm);
+      }
+      .out-btn {
+        height: 28px;
+      }
+      .out-btn.is-done {
+        color: var(--t2);
+        border-color: currentColor;
+      }
+      .out-body {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .out-panel {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .out-body[hidden],
+      .out-panel[hidden] {
+        display: none;
+      }
+      .out-note {
+        font-size: 12px;
+        color: var(--tx-2);
+        padding: 8px 20px;
+        border-bottom: 1px solid var(--bd-1);
+      }
+      .out-note a {
+        color: var(--accent-tx);
+      }
+      .out-code {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        margin: 0;
+        padding: 14px 20px;
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--code-tx);
+        background: var(--code-bg);
+        white-space: pre;
+        tab-size: 2;
+      }
+      .out-code:focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: -2px;
+      }
+      .out-filter-row {
+        padding: 10px 20px;
+        border-bottom: 1px solid var(--bd-1);
+        background: var(--bg-2);
+      }
+      .out-filter {
+        max-width: 360px;
+        font-family: var(--mono);
+        font-size: 12px;
+        height: 30px;
+      }
+      .out-preview-list {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        padding: 12px 20px 16px;
+      }
+      .out-cat + .out-cat {
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--bd-1);
+      }
+      .out-cat-head {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .out-cat-meta {
+        font-family: var(--sans);
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--tx-3);
+      }
+      .out-cat-meta code {
+        font-family: var(--mono);
+      }
+      .out-cat-warn {
+        font-size: 12px;
+        color: var(--warn-tx);
+        margin-bottom: 8px;
+      }
+      .out-tokens {
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 6px;
+      }
+      .out-token {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 10px;
+        background: var(--bg-2);
+        border: 1px solid var(--bd-1);
+        border-radius: var(--r);
+        overflow-wrap: anywhere;
+      }
+      .out-sep {
+        color: var(--tx-3);
+        font-weight: 400;
+      }
+      .out-more,
+      .out-empty {
+        font-size: 12px;
+        color: var(--tx-3);
+        margin-top: 8px;
+      }
+      .out-empty {
+        text-align: center;
+        padding: 20px 0;
+      }
+      @media (max-width: 899px) {
+        .out-head {
+          padding: 8px 16px;
+        }
+        .out-actions {
+          margin-left: 0;
+          width: 100%;
+        }
+        .out-tabs {
+          overflow-x: auto;
+          max-width: 100%;
+        }
+        .out-tabs button {
+          white-space: nowrap;
+        }
+        .out-code,
+        .out-preview-list,
+        .out-filter-row,
+        .out-note {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1238,61 +1364,50 @@
       <main class="board-wrap" id="board-wrap">
         <div class="board" id="board" role="tabpanel" tabindex="-1"></div>
       </main>
-
-      <section class="outputs" aria-label="Review and export">
-
-          <div class="panel">
-            <div class="panel-head">
-              <span>Live preview</span>
-              <div style="display: flex; gap: 6px; flex-wrap: wrap">
-                <button class="btn-xs" onclick="copyCssExport()">Copy CSS</button>
-                <button class="btn-xs btn-solid" onclick="downloadCssExport()">
-                  Download .css
-                </button>
-              </div>
-            </div>
-            <div class="panel-body" id="preview-body">
-              <div class="empty-msg">
-                Add axes and categories to see your naming formula and example
-                tokens.
-              </div>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="panel-head">
-              <span>DTCG-shaped JSON</span>
-              <div style="display: flex; gap: 6px; flex-wrap: wrap">
-                <button class="btn-xs" onclick="copyDtcgExport()">Copy</button>
-                <button class="btn-xs btn-solid" onclick="downloadDtcgExport()">
-                  Download .tokens.json
-                </button>
-                <a class="btn-xs" href="token-value-builder.html" style="text-decoration:none">Fill values →</a>
-              </div>
-            </div>
-            <div class="panel-body">
-              <div class="export-area">
-                <textarea id="dtcg-out" readonly></textarea>
-              </div>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="panel-head">
-              <span>Convention export</span>
-              <div style="display: flex; gap: 6px">
-                <button class="btn-xs" onclick="copyExport()">Copy</button>
-                <button class="btn-xs btn-solid" onclick="downloadExport()">
-                  Download .md
-                </button>
-              </div>
-            </div>
-            <div class="panel-body">
-              <div class="export-area">
-                <textarea id="export-out" readonly></textarea>
-              </div>
-            </div>
-          </div>
-      </section>
     </div>
+
+    <section class="out" id="out" aria-label="Output">
+      <div class="out-resize" id="out-resize" role="separator" tabindex="0"
+        aria-orientation="horizontal" aria-controls="out-body" aria-label="Resize output panel"
+        aria-valuemin="120" title="Drag to resize"></div>
+      <header class="out-head">
+        <button type="button" class="out-toggle" id="out-toggle" aria-controls="out-body" aria-expanded="true">
+          <span class="out-chevron" aria-hidden="true">▾</span> Output
+        </button>
+        <span class="out-count" id="out-count" aria-live="polite"></span>
+        <button type="button" class="out-warn" id="out-warn" hidden></button>
+        <div class="out-actions">
+          <div class="out-tabs" id="out-tabs" role="tablist" aria-label="Output format">
+            <button type="button" role="tab" id="out-tab-preview" data-out-tab="preview" aria-controls="out-panel-preview">Tokens Preview</button>
+            <button type="button" role="tab" id="out-tab-dtcg" data-out-tab="dtcg" aria-controls="out-panel-dtcg">DTCG JSON</button>
+            <button type="button" role="tab" id="out-tab-css" data-out-tab="css" aria-controls="out-panel-css">CSS Variables</button>
+            <button type="button" role="tab" id="out-tab-spec" data-out-tab="spec" aria-controls="out-panel-spec">Markdown Spec</button>
+          </div>
+          <button type="button" class="out-btn" id="out-copy">Copy</button>
+          <button type="button" class="out-btn" id="out-download">Download</button>
+          <span class="visually-hidden" id="out-copy-status" role="status"></span>
+        </div>
+      </header>
+      <div class="out-body" id="out-body">
+        <div class="out-panel out-preview" id="out-panel-preview" role="tabpanel" aria-labelledby="out-tab-preview">
+          <div class="out-filter-row">
+            <input type="search" id="out-filter" class="out-filter" placeholder="Filter generated tokens…"
+              aria-label="Filter generated tokens" spellcheck="false" autocomplete="off" />
+          </div>
+          <div class="out-preview-list" id="out-preview-list"></div>
+        </div>
+        <div class="out-panel" id="out-panel-dtcg" role="tabpanel" aria-labelledby="out-tab-dtcg" hidden>
+          <p class="out-note">Names and types only. <a href="token-value-builder.html">Fill values →</a></p>
+          <pre class="out-code" id="out-text-dtcg" tabindex="0"></pre>
+        </div>
+        <div class="out-panel" id="out-panel-css" role="tabpanel" aria-labelledby="out-tab-css" hidden>
+          <pre class="out-code" id="out-text-css" tabindex="0"></pre>
+        </div>
+        <div class="out-panel" id="out-panel-spec" role="tabpanel" aria-labelledby="out-tab-spec" hidden>
+          <pre class="out-code" id="out-text-spec" tabindex="0"></pre>
+        </div>
+      </div>
+    </section>
 
     <div id="restore-banner" class="restore-banner" hidden role="status">
       <span class="restore-banner-text">Restored your last session.</span>
@@ -1457,7 +1572,7 @@
       function uiSetNamespace(val) {
         setNamespace(val);
         renderFormulaBar();
-        renderPreviewAndExport();
+        renderOutputPanel();
         scheduleAutoSave();
         updateShareLinkButton();
       }
@@ -2060,175 +2175,6 @@
       window.addEventListener("resize", positionPopover);
       document.addEventListener("scroll", positionPopover, true);
 
-      function segClass(ax) {
-        if (ax.slot === "namespace") return "seg-ns";
-        if (ax.slot === "category") return "seg-cat";
-        if (ax.name === "family") return "seg-fam";
-        if (ax.slot === "scale" || ax.name === "scale") return "seg-scale";
-        return "seg-scale";
-      }
-
-      function cssVarPrefix() {
-        return '<span class="seg-prefix">--</span>';
-      }
-
-      function buildColoredTokenFromSegments(segments) {
-        const rendered = segments
-          .filter(({ val }) => !isOmittedAxisValue(val))
-          .map(({ ax, val }) => `<span class="${segClass(ax)}">${esc(val)}</span>`);
-        return (
-          cssVarPrefix() +
-          rendered
-            .map((span, idx) => (idx > 0 ? `<span class="sep">-</span>${span}` : span))
-            .join("")
-        );
-      }
-
-      function buildColoredToken(activeData, pickFn) {
-        const segments = [];
-        activeData.forEach(({ ax, vals }) => {
-          const val = pickFn(vals);
-          if (isOmittedAxisValue(val)) return;
-          segments.push(`<span class="${segClass(ax)}">${esc(val)}</span>`);
-        });
-        return (
-          cssVarPrefix() +
-          segments
-            .map((span, idx) => (idx > 0 ? `<span class="sep">-</span>${span}` : span))
-            .join("")
-        );
-      }
-
-      function buildToken(activeData, pickFn) {
-        return joinTokenParts(
-          activeData.map(({ vals }) => tokenPart(pickFn(vals))),
-        );
-      }
-
-      function countTokensForCategory(category) {
-        return allTokensForCategory(category).length;
-      }
-
-      function countTokens(activeData) {
-        return activeData.reduce(
-          (acc, { ax, vals }) =>
-            ax.slot === "category" || ax.slot === "namespace"
-              ? acc
-              : acc * vals.length,
-          1,
-        );
-      }
-
-
-      function buildCategoryFormula(activeData) {
-        return activeData
-          .map(({ ax }) => `[${ax.name}]`)
-          .join('<span class="sep">-</span>');
-      }
-
-      function previewExamplesForCategory(category) {
-        const paths = tokenSegmentPaths(category);
-        if (!paths.length) return [];
-
-        const nsSeg = [];
-        if (namespaceEnabled && namespaceValue) {
-          nsSeg.push({
-            ax: axes.find((a) => a.slot === "namespace") || {
-              slot: "namespace",
-              name: "namespace",
-            },
-            val: namespaceValue,
-          });
-        }
-        const catSeg = {
-          ax: axes.find((a) => a.slot === "category") || {
-            slot: "category",
-            name: "category",
-          },
-          val: category.name,
-        };
-
-        const examples = [];
-        const toColored = (path) =>
-          buildColoredTokenFromSegments([...nsSeg, catSeg, ...path]);
-
-        examples.push(toColored(paths[0]));
-        if (paths.length > 1) {
-          const mid = toColored(paths[Math.floor(paths.length / 2)]);
-          if (mid !== examples[0]) examples.push(mid);
-        }
-        if (paths.length > 2) {
-          const last = toColored(paths[paths.length - 1]);
-          if (!examples.includes(last)) examples.push(last);
-        }
-        return examples;
-      }
-
-      /* ── Render: Preview ───────────────────────────────── */
-      function renderPreview() {
-        const el = id("preview-body");
-
-        const legend = `
-    <div class="legend">
-      ${namespaceEnabled ? `<span><span class="dot dot-ns"></span>namespace</span>` : ""}
-      <span><span class="dot dot-cat"></span>category</span>
-      ${axes.some((a) => a.name === "family") || hasConditionalGroups() ? `<span><span class="dot dot-fam"></span>family</span>` : ""}
-      <span><span class="dot dot-scale"></span>scale</span>
-    </div>`;
-
-        const formula = `<div class="formula-line">${axes
-          .map((a) => `[${a.name}]`)
-          .join('<span class="sep">-</span>')}</div>`;
-
-        if (!categories.length) {
-          el.innerHTML =
-            legend +
-            formula +
-            `<div class="empty-msg">Add a category to generate example tokens.</div>`;
-          return;
-        }
-
-        const blocks = categories
-          .map((c) => {
-            const activeData = getActiveAxisData(c);
-            const catFormula = `<div class="cp-formula">${buildCategoryFormula(activeData)}</div>`;
-            const examples = previewExamplesForCategory(c);
-
-            if (!examples.length) {
-              return `
-      <div class="cat-preview">
-        <div class="cp-name">${esc(c.name)}</div>
-        ${catFormula}
-        <div class="cp-empty">No values configured for this category yet.</div>
-      </div>`;
-            }
-
-            const total = countTokensForCategory(c);
-            const collisions = tokenPathCollisions(c);
-
-            return `
-      <div class="cat-preview">
-        <div class="cp-name">${esc(c.name)}</div>
-        ${catFormula}
-        ${examples.map((ex) => `<div class="cp-tok">${ex}</div>`).join("")}
-        <div class="cp-count">${total} possible token${total !== 1 ? "s" : ""} in this category</div>
-        ${collisions.length ? `<div class="warn">Name collision${collisions.length !== 1 ? "s" : ""}: ${collisions.map((name) => `<code>${esc(name)}</code>`).join(", ")}</div>` : ""}
-      </div>`;
-          })
-          .join("");
-
-        el.innerHTML = legend + formula + blocks;
-      }
-
-
-      async function copyCssExport() {
-        const css = buildCssExport();
-        if (!css.includes("--")) return;
-        try {
-          await navigator.clipboard.writeText(css);
-        } catch (e) {}
-      }
-
       function setProjectTitle(value) {
         const trimmed = String(value).trim();
         projectTitle = trimmed || defaultTitleForTier(tierMode);
@@ -2306,12 +2252,159 @@
         URL.revokeObjectURL(url);
       }
 
-      async function downloadCssExport() {
-        const collisions = categories.flatMap((c) => tokenPathCollisions(c).map((name) => `${c.name}.${name}`));
+      /* ── Output panel ──────────────────────────────────── */
+      // Docked at the bottom: a header with the token count, collision
+      // warnings, one tab per output and Copy/Download; a body that can be
+      // collapsed and resized by dragging its top edge.
+      const OUT_TABS = {
+        preview: { label: "Tokens Preview", copy: () => buildTokenList(outFilter) },
+        dtcg: { label: "DTCG JSON", copy: buildDtcgExport, download: downloadDtcgExport },
+        css: { label: "CSS Variables", copy: buildCssExport, download: downloadCssExport },
+        spec: { label: "Markdown Spec", copy: buildExport, download: downloadExport },
+      };
+      const OUT_MIN_H = 120;
+      const OUT_PREVIEW_LIMIT = 2000;
+      let outTab = "preview";
+      let outFilter = "";
+      let outHeight = 320;
+      let outCollapsed = window.matchMedia("(max-width: 899px)").matches;
+      let outCopiedTimer = null;
+
+      function outMaxHeight() {
+        return Math.max(OUT_MIN_H, Math.round(window.innerHeight * 0.85));
+      }
+
+      function setOutHeight(h) {
+        outHeight = Math.min(outMaxHeight(), Math.max(OUT_MIN_H, Math.round(h)));
+        id("out-body").style.height = outHeight + "px";
+        const handle = id("out-resize");
+        handle.setAttribute("aria-valuenow", outHeight);
+        handle.setAttribute("aria-valuemax", outMaxHeight());
+      }
+
+      function setOutCollapsed(collapsed) {
+        outCollapsed = collapsed;
+        id("out").classList.toggle("is-collapsed", collapsed);
+        id("out-body").hidden = collapsed;
+        id("out-resize").hidden = collapsed;
+        const toggle = id("out-toggle");
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        toggle.setAttribute("aria-label", collapsed ? "Expand output panel" : "Collapse output panel");
+        if (!collapsed) renderOutputBody();
+      }
+
+      function selectOutTab(tab, focus) {
+        if (!OUT_TABS[tab]) return;
+        outTab = tab;
+        if (outCollapsed) setOutCollapsed(false);
+        renderOutputPanel();
+        if (focus) id("out-tab-" + tab).focus();
+      }
+
+      function renderOutputPanel() {
+        const count = tokenCount();
+        id("out-count").textContent = plural(count, "token");
+
+        // The names are on the button itself (the first few) and in its
+        // accessible name; the Tokens Preview lists them per category.
+        const collisions = tokenCollisions();
+        const warn = id("out-warn");
+        warn.hidden = !collisions.length;
         if (collisions.length) {
-          alert(`Cannot export while token names collide:\n\n${collisions.join("\n")}`);
+          const shown = collisions.slice(0, 3).join(", ") + (collisions.length > 3 ? ", …" : "");
+          warn.textContent = `⚠ ${plural(collisions.length, "name collision")}: ${shown}`;
+          warn.title = `CSS and tokens.json downloads are blocked while these names collide:\n${collisions.join("\n")}`;
+          warn.setAttribute("aria-label", `${plural(collisions.length, "name collision")}: ${collisions.join(", ")}. Show them in Tokens Preview.`);
+        }
+
+        Object.keys(OUT_TABS).forEach((tab) => {
+          const btn = id("out-tab-" + tab);
+          const on = tab === outTab;
+          btn.setAttribute("aria-selected", String(on));
+          btn.tabIndex = on ? 0 : -1;
+          id("out-panel-" + tab).hidden = !on;
+        });
+        const download = id("out-download");
+        download.hidden = !OUT_TABS[outTab].download;
+        download.setAttribute("aria-label", `Download ${OUT_TABS[outTab].label}`);
+        id("out-copy").setAttribute("aria-label", `Copy ${OUT_TABS[outTab].label}`);
+        if (!outCollapsed) renderOutputBody();
+      }
+
+      // Only the visible tab is drawn, and only while the panel is open.
+      function renderOutputBody() {
+        if (outTab === "preview") renderTokenPreview();
+        else id("out-text-" + outTab).textContent = OUT_TABS[outTab].copy();
+      }
+
+      function renderTokenPreview() {
+        const filter = id("out-filter");
+        if (document.activeElement !== filter && filter.value !== outFilter) filter.value = outFilter;
+        const list = id("out-preview-list");
+        const preview = tokenPreview(outFilter);
+        if (!categories.length) {
+          list.innerHTML = `<p class="out-empty">Add a category to generate tokens.</p>`;
           return;
         }
+        if (!preview.length) {
+          list.innerHTML = outFilter
+            ? `<p class="out-empty">No tokens match “${esc(outFilter.trim())}”.</p>`
+            : `<p class="out-empty">No tokens yet. Add values to the axes above.</p>`;
+          return;
+        }
+        let budget = OUT_PREVIEW_LIMIT;
+        list.innerHTML = preview
+          .map((c) => {
+            const shown = c.tokens.slice(0, Math.max(0, budget));
+            budget -= shown.length;
+            const hidden = c.tokens.length - shown.length;
+            const countLabel = outFilter.trim() ? `${c.tokens.length} of ${plural(c.count, "token")}` : plural(c.count, "token");
+            return `<section class="out-cat" aria-label="${esc(c.name)}">
+              <h3 class="out-cat-head"><span class="hue-cat">${esc(c.name)}</span>
+                <span class="out-cat-meta">${countLabel}${c.type ? ` · <code>$type: ${esc(c.type)}</code>` : ""}</span></h3>
+              ${c.collisions.length ? `<p class="out-cat-warn" role="note">${c.collisions.length === 1 ? "Name collision" : "Name collisions"}: ${c.collisions.map((n) => `<code>${esc(n)}</code>`).join(", ")}</p>` : ""}
+              <ul class="out-tokens">${shown.map((t) => `<li class="out-token">${coloredTokenName(t)}</li>`).join("")}</ul>
+              ${hidden ? `<p class="out-more">+ ${hidden} more — use the filter to narrow the list, or Copy for all of them.</p>` : ""}
+            </section>`;
+          })
+          .join("");
+      }
+
+      function coloredTokenName(token) {
+        return token.parts
+          .map((p) => {
+            const ax = axes.find((a) => a.id === p.axisId) || { slot: p.axisId };
+            return `<span class="${hueClass(ax)}">${esc(p.val)}</span>`;
+          })
+          .join('<span class="out-sep">-</span>');
+      }
+
+      async function copyOutTab() {
+        const text = OUT_TABS[outTab].copy();
+        const status = id("out-copy-status");
+        let ok = false;
+        try {
+          await navigator.clipboard.writeText(text);
+          ok = true;
+        } catch (e) {}
+        clearTimeout(outCopiedTimer);
+        status.textContent = ok ? "Copied" : "Copy failed";
+        id("out-copy").classList.toggle("is-done", ok);
+        outCopiedTimer = setTimeout(() => {
+          status.textContent = "";
+          id("out-copy").classList.remove("is-done");
+        }, 1600);
+      }
+
+      function exportBlockedByCollisions() {
+        const collisions = tokenCollisions();
+        if (!collisions.length) return false;
+        alert(`Cannot export while token names collide:\n\n${collisions.join("\n")}`);
+        return true;
+      }
+
+      async function downloadCssExport() {
+        if (exportBlockedByCollisions()) return;
         const css = buildCssExport();
         if (!css.includes("--")) return;
         await downloadFile({
@@ -2321,19 +2414,8 @@
         });
       }
 
-
-      async function copyDtcgExport() {
-        try {
-          await navigator.clipboard.writeText(buildDtcgExport());
-        } catch (e) {}
-      }
-
       async function downloadDtcgExport() {
-        const collisions = categories.flatMap((c) => tokenPathCollisions(c).map((name) => `${c.name}.${name}`));
-        if (collisions.length) {
-          alert(`Cannot export while token names collide:\n\n${collisions.join("\n")}`);
-          return;
-        }
+        if (exportBlockedByCollisions()) return;
         await downloadFile({
           blob: new Blob([buildDtcgExport()], { type: "application/json" }),
           extension: "tokens.json",
@@ -2341,24 +2423,80 @@
         });
       }
 
-
-      function renderExport() {
-        id("export-out").value = buildExport();
-        const dtcgEl = id("dtcg-out");
-        if (dtcgEl) dtcgEl.value = buildDtcgExport();
-      }
-
-      async function copyExport() {
-        try {
-          await navigator.clipboard.writeText(buildExport());
-        } catch (e) {}
-      }
       async function downloadExport() {
         await downloadFile({
           blob: new Blob([buildExport()], { type: "text/markdown" }),
           extension: "md",
           description: "Naming convention",
         });
+      }
+
+      function initOutputPanel() {
+        const out = id("out");
+        const tablist = id("out-tabs");
+        tablist.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-out-tab]");
+          if (btn) selectOutTab(btn.dataset.outTab);
+        });
+        tablist.addEventListener("keydown", (e) => {
+          const keys = Object.keys(OUT_TABS);
+          const i = keys.indexOf(outTab);
+          let j = null;
+          if (e.key === "ArrowRight") j = (i + 1) % keys.length;
+          else if (e.key === "ArrowLeft") j = (i - 1 + keys.length) % keys.length;
+          else if (e.key === "Home") j = 0;
+          else if (e.key === "End") j = keys.length - 1;
+          if (j === null) return;
+          e.preventDefault();
+          selectOutTab(keys[j], true);
+        });
+        id("out-toggle").addEventListener("click", () => setOutCollapsed(!outCollapsed));
+        id("out-copy").addEventListener("click", copyOutTab);
+        id("out-download").addEventListener("click", () => OUT_TABS[outTab].download?.());
+        id("out-warn").addEventListener("click", () => selectOutTab("preview"));
+        id("out-filter").addEventListener("input", (e) => {
+          outFilter = e.target.value;
+          renderTokenPreview();
+        });
+
+        // Drag the top edge to resize; arrow keys do the same from the keyboard.
+        const handle = id("out-resize");
+        handle.addEventListener("pointerdown", (e) => {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          handle.setPointerCapture(e.pointerId);
+          const startY = e.clientY;
+          const startH = outHeight;
+          out.classList.add("is-resizing");
+          const move = (ev) => setOutHeight(startH + (startY - ev.clientY));
+          const up = () => {
+            out.classList.remove("is-resizing");
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", up);
+            handle.removeEventListener("pointercancel", up);
+          };
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", up);
+          handle.addEventListener("pointercancel", up);
+        });
+        handle.addEventListener("keydown", (e) => {
+          const step = e.shiftKey ? 96 : 24;
+          if (e.key === "ArrowUp") setOutHeight(outHeight + step);
+          else if (e.key === "ArrowDown") setOutHeight(outHeight - step);
+          else if (e.key === "Home") setOutHeight(outMaxHeight());
+          else if (e.key === "End") setOutHeight(OUT_MIN_H);
+          else return;
+          e.preventDefault();
+        });
+        window.addEventListener("resize", () => setOutHeight(outHeight));
+
+        // Keep the page's last content clear of the docked panel.
+        const sync = () =>
+          document.documentElement.style.setProperty("--out-h", out.offsetHeight + "px");
+        new ResizeObserver(sync).observe(out);
+
+        setOutHeight(outHeight);
+        setOutCollapsed(outCollapsed);
       }
 
       /* ── Master render ─────────────────────────────────── */
@@ -2376,13 +2514,9 @@
         renderPopover();
         if (wanted) focusFk(wanted);
         else if (fk && !active.isConnected) focusFk(fk);
-        renderPreviewAndExport();
+        renderOutputPanel();
         scheduleAutoSave();
         updateShareLinkButton();
-      }
-      function renderPreviewAndExport() {
-        renderPreview();
-        renderExport();
       }
 
       /* ── Persistence ───────────────────────────────────── */
@@ -2913,6 +3047,7 @@
         },
         true,
       );
+      initOutputPanel();
       initApp();
     </script>
   </body>

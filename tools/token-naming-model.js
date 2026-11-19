@@ -821,6 +821,57 @@ function allTokenNames() {
   return categories.flatMap((c) => allTokensForCategory(c));
 }
 
+/* ── Output panel ──────────────────────────────────── */
+// What the output panel shows besides the export files: the token count, the
+// collision warnings and the Tokens Preview tab.
+
+function tokenCount() {
+  return allTokenNames().length;
+}
+
+// Every colliding token name, as "category.name".
+function tokenCollisions() {
+  return categories.flatMap((c) => tokenPathCollisions(c).map((name) => `${c.name}.${name}`));
+}
+
+// The Tokens Preview, one entry per category in export order. Each token is
+// its CSS name and its parts (namespace and category first, omitted values
+// left out), each part tagged with its axis id so the panel can color it.
+// A query keeps only tokens whose name contains it, ignoring case and
+// surrounding space; categories with no tokens left drop out. count is always
+// the category's full token count.
+function tokenPreview(query = "") {
+  const q = String(query).trim().toLowerCase();
+  const prefix = [];
+  if (namespaceEnabled && namespaceValue) prefix.push({ axisId: "namespace", val: namespaceValue });
+  return categories
+    .map((c) => {
+      const tokens = tokenSegmentPaths(c).map((segments) => {
+        const parts = [
+          ...prefix,
+          { axisId: "category", val: c.name },
+          ...segments.map((s) => ({ axisId: s.ax.id, val: s.val })),
+        ];
+        return { name: joinTokenParts(parts.map((p) => p.val)), parts };
+      });
+      return {
+        name: c.name,
+        type: c.dtcgType || "",
+        count: tokens.length,
+        collisions: tokenPathCollisions(c),
+        tokens: q ? tokens.filter((t) => t.name.toLowerCase().includes(q)) : tokens,
+      };
+    })
+    .filter((c) => !q || c.tokens.length);
+}
+
+// What Copy puts on the clipboard on the Tokens Preview tab: the shown token
+// names, one per line.
+function buildTokenList(query = "") {
+  const names = tokenPreview(query).flatMap((c) => c.tokens.map((t) => t.name));
+  return names.length ? names.join("\n") + "\n" : "";
+}
+
 /* ── Board edits ───────────────────────────────────── */
 // The changes the builder's board makes to the project. Each one leaves the
 // project valid; the board saves an undo snapshot before calling it.
@@ -1417,6 +1468,13 @@ if (typeof module === "object" && module.exports) {
     serializeState,
     allTokens,
     allTokenNames,
+    buildCssExport,
+    buildDtcgExport,
+    buildExport,
+    tokenCount,
+    tokenCollisions,
+    tokenPreview,
+    buildTokenList,
     setNamespace,
     insertAxis,
     renameAxis,
