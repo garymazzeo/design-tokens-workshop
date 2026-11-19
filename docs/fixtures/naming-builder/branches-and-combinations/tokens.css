@@ -1,0 +1,35 @@
+/* Tier 1 token names only — values added elsewhere */
+:root {
+  --mds-color-brand-surface-100: ;
+  --mds-color-brand-surface-200: ;
+  --mds-color-brand-surface-hover-100: ;
+  --mds-color-brand-surface-hover-200: ;
+  --mds-color-brand-text-100: ;
+  --mds-color-brand-text-200: ;
+  --mds-color-brand-text-hover-100: ;
+  --mds-color-brand-text-hover-200: ;
+  --mds-color-brand-border-pressed-300: ;
+  --mds-color-feedback-text: ;
+  --mds-color-feedback-text-strong: ;
+  --mds-color-feedback-icon: ;
+  --mds-color-feedback-icon-strong: ;
+  --mds-border-radius-2xs: ;
+  --mds-border-radius-xs: ;
+  --mds-border-radius-sm: ;
+  --mds-border-radius-md: ;
+  --mds-border-radius-lg: ;
+  --mds-border-radius-xl: ;
+  --mds-border-radius-2xl: ;
+  --mds-border-width-1: ;
+  --mds-border-width-2: ;
+  --mds-border-width-3: ;
+  --mds-border-width-4: ;
+  --mds-border-style-solid: ;
+  --mds-border-style-dashed: ;
+  --mds-space-inline-4: ;
+  --mds-space-inline-8: ;
+  --mds-space-stack-8: ;
+  --mds-space-stack-12: ;
+  --mds-space-stack-16: ;
+  --mds-space-inline-16: ;
+}

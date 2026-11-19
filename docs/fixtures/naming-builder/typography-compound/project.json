@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "tierMode": "tier2",
+  "projectTitle": "Tier 2 Tokens",
+  "namespaceEnabled": false,
+  "namespaceValue": "",
+  "axes": [
+    {
+      "id": "category",
+      "name": "category",
+      "locked": true,
+      "slot": "category"
+    },
+    {
+      "id": "ax1",
+      "name": "hierarchy",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "scale",
+      "name": "scale",
+      "locked": false,
+      "slot": "middle"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat1",
+      "name": "typography",
+      "dtcgType": "typography",
+      "values": {
+        "ax1": {
+          "type": "custom",
+          "config": {},
+          "list": [
+            "display",
+            "heading",
+            "body",
+            "caption"
+          ]
+        },
+        "scale": {
+          "type": "tshirt",
+          "config": {
+            "extra": "0"
+          },
+          "list": []
+        }
+      }
+    }
+  ],
+  "axisSeq": 1,
+  "catSeq": 1,
+  "brSeq": 0
+}

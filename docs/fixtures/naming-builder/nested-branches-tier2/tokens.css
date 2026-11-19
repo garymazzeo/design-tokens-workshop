@@ -1,0 +1,17 @@
+/* Tier 2 token names only — values added elsewhere */
+:root {
+  --color-brand-surface: ;
+  --color-brand-surface-hover: ;
+  --color-brand-surface-strong: ;
+  --color-brand-surface-strong-hover: ;
+  --color-brand-text-subtle: ;
+  --color-brand-text: ;
+  --color-feedback-text: ;
+  --color-feedback-text-disabled: ;
+  --color-feedback-icon: ;
+  --typography-heading-xl: ;
+  --typography-heading-lg: ;
+  --typography-heading-md-strong: ;
+  --typography-weight-regular: ;
+  --typography-weight-bold: ;
+}
