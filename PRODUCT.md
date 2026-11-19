@@ -21,7 +21,7 @@ A single, method-driven toolkit that couples an explicit six-layer naming method
 ## Operating Context
 
 - Public, MIT-licensed, static web project hosted on GitHub, authored and maintained by Gary Mazzeo.
-- Delivered as plain static HTML/CSS/JS — no framework, no build step, no server dependency. Each tool is a self-contained HTML document under `tools/`.
+- Delivered as plain static HTML/CSS/JS — no framework, no build step, no server dependency. Each tool is an HTML document under `tools/`; a tool may load a sibling plain `.js` file with `<script src>` (e.g. `token-naming-model.js`, which Node scripts can also load), as long as it still opens straight from disk.
 - The workshop is used in two registers: as a self-serve curriculum (landing page, online handbook, printable PDF) and, for the confirmed primary user, as a production toolkit (the interactive tools).
 - The repository also carries a planned build specification: `docs/specs/terrazzo-derived-outputs.md`.
 
@@ -55,7 +55,7 @@ A single, method-driven toolkit that couples an explicit six-layer naming method
 2. Keep it standards-shaped: output stays valid DTCG/Terrazzo and preserves aliases; don't break the source to satisfy a single consumer.
 3. Method over taste: naming decisions come from the explicit six-layer system, not ad-hoc judgment, so the method stays teachable and auditable.
 4. Production-utility-first: for the confirmed primary user the tools must yield artifacts a real design-system team can take into a codebase, not just demonstrate ideas.
-5. Stay lean and portable: honor the no-framework, static, self-contained constraint so the workshop keeps working anywhere without a build or deploy chain.
+5. Stay lean and portable: honor the no-framework, static, no-build constraint so the workshop keeps working anywhere without a build or deploy chain.
 
 ## Accessibility & Inclusion
 
