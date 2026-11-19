@@ -6,45 +6,85 @@
     <title>Token Naming Builder — Design System Workshop</title>
     <style>
       :root {
+        color-scheme: light dark;
         --bg: #ffffff;
-        --bg-2: #f4f3ef;
-        --bg-3: #eceae4;
-        --tx: #1a1a18;
-        --tx-2: #56564f;
-        --tx-3: #8a8a82;
-        --bd-1: rgba(26, 26, 24, 0.09);
-        --bd-2: rgba(26, 26, 24, 0.2);
-        --bd-3: rgba(26, 26, 24, 0.38);
-        --t1: #185fa5;
-        --t1-bg: #e6f1fb;
-        --t1-bd: rgba(24, 95, 165, 0.3);
-        --t2: #3b6d11;
-        --t2-bg: #eaf3de;
-        --r: 8px;
-        --r-lg: 12px;
+        --bg-2: #f8fafc;
+        --bg-3: #eef1f6;
+        --band: #e9edf4;
+        --board: #f5f7fa;
+        --tx: #0f172a;
+        --tx-2: #475569;
+        --tx-3: #8492a6;
+        --bd-1: #e2e8f0;
+        --bd-2: #cbd5e1;
+        --bd-3: #94a3b8;
+        --accent: #4f46e5;
+        --accent-tx: #4338ca;
+        --accent-weak: #f3f4ff;
+        --accent-bd: #c7d2fe;
+        --on-accent: #ffffff;
+        --focus: #4f46e5;
+        --danger: #dc2626;
+        --warn-tx: #b45309;
+        --toast-bg: #0f172a;
+        --toast-tx: #f8fafc;
+        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+        --shadow-lg: 0 12px 32px -8px rgba(15, 23, 42, 0.25);
+        --hue-ns: #c2410c;
+        --hue-cat: #1d4ed8;
+        --hue-0: #6d28d9;
+        --hue-1: #0e7490;
+        --hue-2: #047857;
+        --hue-3: #b45309;
+        --hue-4: #be185d;
+        --t1: var(--accent);
+        --t1-bg: var(--accent-weak);
+        --t1-bd: var(--accent-bd);
+        --t2: #047857;
+        --t2-bg: #ecfdf5;
+        --r: 6px;
+        --r-lg: 10px;
         --sans:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
-          sans-serif;
+          Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+          Arial, sans-serif;
         --mono:
-          "SF Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono",
-          monospace;
+          "JetBrains Mono", "SF Mono", "Cascadia Code", "Fira Code", Consolas,
+          "Liberation Mono", monospace;
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #1e1e1b;
-          --bg-2: #292926;
-          --bg-3: #323230;
-          --tx: #f0ede5;
-          --tx-2: #aeaba2;
-          --tx-3: #76736c;
-          --bd-1: rgba(240, 237, 229, 0.09);
-          --bd-2: rgba(240, 237, 229, 0.2);
-          --bd-3: rgba(240, 237, 229, 0.38);
-          --t1: #85b7eb;
-          --t1-bg: #042c53;
-          --t1-bd: rgba(133, 183, 235, 0.3);
-          --t2: #97c459;
-          --t2-bg: #173404;
+          --bg: #111726;
+          --bg-2: #172033;
+          --bg-3: #0b0f17;
+          --band: #111726;
+          --board: #0b0f17;
+          --tx: #e2e8f0;
+          --tx-2: #94a3b8;
+          --tx-3: #64748b;
+          --bd-1: #1e293b;
+          --bd-2: #26334d;
+          --bd-3: #3b4b63;
+          --accent: #6366f1;
+          --accent-tx: #a5b4fc;
+          --accent-weak: rgba(99, 102, 241, 0.1);
+          --accent-bd: rgba(99, 102, 241, 0.45);
+          --on-accent: #ffffff;
+          --focus: #06b6d4;
+          --danger: #f87171;
+          --warn-tx: #f59e0b;
+          --toast-bg: #1e293b;
+          --toast-tx: #e2e8f0;
+          --shadow-sm: none;
+          --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+          --hue-ns: #fb923c;
+          --hue-cat: #93c5fd;
+          --hue-0: #a5b4fc;
+          --hue-1: #22d3ee;
+          --hue-2: #34d399;
+          --hue-3: #fbbf24;
+          --hue-4: #f472b6;
+          --t2: #10b981;
+          --t2-bg: rgba(16, 185, 129, 0.12);
         }
       }
       *,
@@ -56,10 +96,10 @@
       }
       body {
         font-family: var(--sans);
-        background: var(--bg-3);
+        background: var(--board);
         color: var(--tx);
         min-height: 100vh;
-        padding: 2rem 1.5rem;
+        overflow-x: hidden;
         line-height: 1.5;
       }
       input[type="text"],
@@ -163,15 +203,11 @@
       }
 
       .page {
-        max-width: 1180px;
-        margin: 0 auto;
         background: var(--bg);
-        border: 0.5px solid var(--bd-1);
-        border-radius: var(--r-lg);
-        padding: 2rem;
+        min-width: 0;
       }
       .hdr {
-        margin-bottom: 1.5rem;
+        padding: 20px 24px 16px;
       }
       .hdr-eye {
         font-size: 11px;
@@ -200,7 +236,7 @@
       }
       .hdr-title-input:focus {
         outline: none;
-        border-bottom-color: var(--bd-2);
+        border-bottom-color: var(--focus);
       }
       .hdr-desc {
         font-size: 14px;
@@ -248,281 +284,6 @@
       .tier-toggle button.is-active.tier-t2 {
         color: var(--t2);
       }
-      .cat-type-wrap {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex: 1;
-        min-width: 0;
-      }
-      .cat-type-wrap label {
-        font-size: 11px;
-        color: var(--tx-3);
-        white-space: nowrap;
-      }
-      .cat-type-select {
-        max-width: 160px;
-        width: auto;
-        flex: 1;
-        min-width: 120px;
-        font-family: var(--mono);
-        font-size: 12px;
-      }
-      .dtcg-type-warning-icon {
-        color: var(--warn, #a66b00);
-        font-size: 14px;
-        line-height: 1;
-      }
-      .dtcg-type-warning {
-        margin-top: 6px;
-        color: var(--warn, #a66b00);
-        font-size: 10.5px;
-      }
-      .cat-type-hint {
-        font-size: 10px;
-        color: var(--tx-3);
-        white-space: nowrap;
-      }
-      .token-type-extension-note {
-        display: none;
-        color: var(--tx-3);
-        font-size: 10px;
-      }
-      @media (max-width: 720px) {
-        .cat-type-hint {
-          display: none;
-        }
-        .cat-head {
-          flex-wrap: wrap;
-        }
-        .cat-type-wrap {
-          flex-basis: 100%;
-          order: 3;
-        }
-        .cat-type-select {
-          max-width: none;
-        }
-      }
-
-      .step {
-        margin-bottom: 1.75rem;
-      }
-      .step-hdr {
-        display: flex;
-        align-items: baseline;
-        flex-direction: column;
-        margin-bottom: 4px;
-      }
-      .step-num {
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--tx-3);
-        min-width: 60px;
-      }
-      .step-title {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--tx);
-      }
-      .step-hint {
-        font-size: 12px;
-        color: var(--tx-3);
-        line-height: 1.55;
-        margin: 4px 0 12px;
-      }
-
-      @media (max-width: 760px) {
-        .step-hint,
-        .step-body {
-          padding-left: 0;
-          margin-left: 0;
-        }
-      }
-
-      /* axis rows */
-      .axis-row {
-        display: grid;
-        grid-template-columns: 28px 1fr 150px 80px;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 6px;
-      }
-      .axis-handle {
-        font-size: 12px;
-        color: var(--tx-3);
-        text-align: center;
-        cursor: default;
-      }
-      .axis-locked {
-        font-size: 11px;
-        color: var(--tx-3);
-        padding: 0 9px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        background: var(--bg-2);
-        border-radius: var(--r);
-        border: 0.5px solid var(--bd-1);
-      }
-      .axis-add-row {
-        display: flex;
-        gap: 8px;
-        margin-top: 8px;
-      }
-      .axis-add-row input {
-        flex: 1;
-      }
-
-      /* category cards */
-      .cat-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-      .cat-card {
-        border: 0.5px solid var(--bd-1);
-        border-radius: var(--r);
-        overflow: hidden;
-      }
-      .cat-head {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 9px 12px;
-        background: var(--bg-2);
-        border-bottom: 0.5px solid var(--bd-1);
-      }
-      .cat-head input[type="text"] {
-        max-width: 160px;
-        font-weight: 500;
-      }
-      .cat-body {
-        padding: 12px;
-        display: grid;
-        gap: 10px;
-      }
-      .axis-config {
-        border: 0.5px solid var(--bd-1);
-        border-radius: var(--r);
-        padding: 10px;
-      }
-      .axis-config-hdr {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-      .axis-config-name {
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--tx-3);
-      }
-      .gen-row {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-      .gen-row select {
-        width: auto;
-        min-width: 110px;
-      }
-      .gen-row input[type="text"],
-      .gen-row input[type="number"] {
-        width: 70px;
-        flex: none;
-      }
-      .gen-row input[type="number"] {
-        -moz-appearance: textfield;
-        appearance: textfield;
-      }
-      .gen-row input[type="number"]::-webkit-outer-spin-button,
-      .gen-row input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-      .gen-row label {
-        font-size: 11px;
-        color: var(--tx-3);
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-      .values-preview {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        margin-top: 6px;
-      }
-      .val-chip {
-        font-size: 11px;
-        font-family: var(--mono);
-        padding: 2px 8px;
-        border-radius: 20px;
-        background: var(--bg-2);
-        border: 0.5px solid var(--bd-1);
-        color: var(--tx-2);
-      }
-      .cl {
-        font-size: 10px;
-        font-weight: 500;
-        letter-spacing: 0.07em;
-        text-transform: uppercase;
-        color: var(--tx-3);
-        margin-bottom: 4px;
-      }
-      .cat-mode-toggle {
-        display: none;
-      }
-      .axis-nest {
-        margin-left: 12px;
-        padding-left: 12px;
-        border-left: 2px solid var(--bd-1);
-        display: grid;
-        gap: 8px;
-      }
-      .unused-note {
-        font-size: 11px;
-        color: var(--tx-3);
-        font-style: italic;
-        margin: 4px 0;
-      }
-
-      /* layout */
-      .layout {
-        display: grid;
-        grid-template-columns: 1fr min(380px, 36%);
-        gap: 2rem;
-        align-items: start;
-      }
-      .layout-sidebar {
-        position: sticky;
-        top: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-      @media (max-width: 960px) {
-        .layout {
-          grid-template-columns: 1fr;
-        }
-        .layout-sidebar {
-          position: static;
-        }
-      }
-      .sidebar-step-hdr {
-        margin-bottom: 0;
-      }
-      .sidebar-step-hdr .step-hint {
-        margin-left: 0;
-        margin-bottom: 0;
-      }
-
       /* preview panel */
       .panel {
         border: 0.5px solid var(--bd-1);
@@ -679,20 +440,6 @@
         padding: 6px 10px;
         margin-top: 6px;
       }
-      .ns-toggle {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-        color: var(--tx-2);
-        margin-bottom: 10px;
-        cursor: pointer;
-      }
-      .ns-toggle input {
-        width: auto;
-        height: auto;
-        accent-color: var(--t1);
-      }
       .restore-banner {
         position: fixed;
         bottom: 1.5rem;
@@ -747,6 +494,616 @@
       button:disabled {
         opacity: 0.45;
         cursor: not-allowed;
+      }
+
+      /* ── Board ─────────────────────────────────────────
+         Light theme follows the Stitch screenshot; dark mode uses the
+         Stitch code.html palette. */
+      .token-type-extension-note {
+        display: block;
+        color: var(--tx-3);
+        font-size: 10.5px;
+        margin-top: 4px;
+      }
+      :focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+      }
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 1px;
+        border-color: var(--accent);
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      /* Formula syntax bar */
+      .formula-bar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        padding: 12px 24px;
+        background: var(--band);
+        border-top: 1px solid var(--bd-1);
+      }
+      .formula-label {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--tx-2);
+      }
+      .formula {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-family: var(--mono);
+        font-size: 13px;
+        background: var(--bg);
+        border: 1px solid var(--bd-1);
+        border-radius: 6px;
+        padding: 6px 12px;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      .f-sep {
+        color: var(--tx-3);
+        margin: 0 6px;
+      }
+      .f-seg.is-unused {
+        color: var(--tx-3);
+        text-decoration: line-through;
+      }
+      .ns-field {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--tx-2);
+      }
+      .ns-field input {
+        width: 120px;
+        height: 30px;
+        font-family: var(--mono);
+      }
+      .hue-ns { color: var(--hue-ns); }
+      .hue-cat { color: var(--hue-cat); }
+      .hue-0 { color: var(--hue-0); }
+      .hue-1 { color: var(--hue-1); }
+      .hue-2 { color: var(--hue-2); }
+      .hue-3 { color: var(--hue-3); }
+      .hue-4 { color: var(--hue-4); }
+
+      /* Category tabs */
+      .cat-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 24px 12px;
+        background: var(--band);
+        border-bottom: 1px solid var(--bd-1);
+        flex-wrap: wrap;
+      }
+      .cat-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .cat-tab {
+        height: 34px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        background: transparent;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--tx-2);
+      }
+      .cat-tab:hover {
+        background: var(--bg);
+        border-color: var(--bd-1);
+        color: var(--tx);
+      }
+      .cat-tab[aria-selected="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--on-accent);
+      }
+      .add-cat {
+        height: 34px;
+        border: 1px dashed var(--bd-2);
+        background: transparent;
+        color: var(--tx-2);
+        font-size: 13px;
+      }
+      .cat-bar-end {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .type-chip {
+        font-family: var(--mono);
+        font-size: 12px;
+        height: 28px;
+        background: var(--bg);
+      }
+      .type-chip.is-unset {
+        color: var(--warn-tx);
+      }
+
+      /* Board: scrolls sideways in its own container. */
+      .board-wrap {
+        background: var(--board);
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+      }
+      .board {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 24px;
+        width: max-content;
+        min-width: 100%;
+      }
+      .board:focus-visible {
+        outline-offset: -4px;
+      }
+      .board-empty {
+        color: var(--tx-2);
+        font-size: 13px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .col {
+        width: 220px;
+        flex: 0 0 auto;
+        background: var(--bg);
+        border: 1px solid var(--bd-1);
+        border-radius: 10px;
+        box-shadow: var(--shadow-sm);
+      }
+      .col.is-unused {
+        background: var(--board);
+        border-style: dashed;
+        border-color: var(--bd-2);
+        box-shadow: none;
+      }
+      .col-head {
+        padding: 10px 10px 8px 12px;
+        border-bottom: 1px solid var(--bd-1);
+      }
+      .col-title {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .col-name {
+        flex: 1;
+        min-width: 0;
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      input.col-name {
+        height: 28px;
+        padding: 0 6px;
+        margin-left: -6px;
+        border-color: transparent;
+        background: transparent;
+      }
+      input.col-name:hover {
+        border-color: var(--bd-2);
+      }
+      .col.is-unused .col-name {
+        text-decoration: line-through;
+        color: var(--tx-3);
+      }
+      .col-lock {
+        font-size: 10px;
+        color: var(--tx-3);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .col-tools {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-top: 6px;
+      }
+      .unused-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        color: var(--tx-2);
+        cursor: pointer;
+        margin-right: auto;
+      }
+      .unused-toggle input {
+        width: 14px;
+        height: 14px;
+        accent-color: var(--accent);
+      }
+      .icon-btn {
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-color: transparent;
+        background: transparent;
+        color: var(--tx-3);
+        font-size: 13px;
+      }
+      .icon-btn:hover {
+        color: var(--tx);
+        background: var(--bg-2);
+        border-color: var(--bd-1);
+      }
+      .icon-btn.is-danger:hover {
+        color: var(--danger);
+      }
+      .icon-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+      .col-summary {
+        font-size: 11.5px;
+        color: var(--tx-2);
+        margin-top: 4px;
+        font-family: var(--mono);
+      }
+      .col-summary .is-warn {
+        color: var(--warn-tx);
+      }
+      .col-body {
+        padding: 12px;
+        display: grid;
+        gap: 12px;
+      }
+      .col-unused-note {
+        font-size: 12px;
+        color: var(--tx-2);
+        text-align: center;
+        padding: 18px 8px;
+        border: 1px dashed var(--bd-2);
+        border-radius: 8px;
+      }
+
+      /* Groups */
+      .group {
+        border: 1px solid var(--bd-1);
+        border-radius: 8px;
+        padding: 10px;
+        background: var(--bg);
+        display: grid;
+        gap: 8px;
+      }
+      .group.is-conditional {
+        border-color: var(--accent-bd);
+        background: var(--accent-weak);
+      }
+      .group-head {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 26px;
+      }
+      .group-label {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+      }
+      .group-note,
+      .group-count {
+        font-size: 11px;
+        color: var(--tx-3);
+        margin-left: auto;
+        font-family: var(--mono);
+      }
+      .cond-chip {
+        height: 24px;
+        max-width: 140px;
+        padding: 0 8px;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--accent-tx);
+        background: var(--bg);
+        border: 1px solid var(--accent-bd);
+        border-radius: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .cond-chip:hover {
+        background: var(--bg);
+        border-color: var(--accent);
+      }
+      .group-settings {
+        display: grid;
+        gap: 6px;
+      }
+      .group-settings select,
+      .group-settings input {
+        height: 28px;
+        font-size: 12px;
+      }
+      .range-fields {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+      }
+      .range-fields.is-single {
+        grid-template-columns: 1fr;
+      }
+      .range-fields label {
+        font-size: 10.5px;
+        color: var(--tx-3);
+        display: grid;
+        gap: 2px;
+      }
+      .range-fields input {
+        font-family: var(--mono);
+        padding: 0 6px;
+      }
+      .values {
+        list-style: none;
+        display: grid;
+        gap: 6px;
+      }
+      .value-row {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .value-input {
+        font-family: var(--mono);
+        height: 32px;
+        padding-right: 30px;
+      }
+      .value-row.is-omitted .value-input {
+        color: var(--accent-tx);
+        border-color: var(--accent-bd);
+        padding-right: 86px;
+      }
+      .value-row .icon-btn {
+        position: absolute;
+        right: 3px;
+      }
+      .badge-omitted {
+        position: absolute;
+        right: 30px;
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--accent-tx);
+        background: var(--accent-weak);
+        border: 1px solid var(--accent-bd);
+        border-radius: 4px;
+        padding: 1px 5px;
+        pointer-events: none;
+      }
+      .values.is-generated {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .value-chip {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        padding: 2px 7px;
+        border: 1px solid var(--bd-1);
+        border-radius: 4px;
+        background: var(--bg-2);
+      }
+      .add-value {
+        height: 30px;
+        border: 1px dashed var(--bd-2);
+        background: transparent;
+        text-align: center;
+        font-size: 12.5px;
+      }
+      .add-value::placeholder {
+        color: var(--tx-2);
+      }
+      .add-value:focus {
+        text-align: left;
+        font-family: var(--mono);
+      }
+      .group-empty {
+        font-size: 11.5px;
+        color: var(--tx-3);
+        font-style: italic;
+      }
+      .add-group {
+        width: 100%;
+        height: 32px;
+        font-size: 12.5px;
+      }
+      .col-insert {
+        border: 1px dashed var(--bd-2);
+        background: transparent;
+        box-shadow: none;
+      }
+      .insert-axis {
+        width: 100%;
+        height: auto;
+        min-height: 220px;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 8px;
+        border: 0;
+        background: transparent;
+        border-radius: 10px;
+        color: var(--tx-2);
+        padding: 16px;
+      }
+      .insert-axis .plus {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--bd-2);
+        display: grid;
+        place-items: center;
+        font-size: 22px;
+        background: var(--bg);
+      }
+      .insert-axis strong {
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--tx);
+      }
+      .insert-axis span:last-child {
+        font-size: 11.5px;
+        text-align: center;
+      }
+
+      /* Popover */
+      .popover {
+        position: fixed;
+        z-index: 900;
+        width: max-content;
+        min-width: 240px;
+        max-width: min(360px, calc(100vw - 16px));
+        max-height: min(70vh, 520px);
+        overflow: auto;
+        background: var(--bg);
+        color: var(--tx);
+        border: 1px solid var(--bd-2);
+        border-radius: 10px;
+        box-shadow: var(--shadow-lg);
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+        font-size: 13px;
+      }
+      .popover[hidden] {
+        display: none;
+      }
+      .pop-title {
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .pop-hint {
+        font-size: 11.5px;
+        color: var(--tx-2);
+      }
+      .pop-hint.is-error {
+        color: var(--danger);
+      }
+      .pop-field {
+        display: grid;
+        gap: 4px;
+        font-size: 11.5px;
+        color: var(--tx-2);
+      }
+      .pop-field input,
+      .pop-field select {
+        height: 32px;
+      }
+      .pop-actions {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+        align-items: center;
+      }
+      .pop-actions .is-danger {
+        margin-right: auto;
+        color: var(--danger);
+      }
+      .cond-row {
+        display: grid;
+        gap: 6px;
+      }
+      .cond-row-label {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .cond-values {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .cond-toggle {
+        height: 26px;
+        padding: 0 9px;
+        font-family: var(--mono);
+        font-size: 12px;
+        border-radius: 13px;
+      }
+      .cond-toggle[aria-pressed="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--on-accent);
+      }
+
+      /* Undo toast */
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 1.5rem;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 8px 8px 14px;
+        font-size: 13px;
+        color: var(--toast-tx);
+        background: var(--toast-bg);
+        border-radius: 8px;
+        box-shadow: var(--shadow-lg);
+      }
+      .toast[hidden] {
+        display: none;
+      }
+      .toast button {
+        height: 28px;
+        color: inherit;
+        background: transparent;
+        border-color: currentColor;
+      }
+
+      /* Outputs (redesigned in the output-panel slice) */
+      .outputs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+        padding: 24px;
+        border-top: 1px solid var(--bd-1);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+        button:active {
+          transform: none;
+        }
       }
     </style>
   </head>
@@ -849,94 +1206,41 @@
         </div>
       </div>
 
-      <div class="layout">
-        <div class="layout-main">
-          <!-- STEP 1: Axes -->
-          <div class="step">
-            <div class="step-hdr">
-              <span class="step-num">Step 1</span>
-              <span class="step-title">Define your axes</span>
-            </div>
-            <p class="step-hint" id="step1-hint">
-              Token names follow a fixed structure:
-              <strong style="font-weight: 500">category</strong> and
-              <strong style="font-weight: 500">scale</strong> are required.
-              <strong style="font-weight: 500">Namespace</strong> is optional and
-              comes first when enabled. Add other axes (e.g.
-              <strong style="font-weight: 500">family</strong>) between category
-              and scale.
-            </p>
-            <div class="step-body">
-              <label class="ns-toggle">
-                <input
-                  type="checkbox"
-                  id="namespace-toggle"
-                  onchange="toggleNamespace(this.checked)"
-                />
-                Include namespace axis (before category)
-              </label>
-              <div id="axis-list"></div>
-              <div class="axis-add-row">
-                <input
-                  type="text"
-                  id="new-axis-name"
-                  placeholder="e.g. family, variant — comma-separated OK"
-                  onkeydown="if(event.key==='Enter'){event.preventDefault();addAxis()}"
-                />
-                <button onclick="addAxis()">+ Add axis</button>
-              </div>
-            </div>
-          </div>
+      <section class="formula-bar" aria-label="Formula">
+        <span class="formula-label" id="formula-label">Formula syntax</span>
+        <div class="formula" id="formula" aria-labelledby="formula-label"></div>
+        <label class="ns-field">
+          Namespace:
+          <input
+            type="text"
+            id="namespace-input"
+            placeholder="none"
+            autocomplete="off"
+            spellcheck="false"
+            onfocus="historyOnFieldFocus('namespace')"
+            onblur="historyOnFieldBlur('namespace'); renderFormulaBar()"
+            oninput="uiSetNamespace(this.value)"
+          />
+        </label>
+      </section>
 
-          <!-- STEP 2: Categories -->
-          <div class="step">
-            <div class="step-hdr">
-              <span class="step-num">Step 2</span>
-              <span class="step-title"
-                >Add categories &amp; populate axis values</span
-              >
-            </div>
-            <p class="step-hint" id="step2-hint">
-              Each category (color, space, font-size…) gets its own values for
-               each axis and a token type
-              (category name ≠ type — e.g. space → dimension).
-              <strong style="font-weight: 500">Category</strong> and
-              <strong style="font-weight: 500">scale</strong> are always
-              configured here. Namespace is set once in Step 1 and applies to
-              all tokens. Set an axis to
-              <strong style="font-weight: 500">Unused</strong> when it doesn't
-              apply — e.g.
-              <code style="font-family: var(--mono)">space</code> usually has no
-              family axis. Conditional
-              <strong style="font-weight: 500">groups</strong> (e.g. a
-              different scale for border-radius and border-width) are shown
-              under each axis.
-            </p>
-            <div class="step-body">
-              <div class="cat-list" id="cat-list"></div>
-              <div class="axis-add-row">
-                <input
-                  type="text"
-                  id="new-cat-name"
-                  placeholder="e.g. color, space, font-size — comma-separated OK"
-                  onkeydown="if(event.key==='Enter'){event.preventDefault();addCategory()}"
-                />
-                <button onclick="addCategory()">+ Add category</button>
-              </div>
-            </div>
-          </div>
+      <nav class="cat-bar" aria-label="Categories">
+        <div class="cat-tabs" id="cat-tabs" role="tablist" aria-label="Categories"></div>
+        <button type="button" class="add-cat" data-act="new-category" data-fk="add-cat" aria-haspopup="dialog">
+          + Add Category
+        </button>
+        <div class="cat-bar-end">
+          <button type="button" class="type-chip" id="type-chip" data-act="edit-category" data-fk="type-chip" aria-haspopup="dialog"></button>
+          <button type="button" class="icon-btn" id="cat-menu-btn" data-act="edit-category" data-fk="cat-menu" aria-haspopup="dialog" aria-label="Category settings">⋯</button>
         </div>
+      </nav>
 
-        <aside class="layout-sidebar">
-          <div class="step-hdr sidebar-step-hdr">
-            <span class="step-num">Step 3</span>
-            <span class="step-title">Review &amp; export</span>
-          </div>
-          <p class="step-hint" id="step3-hint">
-            Preview names live. Export CSS stubs, a markdown convention, or
-            DTCG-shaped JSON (group <code style="font-family: var(--mono)">$type</code>
-            + leaf descriptions — not import-ready values).
-          </p>
+      <main class="board-wrap" id="board-wrap">
+        <div class="board" id="board" role="tabpanel" tabindex="-1"></div>
+      </main>
+
+      <section class="outputs" aria-label="Review and export">
+
           <div class="panel">
             <div class="panel-head">
               <span>Live preview</span>
@@ -987,8 +1291,7 @@
               </div>
             </div>
           </div>
-        </aside>
-      </div>
+      </section>
     </div>
 
     <div id="restore-banner" class="restore-banner" hidden role="status">
@@ -1007,6 +1310,9 @@
         </button>
       </div>
     </div>
+
+    <div id="popover" class="popover" role="dialog" aria-labelledby="pop-title" hidden></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="token-naming-model.js"></script>
     <script>
@@ -1037,50 +1343,6 @@
               : "Workshop tool · Tier 1 · Primitive naming";
         }
 
-        const step1 = id("step1-hint");
-        if (step1) {
-          step1.innerHTML =
-            tierMode === "tier2"
-              ? `Token names follow a fixed structure:
-              <strong style="font-weight: 500">category</strong> is required.
-              Other axes (role, emphasis, hierarchy, state, scale, …) are optional —
-              add, reorder, or remove them like any middle axis.
-              <strong style="font-weight: 500">Namespace</strong> is optional and comes first when enabled.`
-              : `Token names follow a fixed structure:
-              <strong style="font-weight: 500">category</strong> and
-              <strong style="font-weight: 500">scale</strong> are required.
-              <strong style="font-weight: 500">Namespace</strong> is optional and
-              comes first when enabled. Add other axes (e.g.
-              <strong style="font-weight: 500">family</strong>) between category
-              and scale.`;
-        }
-
-        const step2 = id("step2-hint");
-        if (step2) {
-          step2.innerHTML =
-            tierMode === "tier2"
-              ? `Each category gets axis values and a token type
-              (category name ≠ type — e.g. space → dimension).
-              Set any axis to <strong style="font-weight: 500">Unused</strong>
-              when it does not apply, or remove the axis entirely in Step 1.
-              Use axes for compound names such as
-              <code style="font-family: var(--mono)">typography-heading-xl</code>.`
-              : `Each category (color, space, font-size…) gets its own values for
-               each axis and a token type
-              (category name ≠ type — e.g. space → dimension).
-              <strong style="font-weight: 500">Category</strong> and
-              <strong style="font-weight: 500">scale</strong> are always
-              configured here. Namespace is set once in Step 1 and applies to
-              all tokens. Set an axis to
-              <strong style="font-weight: 500">Unused</strong> when it doesn't
-              apply — e.g.
-              <code style="font-family: var(--mono)">space</code> usually has no
-              family axis. Conditional
-              <strong style="font-weight: 500">groups</strong> (e.g. a
-              different scale for border-radius and border-width) are shown
-              under each axis.`;
-        }
-
         document.querySelectorAll("#preset-row [data-preset]").forEach((btn) => {
           const key = btn.getAttribute("data-preset");
           const show =
@@ -1089,31 +1351,6 @@
           btn.hidden = !show;
         });
       }
-
-      /* ── Axis management ───────────────────────────────── */
-      function toggleNamespace(enabled) {
-        pushHistory();
-        namespaceEnabled = enabled;
-        if (enabled) {
-          axes.unshift({
-            id: "namespace",
-            name: "namespace",
-            locked: true,
-            slot: "namespace",
-          });
-        } else {
-          axes = axes.filter((a) => a.slot !== "namespace");
-          namespaceValue = "";
-        }
-        renderAll();
-      }
-
-      function setNamespaceValue(val) {
-        namespaceValue = val.trim().toLowerCase().replace(/\s+/g, "-");
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-
 
       function seedDefaultCategory() {
         if (categories.length) return;
@@ -1124,146 +1361,6 @@
           values: {},
         });
         initCategoryValues(categories[0]);
-      }
-
-      function addAxis() {
-        const inp = id("new-axis-name");
-        const names = parseCustomList(inp.value)
-          .map((s) => s.trim().toLowerCase().replace(/\s+/g, "-"))
-          .filter(Boolean);
-        const existing = new Set(axes.map((a) => a.name));
-        const seen = new Set();
-        const toAdd = [];
-        for (const name of names) {
-          if (
-            !name ||
-            RESERVED_AXIS_NAMES.has(name) ||
-            seen.has(name) ||
-            existing.has(name)
-          )
-            continue;
-          seen.add(name);
-          toAdd.push(name);
-        }
-        if (!toAdd.length) {
-          inp.focus();
-          return;
-        }
-        pushHistory();
-        let insertAt = scaleAxisIndex();
-        if (insertAt < 0) insertAt = axes.length;
-        toAdd.forEach((name) => {
-          const newAx = {
-            id: "ax" + ++axisSeq,
-            name,
-            locked: false,
-            slot: "middle",
-          };
-          axes.splice(insertAt, 0, newAx);
-          categories.forEach((c) => (c.values[newAx.id] = mkAxisEntry()));
-          insertAt++;
-        });
-        inp.value = "";
-        renderAll();
-        inp.focus();
-      }
-      function removeAxis(axId) {
-        const ax = axes.find((a) => a.id === axId);
-        if (!ax || ax.slot !== "middle") return;
-        pushHistory();
-        axes = axes.filter((a) => a.id !== axId);
-        // Conditions on the removed axis are dropped along with it.
-        categories.forEach(normalizeCategory);
-        renderAll();
-      }
-      function renameAxis(axId, val) {
-        const ax = axes.find((a) => a.id === axId);
-        if (!ax || ax.slot !== "middle") return;
-        const next = val.trim().toLowerCase().replace(/\s+/g, "-") || ax.name;
-        if (
-          RESERVED_AXIS_NAMES.has(next) ||
-          axes.some((a) => a.id !== axId && a.name === next)
-        )
-          return;
-        ax.name = next;
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-      function moveAxis(axId, dir) {
-        const ax = axes.find((a) => a.id === axId);
-        if (!ax || ax.slot !== "middle") return;
-        const i = axes.findIndex((a) => a.id === axId);
-        const j = i + dir;
-        const catIdx = categoryAxisIndex();
-        const scaleIdx = scaleAxisIndex();
-        const maxIdx = scaleIdx >= 0 ? scaleIdx : axes.length;
-        if (j <= catIdx || j >= maxIdx) return;
-        pushHistory();
-        [axes[i], axes[j]] = [axes[j], axes[i]];
-        // A condition may only name earlier axes, so moving an axis drops
-        // conditions that now point forward.
-        categories.forEach(normalizeCategory);
-        renderAll();
-      }
-
-
-      // The ALL group's generator for an axis in a category. Conditional groups
-      // are read-only in this UI until the board redesign lands.
-      function getAxisEntry(category, axId) {
-        return category.values[axId] || (category.values[axId] = mkAxisEntry());
-      }
-
-      function getAllGroupGenerator(category, axId) {
-        return allGroup(getAxisEntry(category, axId)).generator;
-      }
-
-      function addCategory() {
-        const inp = id("new-cat-name");
-        const names = parseCustomList(inp.value)
-          .map((s) => s.trim().toLowerCase().replace(/\s+/g, "-"))
-          .filter(Boolean);
-        const existing = new Set(categories.map((c) => c.name));
-        const seen = new Set();
-        const toAdd = [];
-        for (const name of names) {
-          if (seen.has(name) || existing.has(name)) continue;
-          seen.add(name);
-          toAdd.push(name);
-        }
-        if (!toAdd.length) {
-          inp.focus();
-          return;
-        }
-        pushHistory();
-        toAdd.forEach((name) => {
-          const c = { id: "cat" + ++catSeq, name, dtcgType: "", values: {} };
-          initCategoryValues(c);
-          categories.push(c);
-        });
-        inp.value = "";
-        renderAll();
-        inp.focus();
-      }
-      function removeCategory(catId) {
-        pushHistory();
-        categories = categories.filter((c) => c.id !== catId);
-        renderAll();
-      }
-      function renameCategory(catId, val) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        c.name = val.trim().toLowerCase().replace(/\s+/g, "-") || c.name;
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-
-      function setCategoryDtcgType(catId, val) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        c.dtcgType = DTCG_TYPES.has(val) ? val : "";
-        renderCategories();
-        renderPreviewAndExport();
-        scheduleAutoSave();
       }
 
       function dtcgTypeOptionsHtml(cur) {
@@ -1289,301 +1386,679 @@
         return TERRAZZO_EXTENSION_TYPES.includes(type);
       }
 
-      function tokenTypeExtensionNoteHtml(idSuffix, type) {
-        const visible = isTerrazzoExtensionType(type);
-        return `<span id="token-type-extension-note-${esc(idSuffix)}" class="token-type-extension-note" style="display:${visible ? "" : "none"}">Terrazzo extension; output support may require a custom plugin.</span>`;
-      }
+      /* ── Board ─────────────────────────────────────────── */
+      // The board edits the project only through the model's board edits
+      // (token-naming-model.js). Elements that can hold focus carry a
+      // data-fk key so focus survives a re-render.
+      let activeCatId = null;
+      let pendingFocusFk = null;
 
-      function dtcgTypeSelectHtml(item) {
-        const cur = item.dtcgType || "";
-        return `<select id="dtcg-type-${esc(item.id)}" class="cat-type-select" aria-label="Token type for ${esc(item.name)}" ${historyFieldAttrs("dtcg:" + item.id)} onchange="setCategoryDtcgType('${item.id}',this.value)">
-          ${dtcgTypeOptionsHtml(cur)}
-        </select>${tokenTypeExtensionNoteHtml(item.id, cur)}`;
-      }
+      const GENERATOR_LABELS = {
+        custom: "Literal list",
+        numeric: "Numeric range",
+        ordinal: "Ordinal (100–900)",
+        tshirt: "T-shirt sizes",
+      };
+      const TRASH_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>`;
 
-
-      /* ── Render: Axis list (Step 1) ───────────────────── */
-      function renderLockedAxisRow(ax, i, note) {
-        return `
-        <div class="axis-row">
-          <span class="axis-handle">${i + 1}</span>
-          <div class="axis-locked">${esc(ax.name)} <span style="color:var(--tx-3);margin-left:6px;font-size:10px">(${note})</span></div>
-          <div class="axis-locked" style="justify-content:center;color:var(--tx-3)">—</div>
-          <div></div>
-        </div>`;
-      }
-
-      function renderAxisList() {
-        const el = id("axis-list");
-        const nsToggle = id("namespace-toggle");
-        if (nsToggle) nsToggle.checked = namespaceEnabled;
-
-        const parts = [];
-
-        axes.forEach((ax, i) => {
-          if (ax.slot === "namespace") {
-            parts.push(`
-        <div class="axis-row">
-          <span class="axis-handle">${i + 1}</span>
-          <div class="axis-locked">namespace <span style="color:var(--tx-3);margin-left:6px;font-size:10px">(optional)</span></div>
-          <input type="text" id="namespace-value" placeholder="e.g. ds" value="${esc(namespaceValue)}" ${historyFieldAttrs("namespace")} oninput="setNamespaceValue(this.value)" />
-          <div></div>
-        </div>`);
-            return;
-          }
-          if (ax.slot === "category") {
-            parts.push(renderLockedAxisRow(ax, i, "required — Step 2"));
-            return;
-          }
-          if (ax.slot === "scale") {
-            const scaleNote =
-              tierMode === "tier2"
-                ? "optional — Step 2"
-                : "required — Step 2";
-            parts.push(renderLockedAxisRow(ax, i, scaleNote));
-            return;
-          }
-          if (ax.slot === "middle") {
-            parts.push(`
-      <div class="axis-row">
-        <span class="axis-handle">${i + 1}</span>
-        <input type="text" value="${esc(ax.name)}" ${historyFieldAttrs("axis:" + ax.id)} oninput="renameAxis('${ax.id}',this.value)" />
-        <div style="display:flex;gap:4px">
-          <button class="btn-icon btn-ghost" onclick="moveAxis('${ax.id}',-1)" title="Move up">↑</button>
-          <button class="btn-icon btn-ghost" onclick="moveAxis('${ax.id}',1)" title="Move down">↓</button>
-        </div>
-        <button class="btn-icon btn-ghost" onclick="removeAxis('${ax.id}')" title="Remove axis">✕</button>
-      </div>`);
-          }
-        });
-
-        el.innerHTML = parts.join("");
-      }
-
-      /* ── Render: Category cards (Step 2) ──────────────── */
-      function renderCategories() {
-        const el = id("cat-list");
-        if (!categories.length) {
-          el.innerHTML = `<div class="empty-msg">No categories yet — add one below. Each category includes a name, token type, and axis values.</div>`;
-          return;
+      function activeCategory() {
+        let c = categories.find((x) => x.id === activeCatId);
+        if (!c) {
+          c = categories[0] || null;
+          activeCatId = c ? c.id : null;
         }
-        el.innerHTML = categories
-          .map((c) => {
-            const body = axes
-              .filter(isConfigurableAxis)
-              .map((ax) => renderAxisNode(c, ax))
-              .join("");
-            return `
-      <div class="cat-card">
-        <div class="cat-head">
-          <input type="text" value="${esc(c.name)}" ${historyFieldAttrs("cat:" + c.id)} oninput="renameCategory('${c.id}',this.value)" />
-          <div class="cat-type-wrap">
-            <label for="dtcg-type-${esc(c.id)}">Token type</label>
-            ${dtcgTypeSelectHtml(c)}
-            <span class="cat-type-hint">name ≠ type</span>
-          </div>
-          <button class="btn-icon btn-ghost" onclick="removeCategory('${c.id}')" title="Remove category">✕</button>
-        </div>
-        <div class="cat-body">
-          ${body}
-        </div>
-      </div>`;
-          })
-          .join("");
+        return c;
       }
 
-      function renderGroupSummary(entry) {
-        const groups = conditionalGroups(entry);
-        if (!groups.length) return "";
-        return `<div class="axis-groups" style="margin-top:8px;display:grid;gap:4px;font-size:11px;color:var(--tx-2)">
-          <div style="color:var(--tx-3)">Conditional groups (read-only for now) — when they match, their values replace the ones above:</div>
-          ${groups
-            .map((g) => {
-              const vals = genValues(g.generator);
-              return `<div>when <strong>${esc(describeCondition(g.condition))}</strong> → ${vals.length ? vals.map((v) => `<span class="val-chip">${esc(v)}</span>`).join(" ") : `<span class="cp-empty">no values (axis skipped)</span>`}${g.tokenType ? ` · token type <code>${esc(g.tokenType)}</code>` : ""}</div>`;
-            })
-            .join("")}
-        </div>`;
+      function boardAxes() {
+        return axes.filter(isConfigurableAxis);
       }
 
-      function renderAxisNode(cat, ax) {
-        const entry = getAxisEntry(cat, ax.id);
-        const gen = allGroup(entry).generator;
-        const scaleVal = entry.unused ? { type: "unused", config: {}, list: [] } : gen;
-        const flatConfig = renderScaleConfig({
-          scaleVal,
-          label: ax.name,
-          fieldKeyPrefix: `${cat.id}|${ax.id}`,
-          typeOptions: SCALE_TYPES,
-          countId: axisUIKey(cat.id, ax.id, "count"),
-          previewId: axisUIKey(cat.id, ax.id, "preview"),
-          warnId: axisUIKey(cat.id, ax.id, "warn"),
-          tooManyId: axisUIKey(cat.id, ax.id, "too-many"),
-          customInputId: axisUIKey(cat.id, ax.id, "custom"),
-          onTypeChange: `setAxisType('${cat.id}','${ax.id}',this.value)`,
-          onCfg: (key) => `setCfg('${cat.id}','${ax.id}','${key}',this.value)`,
-          onTshirtExtra: `setTshirtExtra('${cat.id}','${ax.id}',this.value)`,
-          onCustomList: `setCustomList('${cat.id}','${ax.id}',this.value)`,
-          emptyWarn:
-            "No values yet — configure this axis or remove it for this category.",
-        });
-        return `<div>${flatConfig}${entry.unused ? "" : renderGroupSummary(entry)}</div>`;
+      function hueClass(ax) {
+        if (ax.slot === "namespace") return "hue-ns";
+        if (ax.slot === "category") return "hue-cat";
+        return "hue-" + (boardAxes().indexOf(ax) % 5);
       }
 
-      function axisUIKey(catId, axId, suffix) {
-        return `axis-${suffix}-${catId}-${axId}`;
+      function plural(n, word) {
+        return `${n} ${word}${n === 1 ? "" : "s"}`;
       }
 
-      function renderScaleConfig(opts) {
-        const av = opts.scaleVal;
-        const cfg = av.config || {};
-        const values = genValues(av);
-        const isUnused = av.type === "unused";
-        const fk = opts.fieldKeyPrefix || "root";
-
-        let genControls = "";
-        if (!isUnused) {
-          if (av.type === "numeric") {
-            genControls = `
-      <label>start <input type="text" value="${esc(cfg.start ?? "4")}" ${historyFieldAttrs("cfg:" + fk + "|start")} oninput="${opts.onCfg("start")}"></label>
-      <label>end <input type="text" value="${esc(cfg.end ?? "64")}" ${historyFieldAttrs("cfg:" + fk + "|end")} oninput="${opts.onCfg("end")}"></label>
-      <label>step <input type="text" value="${esc(cfg.step ?? "4")}" ${historyFieldAttrs("cfg:" + fk + "|step")} oninput="${opts.onCfg("step")}"></label>`;
-          } else if (av.type === "ordinal") {
-            genControls = `
-      <label>start <input type="text" value="${esc(cfg.start ?? "100")}" ${historyFieldAttrs("cfg:" + fk + "|start")} oninput="${opts.onCfg("start")}"></label>
-      <label>end <input type="text" value="${esc(cfg.end ?? "900")}" ${historyFieldAttrs("cfg:" + fk + "|end")} oninput="${opts.onCfg("end")}"></label>
-      <label>step <input type="text" value="${esc(cfg.step ?? "100")}" ${historyFieldAttrs("cfg:" + fk + "|step")} oninput="${opts.onCfg("step")}"></label>`;
-          } else if (av.type === "tshirt") {
-            genControls = `
-      <label>extra sizes <input type="number" min="0" step="1" value="${esc(cfg.extra ?? "0")}" ${historyFieldAttrs("cfg:" + fk + "|extra")} oninput="${opts.onTshirtExtra}"></label>
-      <span style="font-size:10.5px;color:var(--tx-3)">→ adds 3xs, 2xs … 2xl, 3xl</span>`;
-          } else if (av.type === "custom") {
-            const customDisplay =
-              av.listText != null ? av.listText : (av.list || []).join(", ");
-            genControls = `<input type="text" id="${opts.customInputId}" style="flex:1;min-width:200px" placeholder="comma-separated, e.g. light, dark, [default], [base]"
-      value="${esc(customDisplay)}" ${historyFieldAttrs("custom:" + fk)} oninput="${opts.onCustomList}">`;
-          }
+      // Applies one board edit as one undo step and redraws. fn returns false
+      // when the model refused the edit; nothing is recorded then.
+      function edit(fn) {
+        if (isRestoringHistory) return false;
+        const before = serializeState();
+        if (fn() === false) {
+          renderAll(); // puts back any field the user typed into
+          return false;
         }
-
-        const warn =
-          !isUnused && values.length === 0
-            ? `<div class="warn" id="${opts.warnId}">${opts.emptyWarn}</div>`
-            : `<div class="warn" id="${opts.warnId}" style="display:none"></div>`;
-        const tooMany =
-          values.length > 14
-            ? `<div class="warn" id="${opts.tooManyId}">${values.length} values — that's a lot for one axis. Consider narrowing the range.</div>`
-            : `<div class="warn" id="${opts.tooManyId}" style="display:none"></div>`;
-        const unusedNote = isUnused
-          ? `<div class="unused-note">This axis is unused for this category.</div>`
-          : "";
-
-        return `
-    <div class="axis-config">
-      <div class="axis-config-hdr">
-        <span class="axis-config-name">${esc(opts.label)}</span>
-        <select onchange="${opts.onTypeChange}" style="width:auto;min-width:140px">
-          ${Object.entries(opts.typeOptions)
-            .map(
-              ([k, v]) =>
-                `<option value="${k}" ${av.type === k ? "selected" : ""}>${v.label}</option>`,
-            )
-            .join("")}
-        </select>
-      </div>
-      ${isUnused ? unusedNote : `<div class="gen-row">${genControls}</div>`}
-      ${warn}${tooMany}
-      ${isUnused ? "" : `<div class="cl" id="${opts.countId}" style="margin-top:6px">Generated values (${values.length})</div>
-      <div class="values-preview" id="${opts.previewId}">
-        ${values.length ? values.map((v) => `<span class="val-chip">${esc(v)}</span>`).join("") : `<span class="cp-empty">none</span>`}
-      </div>`}
-    </div>`;
-      }
-
-      function setAxisType(catId, axId, type) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        pushHistory();
-        const entry = getAxisEntry(c, axId);
-        if (type === "unused") {
-          entry.unused = true;
+        if (JSON.stringify(serializeState()) === JSON.stringify(before)) {
           renderAll();
-          return;
+          return true;
         }
-        delete entry.unused;
-        const av = allGroup(entry).generator;
-        av.type = type;
-        if (type === "custom" && !av.list) {
-          av.list = [];
-        } else if (type !== "custom") {
-          delete av.listText;
-        }
+        undoStack.push(before);
+        if (undoStack.length > MAX_HISTORY) undoStack.shift();
+        redoStack.length = 0;
+        updateUndoRedoUI();
         renderAll();
-      }
-      function setCfg(catId, axId, key, val) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const av = getAllGroupGenerator(c, axId);
-        av.config = av.config || {};
-        av.config[key] = val;
-        refreshAxisValuesUI(catId, axId);
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-      function setTshirtExtra(catId, axId, val) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const av = getAllGroupGenerator(c, axId);
-        av.config = av.config || {};
-        av.config.extra = val;
-        refreshAxisValuesUI(catId, axId);
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-      function refreshAxisValuesUI(catId, axId) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const av = getAllGroupGenerator(c, axId);
-        const values = genValues(av);
-        const countEl = id(axisUIKey(catId, axId, "count"));
-        const previewEl = id(axisUIKey(catId, axId, "preview"));
-        const warnEl = id(axisUIKey(catId, axId, "warn"));
-        const tooManyEl = id(axisUIKey(catId, axId, "too-many"));
-        if (countEl)
-          countEl.textContent = `Generated values (${values.length})`;
-        if (previewEl) {
-          previewEl.innerHTML = values.length
-            ? values.map((v) => `<span class="val-chip">${esc(v)}</span>`).join("")
-            : `<span class="cp-empty">none</span>`;
-        }
-        if (warnEl) {
-          if (values.length === 0) {
-            warnEl.style.display = "";
-            warnEl.textContent =
-              "No values yet — configure this axis or remove it for this category.";
-          } else {
-            warnEl.style.display = "none";
-          }
-        }
-        if (tooManyEl) {
-          if (values.length > 14) {
-            tooManyEl.style.display = "";
-            tooManyEl.textContent = `${values.length} values — that's a lot for one axis. Consider narrowing the range.`;
-          } else {
-            tooManyEl.style.display = "none";
-          }
-        }
-      }
-      function setCustomList(catId, axId, val) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const av = getAllGroupGenerator(c, axId);
-        av.listText = val;
-        av.list = parseCustomList(val);
-        refreshAxisValuesUI(catId, axId);
-        renderPreviewAndExport();
-        scheduleAutoSave();
+        return true;
       }
 
+      function focusFk(fk) {
+        if (!fk) return false;
+        const el = document.querySelector(`[data-fk="${CSS.escape(fk)}"]`);
+        if (!el || el.disabled) return false;
+        el.focus();
+        return true;
+      }
+
+      /* Formula bar */
+      function uiSetNamespace(val) {
+        setNamespace(val);
+        renderFormulaBar();
+        renderPreviewAndExport();
+        scheduleAutoSave();
+        updateShareLinkButton();
+      }
+
+      function renderFormulaBar() {
+        const c = activeCategory();
+        id("formula").innerHTML = axes
+          .map((ax) => {
+            const entry = c && isConfigurableAxis(ax) ? c.values[ax.id] : null;
+            const label = `{${esc(ax.name)}}`;
+            return entry && entry.unused
+              ? `<s class="f-seg ${hueClass(ax)} is-unused" title="Unused for ${esc(c.name)}">${label}</s>`
+              : `<span class="f-seg ${hueClass(ax)}">${label}</span>`;
+          })
+          .join('<span class="f-sep">.</span>');
+        const ns = id("namespace-input");
+        if (ns && document.activeElement !== ns) ns.value = namespaceValue;
+      }
+
+      /* Category tabs */
+      function renderTabs() {
+        const c = activeCategory();
+        const list = id("cat-tabs");
+        const tabs = [...list.children];
+        const same =
+          tabs.length === categories.length &&
+          tabs.every((t, i) => t.dataset.cat === categories[i].id && t.textContent === categories[i].name);
+        if (same) {
+          // Update in place so a double-click on a tab still lands on it.
+          tabs.forEach((t) => {
+            const on = t.dataset.cat === activeCatId;
+            t.setAttribute("aria-selected", on);
+            t.tabIndex = on ? 0 : -1;
+          });
+        } else list.innerHTML = categories
+          .map(
+            (cat) => `<button type="button" role="tab" class="cat-tab" id="tab-${esc(cat.id)}"
+              data-act="select-category" data-cat="${esc(cat.id)}" data-fk="tab:${esc(cat.id)}"
+              aria-selected="${cat === c}" aria-controls="board" tabindex="${cat === c ? 0 : -1}"
+              title="Double-click to rename or set its token type">${esc(cat.name)}</button>`,
+          )
+          .join("");
+        const chip = id("type-chip");
+        const menu = id("cat-menu-btn");
+        chip.hidden = menu.hidden = !c;
+        if (c) {
+          chip.textContent = `$type: ${c.dtcgType || "not set"}`;
+          chip.classList.toggle("is-unset", !c.dtcgType);
+          chip.setAttribute("aria-label", `Token type for ${c.name}: ${c.dtcgType || "not set"}. Edit`);
+          menu.setAttribute("aria-label", `Settings for category ${c.name}`);
+        }
+      }
+
+      function selectCategory(catId, focus) {
+        activeCatId = catId;
+        closePopover(false);
+        renderFormulaBar();
+        renderTabs();
+        renderBoard();
+        if (focus) focusFk("tab:" + catId);
+      }
+
+      /* Columns */
+      function renderBoard() {
+        const el = id("board");
+        const c = activeCategory();
+        if (!c) {
+          el.removeAttribute("aria-labelledby");
+          el.innerHTML = `<div class="board-empty">No categories yet.
+            <button type="button" data-act="new-category" data-fk="empty-add-cat" aria-haspopup="dialog">+ Add Category</button></div>`;
+          return;
+        }
+        el.setAttribute("aria-labelledby", "tab-" + c.id);
+        el.innerHTML = boardAxes().map((ax) => renderColumn(c, ax)).join("") + renderInsertColumn();
+      }
+
+      function renderColumn(c, ax) {
+        const entry = c.values[ax.id] || mkAxisEntry();
+        const unused = !!entry.unused;
+        const middle = ax.slot === "middle";
+        const conds = conditionalGroups(entry);
+        const valueCount = groupValues(entry.groups).length;
+        const a = `data-ax="${esc(ax.id)}"`;
+        const name = middle
+          ? `<input type="text" class="col-name ${hueClass(ax)}" value="${esc(ax.name)}" aria-label="Axis name" data-act="rename-axis" ${a} data-fk="axname:${esc(ax.id)}" spellcheck="false" />`
+          : `<span class="col-name ${hueClass(ax)}">${esc(ax.name)}</span><span class="col-lock" title="Tier 1 keeps scale last">fixed</span>`;
+        const summary = unused
+          ? `Unused for ${esc(c.name)}`
+          : `${valueCount ? plural(valueCount, "value") : `<span class="is-warn">no values</span>`} · ${conds.length ? plural(conds.length, "group") + " + ALL" : "ALL only"}`;
+        const moveBtn = (dir, glyph, word) =>
+          `<button type="button" class="icon-btn" data-act="move-axis" data-dir="${dir}" ${a} data-fk="move:${esc(ax.id)}:${dir}"
+            aria-label="Move ${esc(ax.name)} ${word}" title="Move ${word}" ${canMoveAxis(ax.id, dir) ? "" : "disabled"}>${glyph}</button>`;
+        const tools = `
+          <label class="unused-toggle" title="Leave this axis out of ${esc(c.name)} names">
+            <input type="checkbox" data-act="toggle-unused" ${a} data-fk="unused:${esc(ax.id)}" ${unused ? "checked" : ""} /> Unused
+          </label>
+          ${middle ? moveBtn(-1, "↑", "earlier") + moveBtn(1, "↓", "later") : ""}
+          ${middle ? `<button type="button" class="icon-btn is-danger" data-act="remove-axis" ${a} data-fk="remove:${esc(ax.id)}" aria-label="Remove the ${esc(ax.name)} axis from the project" title="Remove axis from the project">${TRASH_ICON}</button>` : ""}`;
+        const body = unused
+          ? `<p class="col-unused-note">Unused for <strong>${esc(c.name)}</strong>: its names skip this axis. Untick Unused to bring it back.</p>`
+          : [allGroup(entry), ...conds].map((g) => renderGroup(c, ax, g, conds.length)).join("") +
+            renderAddGroup(c, ax);
+        return `
+        <section class="col${unused ? " is-unused" : ""}" aria-label="${esc(ax.name)} axis">
+          <header class="col-head">
+            <div class="col-title">${name}</div>
+            <div class="col-tools">${tools}</div>
+            <div class="col-summary">${summary}</div>
+          </header>
+          <div class="col-body">${body}</div>
+        </section>`;
+      }
+
+      function renderAddGroup(c, ax) {
+        const can = conditionOptions(c.id, ax.id).length > 0;
+        return `<button type="button" class="add-group" data-act="new-group" data-ax="${esc(ax.id)}" data-fk="addgroup:${esc(ax.id)}" aria-haspopup="dialog"
+          ${can ? "" : 'disabled title="Groups need an earlier axis with values"'}>+ add group</button>`;
+      }
+
+      function renderGroup(c, ax, g, conditionalCount) {
+        const isAll = isAllGroup(g);
+        const gen = g.generator;
+        const vals = genValues(gen);
+        const ref = `data-ax="${esc(ax.id)}" data-group="${esc(g.id)}"`;
+        const gk = esc(g.id);
+        const head = isAll
+          ? `<span class="group-label">ALL</span><span class="group-note">${conditionalCount ? "when no group matches" : "every name"}</span>`
+          : `<button type="button" class="cond-chip" data-act="edit-condition" ${ref} data-fk="chip:${gk}" aria-haspopup="dialog"
+              aria-label="Condition: ${esc(describeCondition(g.condition))}. Edit condition" title="${esc(describeCondition(g.condition))}">${esc(conditionSummary(g.condition))} ▾</button>
+             <span class="group-count">${plural(vals.length, "value")}</span>
+             <button type="button" class="icon-btn is-danger" data-act="remove-group" ${ref} data-fk="rmgroup:${gk}" aria-label="Remove the group for ${esc(describeCondition(g.condition))}">✕</button>`;
+
+        const genSelect = `<select data-act="set-generator" ${ref} data-fk="gen:${gk}" aria-label="How these ${esc(ax.name)} values are made">
+          ${Object.entries(GENERATOR_LABELS).map(([k, label]) => `<option value="${k}"${gen.type === k ? " selected" : ""}>${label}</option>`).join("")}
+        </select>`;
+        const cfg = gen.config || {};
+        const field = (key, label, fallback) =>
+          `<label>${label}<input type="text" inputmode="decimal" value="${esc(cfg[key] ?? fallback)}" data-act="set-config" data-key="${key}" ${ref} data-fk="cfg:${gk}:${key}" /></label>`;
+        let range = "";
+        if (gen.type === "numeric") range = `<div class="range-fields">${field("start", "start", "4")}${field("end", "end", "64")}${field("step", "step", "4")}</div>`;
+        else if (gen.type === "ordinal") range = `<div class="range-fields">${field("start", "start", "100")}${field("end", "end", "900")}${field("step", "step", "100")}</div>`;
+        else if (gen.type === "tshirt") range = `<div class="range-fields is-single">${field("extra", "extra sizes (adds 2xs, 2xl …)", "0")}</div>`;
+
+        let typeSelect = "";
+        if (!isAll && canSetGroupTokenType(g)) {
+          typeSelect = `<select data-act="set-group-type" ${ref} data-fk="gtype:${gk}" aria-label="Token type for names this group matches">
+            <option value=""${g.tokenType ? "" : " selected"}>$type: category's (${esc(c.dtcgType || "not set")})</option>
+            ${dtcgTypeOptionsHtml(g.tokenType || "").replace(/<option value=""[^>]*>[^<]*<\/option>/, "")}
+          </select>`;
+        }
+
+        let values;
+        if (gen.type === "custom") {
+          values = `<ul class="values" aria-label="${esc(ax.name)} values">${(gen.list || [])
+            .map((v, i) => {
+              const omitted = isOmittedAxisValue(v);
+              return `<li class="value-row${omitted ? " is-omitted" : ""}">
+                <input type="text" class="value-input" value="${esc(v)}" data-act="rename-value" data-index="${i}" ${ref} data-fk="val:${gk}:${i}" aria-label="${esc(ax.name)} value ${i + 1}${omitted ? " (omitted from names)" : ""}" spellcheck="false" />
+                ${omitted ? `<span class="badge-omitted" title="Makes a token but adds nothing to its name">omitted</span>` : ""}
+                <button type="button" class="icon-btn" data-act="remove-value" data-index="${i}" ${ref} data-fk="rmval:${gk}:${i}" aria-label="Remove ${esc(v)}">✕</button>
+              </li>`;
+            })
+            .join("")}</ul>
+            <input type="text" class="add-value" placeholder="+ add value" data-act="add-value" ${ref} data-fk="add:${gk}" aria-label="Add a ${esc(ax.name)} value; use [brackets] to leave it out of names" spellcheck="false" />`;
+        } else {
+          // Adding a value turns a generated range into a literal list of its values.
+          values = `<ul class="values is-generated" aria-label="${esc(ax.name)} values">${vals.map((v) => `<li class="value-chip">${esc(v)}</li>`).join("")}</ul>
+            <input type="text" class="add-value" placeholder="+ add value" data-act="add-value" ${ref} data-fk="add:${gk}" aria-label="Add a ${esc(ax.name)} value; this turns the range into a literal list" title="Adding a value turns this range into a literal list" spellcheck="false" />`;
+        }
+        const empty = vals.length
+          ? ""
+          : `<p class="group-empty">${isAll ? "No values: this axis adds nothing to names." : "No values: names this group matches skip this axis."}</p>`;
+        return `<div class="group${isAll ? "" : " is-conditional"}" role="group" aria-label="${isAll ? "ALL group" : "Group for " + esc(describeCondition(g.condition))}">
+          <div class="group-head">${head}</div>
+          <div class="group-settings">${genSelect}${range}${typeSelect}</div>
+          ${values}${empty}
+        </div>`;
+      }
+
+      function renderInsertColumn() {
+        return `<div class="col col-insert">
+          <button type="button" class="insert-axis" data-act="insert-axis" data-fk="insert-axis" aria-haspopup="dialog">
+            <span class="plus" aria-hidden="true">+</span>
+            <strong>Insert axis</strong>
+            <span>Adds an axis to every category</span>
+          </button>
+        </div>`;
+      }
+
+      /* Popovers */
+      // popover: {kind, anchorFk, axId?, groupId?, draft?, error?}
+      let popover = null;
+
+      function openPopover(state, anchor) {
+        popover = { ...state, anchorFk: anchor && anchor.dataset.fk };
+        renderPopover();
+        const el = id("popover");
+        const first = el.querySelector("[autofocus], input, select, button:not([disabled])");
+        if (first) {
+          first.focus();
+          if (first.select && first.type === "text") first.select();
+        }
+      }
+
+      function closePopover(restoreFocus = true) {
+        if (!popover) return;
+        const fk = popover.anchorFk;
+        popover = null;
+        const el = id("popover");
+        el.hidden = true;
+        el.innerHTML = "";
+        if (restoreFocus) focusFk(fk) || id("board").focus();
+      }
+
+      function popoverGroup() {
+        const c = activeCategory();
+        if (!c || !popover.axId) return null;
+        const entry = c.values[popover.axId];
+        return entry && entry.groups.find((g) => g.id === popover.groupId);
+      }
+
+      function renderPopover() {
+        const el = id("popover");
+        if (!popover) {
+          el.hidden = true;
+          return;
+        }
+        const c = activeCategory();
+        let html = null;
+        if (popover.kind === "condition" || popover.kind === "new-group") html = c && conditionPopoverHtml(c);
+        else if (popover.kind === "category") html = c && categoryPopoverHtml(c);
+        else if (popover.kind === "new-category") html = categoryPopoverHtml(null);
+        else if (popover.kind === "insert-axis") html = insertAxisPopoverHtml();
+        if (!html) {
+          closePopover(false);
+          return;
+        }
+        const fk = document.activeElement && el.contains(document.activeElement) ? document.activeElement.dataset.fk : null;
+        el.innerHTML = html;
+        el.hidden = false;
+        positionPopover();
+        if (fk) focusFk(fk);
+      }
+
+      function positionPopover() {
+        const el = id("popover");
+        if (!popover || el.hidden) return;
+        const anchor = popover.anchorFk && document.querySelector(`[data-fk="${CSS.escape(popover.anchorFk)}"]`);
+        const r = anchor ? anchor.getBoundingClientRect() : { left: 16, right: 16, top: 16, bottom: 16 };
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+        const left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+        let top = r.bottom + 6;
+        if (top + h > window.innerHeight - 8 && r.top - h - 6 > 8) top = r.top - h - 6;
+        el.style.left = left + "px";
+        el.style.top = Math.max(8, top) + "px";
+      }
+
+      function conditionPopoverHtml(c) {
+        const ax = axes.find((a) => a.id === popover.axId);
+        if (!ax) return null;
+        const isNew = popover.kind === "new-group";
+        const group = isNew ? null : popoverGroup();
+        if (!isNew && !group) return null;
+        const condition = isNew ? popover.draft : group.condition;
+        const rows = conditionOptions(c.id, ax.id, condition)
+          .map(
+            (o) => `<div class="cond-row" role="group" aria-label="${esc(o.name)}">
+              <span class="cond-row-label ${hueClass(axes.find((a) => a.id === o.axId))}">${esc(o.name)}</span>
+              <div class="cond-values">${o.values
+                .map((v) => {
+                  const on = (condition[o.axId] || []).includes(v);
+                  return `<button type="button" class="cond-toggle" aria-pressed="${on}" data-pop="toggle" data-cond-ax="${esc(o.axId)}" data-value="${esc(v)}" data-fk="pop:${esc(o.axId)}:${esc(v)}">${esc(v)}</button>`;
+                })
+                .join("")}</div>
+            </div>`,
+          )
+          .join("");
+        const empty = !Object.keys(condition).length;
+        return `<div class="pop-title" id="pop-title">${isNew ? "New group" : "Condition"} on ${esc(ax.name)}</div>
+          <p class="pop-hint">${isNew ? "Pick the earlier values this group applies to." : "The group applies when a name has these values."} Values on one axis are alternatives; different axes must all match.</p>
+          ${rows}
+          ${popover.error ? `<p class="pop-hint is-error" role="alert">${esc(popover.error)}</p>` : ""}
+          <div class="pop-actions">
+            ${isNew
+              ? `<button type="button" data-pop="close" data-fk="pop:cancel">Cancel</button>
+                 <button type="button" class="btn-solid" data-pop="create-group" data-fk="pop:create" ${empty ? "disabled" : ""}>Add group</button>`
+              : `<button type="button" class="btn-solid" data-pop="close" data-fk="pop:done">Done</button>`}
+          </div>`;
+      }
+
+      function categoryPopoverHtml(c) {
+        const isNew = !c;
+        const type = isNew ? popover.draftType || "" : c.dtcgType || "";
+        return `<form class="pop-form" data-pop-form="${isNew ? "create-category" : "update-category"}">
+          <div class="pop-title" id="pop-title">${isNew ? "New category" : "Category"}</div>
+          <label class="pop-field">Name
+            <input type="text" name="name" value="${esc(isNew ? popover.draftName || "" : c.name)}" placeholder="e.g. color, spacing" data-fk="pop:cat-name" spellcheck="false" autocomplete="off" />
+          </label>
+          <label class="pop-field">Token type ($type)
+            <select name="type" data-fk="pop:cat-type">${dtcgTypeOptionsHtml(type)}</select>
+            ${isTerrazzoExtensionType(type) ? `<span class="token-type-extension-note">Terrazzo extension; output support may require a custom plugin.</span>` : ""}
+          </label>
+          ${popover.error ? `<p class="pop-hint is-error" role="alert">${esc(popover.error)}</p>` : ""}
+          <div class="pop-actions">
+            ${isNew
+              ? `<button type="button" data-pop="close" data-fk="pop:cancel">Cancel</button>
+                 <button type="submit" class="btn-solid" data-fk="pop:submit">Add category</button>`
+              : `<button type="button" class="btn-ghost is-danger" data-pop="delete-category" data-fk="pop:delete">Delete</button>
+                 <button type="submit" class="btn-solid" data-fk="pop:submit">Done</button>`}
+          </div>
+        </form>`;
+      }
+
+      function insertAxisPopoverHtml() {
+        return `<form class="pop-form" data-pop-form="insert-axis">
+          <div class="pop-title" id="pop-title">Insert axis</div>
+          <p class="pop-hint">The new axis is added to every category${tierMode === "tier1" ? ", before scale" : ""}. Mark it Unused where it doesn't apply.</p>
+          <label class="pop-field">Name
+            <input type="text" name="name" value="${esc(popover.draftName || "")}" placeholder="e.g. family, role, state" data-fk="pop:axis-name" spellcheck="false" autocomplete="off" />
+          </label>
+          ${popover.error ? `<p class="pop-hint is-error" role="alert">${esc(popover.error)}</p>` : ""}
+          <div class="pop-actions">
+            <button type="button" data-pop="close" data-fk="pop:cancel">Cancel</button>
+            <button type="submit" class="btn-solid" data-fk="pop:submit">Insert</button>
+          </div>
+        </form>`;
+      }
+
+      function onPopoverClick(btn) {
+        const act = btn.dataset.pop;
+        const c = activeCategory();
+        if (act === "close") return closePopover();
+        if (act === "toggle") {
+          const { condAx, value } = btn.dataset;
+          popover.error = null;
+          if (popover.kind === "new-group") {
+            const vals = popover.draft[condAx] || [];
+            const next = vals.includes(value) ? vals.filter((v) => v !== value) : [...vals, value];
+            if (next.length) popover.draft[condAx] = next;
+            else delete popover.draft[condAx];
+            renderPopover();
+          } else if (!edit(() => toggleConditionValue(c.id, popover.axId, popover.groupId, condAx, value))) {
+            popover.error = "A group needs at least one value in its condition. Remove the group instead.";
+            renderPopover();
+          }
+          return;
+        }
+        if (act === "create-group") {
+          let groupId = null;
+          edit(() => (groupId = addGroup(c.id, popover.axId, popover.draft)) !== null);
+          if (groupId) {
+            popover.anchorFk = "add:" + groupId;
+            closePopover();
+          }
+          return;
+        }
+        if (act === "delete-category") {
+          if (!confirm(`Delete the "${c.name}" category and all its values? You can undo this.`)) return;
+          closePopover(false);
+          edit(() => removeCategory(c.id));
+          showToast(`Deleted the "${c.name}" category.`);
+          focusFk("tab:" + activeCatId) || id("board").focus();
+        }
+      }
+
+      function onPopoverSubmit(form) {
+        const kind = form.dataset.popForm;
+        const name = form.elements.name.value;
+        const type = form.elements.type ? form.elements.type.value : "";
+        const c = activeCategory();
+        if (kind === "create-category") {
+          let catId = null;
+          if (!edit(() => (catId = addCategory(name, type)) !== null)) {
+            Object.assign(popover, { draftName: name, draftType: type, error: name.trim() ? `There's already a category called "${slugName(name)}".` : "Enter a name." });
+            return renderPopover();
+          }
+          closePopover(false);
+          selectCategory(catId);
+          focusFk("tab:" + catId);
+        } else if (kind === "update-category") {
+          closePopover();
+        } else if (kind === "insert-axis") {
+          let axId = null;
+          if (!edit(() => (axId = insertAxis(name)) !== null)) {
+            const slug = slugName(name);
+            Object.assign(popover, { draftName: name, error: !slug ? "Enter a name." : RESERVED_AXIS_NAMES.has(slug) ? `"${slug}" is reserved.` : `There's already an axis called "${slug}".` });
+            return renderPopover();
+          }
+          closePopover(false);
+          focusFk("add:" + allGroup(activeCategory().values[axId]).id);
+          const col = document.querySelector(`[data-fk="axname:${CSS.escape(axId)}"]`);
+          if (col) col.scrollIntoView({ block: "nearest", inline: "nearest" });
+        }
+      }
+
+      // Category name and type apply as soon as they change.
+      function onPopoverChange(target) {
+        const form = target.form;
+        if (!form || form.dataset.popForm !== "update-category") return;
+        const c = activeCategory();
+        if (target.name === "name") {
+          if (!edit(() => renameCategory(c.id, target.value))) {
+            popover.error = target.value.trim() ? `There's already a category called "${slugName(target.value)}".` : "A category needs a name.";
+            renderPopover();
+          } else popover.error = null;
+        } else if (target.name === "type") {
+          edit(() => setCategoryType(c.id, target.value));
+        }
+      }
+
+      /* Board actions */
+      function ref(el) {
+        const c = activeCategory();
+        return { c, axId: el.dataset.ax, groupId: el.dataset.group, index: Number(el.dataset.index) };
+      }
+
+      function onBoardClick(el) {
+        const act = el.dataset.act;
+        const { c, axId, groupId, index } = ref(el);
+        switch (act) {
+          case "select-category":
+            return selectCategory(el.dataset.cat, true);
+          case "new-category":
+            return openPopover({ kind: "new-category" }, el);
+          case "edit-category":
+            return c && openPopover({ kind: "category" }, el);
+          case "insert-axis":
+            return openPopover({ kind: "insert-axis" }, el);
+          case "move-axis": {
+            const dir = Number(el.dataset.dir);
+            if (!canMoveAxis(axId, dir) || !confirmConditionLoss(axId, dir)) return;
+            // Stay on this button unless the axis can't move further that way.
+            pendingFocusFk = canMoveAxis(axId, 2 * dir) ? el.dataset.fk : `move:${axId}:${-dir}`;
+            return edit(() => moveAxis(axId, dir));
+          }
+          case "remove-axis":
+            return uiRemoveAxis(axId);
+          case "new-group":
+            return openPopover({ kind: "new-group", axId, draft: {} }, el);
+          case "edit-condition":
+            return openPopover({ kind: "condition", axId, groupId }, el);
+          case "remove-group":
+            pendingFocusFk = "addgroup:" + axId;
+            return edit(() => removeGroup(c.id, axId, groupId));
+          case "remove-value": {
+            const next = `val:${groupId}:${index}`;
+            return edit(() => removeGroupValue(c.id, axId, groupId, index)) &&
+              (focusFk(next) || focusFk(`val:${groupId}:${index - 1}`) || focusFk("add:" + groupId));
+          }
+        }
+      }
+
+      function onBoardChange(el) {
+        const act = el.dataset.act;
+        const { c, axId, groupId, index } = ref(el);
+        switch (act) {
+          case "rename-axis":
+            if (!edit(() => renameAxis(axId, el.value)))
+              showToast(
+                slugName(el.value)
+                  ? `"${slugName(el.value)}" is reserved or already used by another axis.`
+                  : "An axis needs a name.",
+                false,
+              );
+            return;
+          case "toggle-unused":
+            return edit(() => setAxisUnused(c.id, axId, el.checked));
+          case "set-generator":
+            return edit(() => setGroupGenerator(c.id, axId, groupId, el.value));
+          case "set-config":
+            return edit(() => setGeneratorConfig(c.id, axId, groupId, el.dataset.key, el.value));
+          case "set-group-type":
+            return edit(() => setGroupTokenType(c.id, axId, groupId, el.value));
+          case "rename-value":
+            return el.value.trim()
+              ? edit(() => renameGroupValue(c.id, axId, groupId, index, el.value))
+              : edit(() => removeGroupValue(c.id, axId, groupId, index));
+          case "add-value":
+            return commitAddValue(el);
+        }
+      }
+
+      function commitAddValue(el) {
+        const { c, axId, groupId } = ref(el);
+        const values = parseCustomList(el.value);
+        if (!values.length) return;
+        pendingFocusFk = "add:" + groupId;
+        // Commas add several values at once, like the old literal list field.
+        edit(() => values.map((v) => addGroupValue(c.id, axId, groupId, v)).some(Boolean));
+      }
+
+      // Moving an axis past another drops conditions that would then point
+      // forward; say which groups go before doing it.
+      function confirmConditionLoss(axId, dir) {
+        const i = axisIndexById(axId);
+        const other = axes[i + dir];
+        const [earlier, later] = dir < 0 ? [other, axes[i]] : [axes[i], other];
+        const lost = categories.filter((c) => {
+          const entry = c.values[later.id];
+          return entry && conditionalGroups(entry).some((g) => earlier.id in g.condition);
+        });
+        if (!lost.length) return true;
+        return confirm(
+          `Moving "${axes[i].name}" puts "${later.name}" before "${earlier.name}". Groups on ${later.name} whose condition uses ${earlier.name} will lose that part of their condition (groups left with no condition are removed) in: ${lost.map((c) => c.name).join(", ")}.\n\nYou can undo this. Continue?`,
+        );
+      }
+
+      function uiRemoveAxis(axId) {
+        const ax = axes.find((a) => a.id === axId);
+        if (!ax) return;
+        const used = categoriesWithValuesOn(axId);
+        const msg =
+          `Remove the "${ax.name}" axis from the whole project?\n\n` +
+          (used.length
+            ? `These categories have values on it, which will be removed:\n• ${used.join("\n• ")}`
+            : "No category has values on it.") +
+          `\n\nGroups whose condition uses ${ax.name} lose that part. You can undo this.`;
+        if (!confirm(msg)) return;
+        const cols = boardAxes();
+        const neighbour = cols[cols.indexOf(ax) + 1] || cols[cols.indexOf(ax) - 1];
+        pendingFocusFk = neighbour && neighbour.slot === "middle" ? "remove:" + neighbour.id : "insert-axis";
+        if (edit(() => removeAxis(axId))) showToast(`Removed the "${ax.name}" axis.`);
+      }
+
+      /* Undo toast */
+      let toastTimer = null;
+      function showToast(msg, withUndo = true) {
+        const el = id("toast");
+        el.innerHTML = `<span>${esc(msg)}</span>${withUndo ? `<button type="button" data-fk="toast-undo" onclick="undo(); hideToast()">Undo</button>` : ""}`;
+        el.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(hideToast, 8000);
+      }
+      function hideToast() {
+        clearTimeout(toastTimer);
+        id("toast").hidden = true;
+      }
+
+      /* Events */
+      document.addEventListener("click", (e) => {
+        const pop = e.target.closest("#popover [data-pop]");
+        if (pop) return onPopoverClick(pop);
+        const el = e.target.closest("[data-act]");
+        if (!el || el.disabled || el.tagName === "INPUT" || el.tagName === "SELECT") return;
+        onBoardClick(el);
+      });
+      document.addEventListener("change", (e) => {
+        if (e.target.closest("#popover")) return onPopoverChange(e.target);
+        const el = e.target.closest("[data-act]");
+        if (el && (el.tagName === "INPUT" || el.tagName === "SELECT")) onBoardChange(el);
+      });
+      document.addEventListener("submit", (e) => {
+        const form = e.target.closest("#popover form");
+        if (!form) return;
+        e.preventDefault();
+        onPopoverSubmit(form);
+      });
+      document.addEventListener("dblclick", (e) => {
+        const tab = e.target.closest(".cat-tab");
+        if (!tab) return;
+        selectCategory(tab.dataset.cat);
+        openPopover({ kind: "category" }, tab);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && popover) {
+          e.preventDefault();
+          return closePopover();
+        }
+        const t = e.target;
+        if (e.key === "Enter" && t.matches && t.matches('input[type="text"][data-act]')) {
+          e.preventDefault();
+          if (t.dataset.act === "add-value") commitAddValue(t);
+          else onBoardChange(t);
+          return;
+        }
+        if (t.classList && t.classList.contains("cat-tab")) {
+          const i = categories.findIndex((c) => c.id === t.dataset.cat);
+          let j = null;
+          if (e.key === "ArrowRight") j = (i + 1) % categories.length;
+          else if (e.key === "ArrowLeft") j = (i - 1 + categories.length) % categories.length;
+          else if (e.key === "Home") j = 0;
+          else if (e.key === "End") j = categories.length - 1;
+          else if (e.key === "F2") {
+            e.preventDefault();
+            return openPopover({ kind: "category" }, t);
+          }
+          if (j !== null) {
+            e.preventDefault();
+            selectCategory(categories[j].id, true);
+          }
+        }
+      });
+      document.addEventListener("mousedown", (e) => {
+        if (!popover) return;
+        if (e.target.closest("#popover")) return;
+        const anchor = popover.anchorFk && e.target.closest(`[data-fk="${CSS.escape(popover.anchorFk)}"]`);
+        if (!anchor) closePopover(false);
+      });
+      window.addEventListener("resize", positionPopover);
+      document.addEventListener("scroll", positionPopover, true);
 
       function segClass(ax) {
         if (ax.slot === "namespace") return "seg-ns";
@@ -1890,8 +2365,17 @@
       function renderAll() {
         syncProjectTitleUI();
         updateTierModeUI();
-        renderAxisList();
-        renderCategories();
+        // Focus survives the redraw: back to the element with the same key.
+        const active = document.activeElement;
+        const wanted = pendingFocusFk;
+        const fk = active && active.dataset ? active.dataset.fk : null;
+        pendingFocusFk = null;
+        renderFormulaBar();
+        renderTabs();
+        renderBoard();
+        renderPopover();
+        if (wanted) focusFk(wanted);
+        else if (fk && !active.isConnected) focusFk(fk);
         renderPreviewAndExport();
         scheduleAutoSave();
         updateShareLinkButton();
@@ -1915,11 +2399,6 @@
       let redoStack = [];
       let isRestoringHistory = false;
       const historyFieldGuard = new Set();
-
-      function historyFieldAttrs(fieldKey) {
-        const k = String(fieldKey).replace(/'/g, "\\'");
-        return `onfocus="historyOnFieldFocus('${k}')" onblur="historyOnFieldBlur('${k}')"`;
-      }
 
       function historyOnFieldFocus(fieldKey) {
         if (isRestoringHistory) return;
@@ -1985,8 +2464,6 @@
           showPersistenceError(err);
           return false;
         }
-        const nsToggle = id("namespace-toggle");
-        if (nsToggle) nsToggle.checked = namespaceEnabled;
         hideRestoreBanner();
         renderAll();
         return true;

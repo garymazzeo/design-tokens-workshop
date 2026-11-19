@@ -821,6 +821,317 @@ function allTokenNames() {
   return categories.flatMap((c) => allTokensForCategory(c));
 }
 
+/* ── Board edits ───────────────────────────────────── */
+// The changes the builder's board makes to the project. Each one leaves the
+// project valid; the board saves an undo snapshot before calling it.
+
+function slugName(val) {
+  return String(val || "").trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+// An empty namespace means the project has none.
+function setNamespace(val) {
+  namespaceValue = slugName(val);
+  namespaceEnabled = !!namespaceValue;
+  const has = axes.some((a) => a.slot === "namespace");
+  if (namespaceEnabled && !has) {
+    axes.unshift({ id: "namespace", name: "namespace", locked: true, slot: "namespace" });
+  } else if (!namespaceEnabled && has) {
+    axes = axes.filter((a) => a.slot !== "namespace");
+  }
+}
+
+function isValidAxisName(name, exceptAxId) {
+  return (
+    !!name &&
+    !RESERVED_AXIS_NAMES.has(name) &&
+    !axes.some((a) => a.id !== exceptAxId && a.name === name)
+  );
+}
+
+// Adds an axis to the formula (and so to every category), before scale in
+// Tier 1 and last in Tier 2. Returns the new axis id, or null for a missing,
+// reserved or duplicate name.
+function insertAxis(name) {
+  const slug = slugName(name);
+  if (!isValidAxisName(slug)) return null;
+  const ax = { id: "ax" + ++axisSeq, name: slug, locked: false, slot: "middle" };
+  const scaleIdx = scaleAxisIndex();
+  axes.splice(scaleIdx < 0 ? axes.length : scaleIdx, 0, ax);
+  categories.forEach((c) => (c.values[ax.id] = mkAxisEntry()));
+  return ax.id;
+}
+
+function renameAxis(axId, name) {
+  const ax = axes.find((a) => a.id === axId);
+  const slug = slugName(name);
+  if (!ax || ax.slot !== "middle" || !isValidAxisName(slug, axId)) return false;
+  ax.name = slug;
+  return true;
+}
+
+// Swaps an axis with its neighbour (dir -1 earlier, +1 later). Category stays
+// first and Tier 1's scale stays last. A condition may only name earlier axes,
+// so conditions that would point forward are dropped.
+function canMoveAxis(axId, dir) {
+  const i = axisIndexById(axId);
+  const j = i + dir;
+  if (i < 0 || axes[i].slot !== "middle") return false;
+  const scaleIdx = scaleAxisIndex();
+  return j > categoryAxisIndex() && j < (scaleIdx >= 0 ? scaleIdx : axes.length);
+}
+
+function moveAxis(axId, dir) {
+  if (!canMoveAxis(axId, dir)) return false;
+  const i = axisIndexById(axId);
+  [axes[i], axes[i + dir]] = [axes[i + dir], axes[i]];
+  categories.forEach(normalizeCategory);
+  return true;
+}
+
+// Names of the categories that hold at least one value on an axis, including
+// categories where the axis is Unused (removing the axis loses those too).
+function categoriesWithValuesOn(axId) {
+  return categories
+    .filter((c) => {
+      const entry = c.values[axId];
+      return entry && entry.groups.some((g) => genValues(g.generator).length);
+    })
+    .map((c) => c.name);
+}
+
+// Removes an axis from the whole project. Conditions on it go with it.
+function removeAxis(axId) {
+  const ax = axes.find((a) => a.id === axId);
+  if (!ax || ax.slot !== "middle") return false;
+  axes = axes.filter((a) => a !== ax);
+  categories.forEach(normalizeCategory);
+  return true;
+}
+
+/* Groups */
+function findEntry(catId, axId) {
+  const c = categories.find((x) => x.id === catId);
+  const ax = axes.find((a) => a.id === axId);
+  if (!c || !ax || !isConfigurableAxis(ax)) return null;
+  return c.values[axId] || (c.values[axId] = mkAxisEntry());
+}
+
+function findGroup(catId, axId, groupId) {
+  const entry = findEntry(catId, axId);
+  return (entry && entry.groups.find((g) => g.id === groupId)) || null;
+}
+
+// The axes a group on axId may name in its condition: every earlier axis the
+// category uses, with every value it can take (raw, so omitted values like
+// "[base]" can be chosen). Values the given condition already names are kept,
+// so they can be switched off after they were removed from the axis.
+function conditionOptions(catId, axId, condition = {}) {
+  const c = categories.find((x) => x.id === catId);
+  const idx = axisIndexById(axId);
+  if (!c || idx < 0) return [];
+  return axes
+    .slice(0, idx)
+    .filter(isConfigurableAxis)
+    .map((ax) => {
+      const entry = c.values[ax.id];
+      const values = entry && !entry.unused ? groupValues(entry.groups) : [];
+      (condition[ax.id] || []).forEach((v) => values.includes(v) || values.push(v));
+      return { axId: ax.id, name: ax.name, values };
+    })
+    .filter((o) => o.values.length);
+}
+
+// A condition in a few words, e.g. "brand · container/text", in axis order.
+function conditionSummary(condition) {
+  return Object.entries(condition)
+    .sort(([a], [b]) => axisIndexById(a) - axisIndexById(b))
+    .map(([, vals]) => vals.join("/"))
+    .join(" · ");
+}
+
+function isValidCondition(axId, condition) {
+  const idx = axisIndexById(axId);
+  const entries = Object.entries(condition || {});
+  return (
+    entries.length > 0 &&
+    entries.every(([condAx, vals]) => {
+      const j = axisIndexById(condAx);
+      return (
+        j >= 0 && j < idx && isConfigurableAxis(axes[j]) &&
+        Array.isArray(vals) && vals.length > 0
+      );
+    })
+  );
+}
+
+// Adds a conditional group with no values yet. Returns its id, or null when the
+// condition is empty or names an axis that isn't earlier.
+function addGroup(catId, axId, condition) {
+  const entry = findEntry(catId, axId);
+  if (!entry || !isValidCondition(axId, condition)) return null;
+  const cond = Object.fromEntries(
+    Object.entries(condition).map(([k, vals]) => [k, [...new Set(vals)]]),
+  );
+  const group = mkGroup(cond, mkGenerator());
+  entry.groups.push(group);
+  return group.id;
+}
+
+function removeGroup(catId, axId, groupId) {
+  const entry = findEntry(catId, axId);
+  const group = findGroup(catId, axId, groupId);
+  if (!group || isAllGroup(group)) return false;
+  entry.groups = entry.groups.filter((g) => g !== group);
+  return true;
+}
+
+// Switches one value of an earlier axis in or out of a group's condition.
+// Refused (false) when it would leave the condition empty.
+function toggleConditionValue(catId, axId, groupId, condAxId, value) {
+  const group = findGroup(catId, axId, groupId);
+  if (!group || isAllGroup(group)) return false;
+  const next = { ...group.condition };
+  const vals = next[condAxId] || [];
+  next[condAxId] = vals.includes(value) ? vals.filter((v) => v !== value) : [...vals, value];
+  if (!next[condAxId].length) delete next[condAxId];
+  if (!isValidCondition(axId, next)) return false;
+  group.condition = next;
+  // A token type needs the axis right after category in the condition.
+  const firstAx = typeAxis();
+  if (group.tokenType && !(firstAx && firstAx.id in next)) delete group.tokenType;
+  return true;
+}
+
+/* Values */
+// Literal-list values. Adding to a group that generates its values (numeric,
+// ordinal, t-shirt) first turns it into a literal list of those values.
+function literalGenerator(group) {
+  const gen = group.generator;
+  if (gen.type !== "custom") {
+    group.generator = mkGenerator(genValues(gen));
+  }
+  delete group.generator.listText;
+  return group.generator;
+}
+
+function addGroupValue(catId, axId, groupId, value) {
+  const group = findGroup(catId, axId, groupId);
+  const val = String(value || "").trim();
+  if (!group || !val) return false;
+  const gen = literalGenerator(group);
+  if (gen.list.includes(val)) return false;
+  gen.list = [...gen.list, val];
+  return true;
+}
+
+function renameGroupValue(catId, axId, groupId, index, value) {
+  const group = findGroup(catId, axId, groupId);
+  const val = String(value || "").trim();
+  if (!group || !val) return false;
+  const gen = literalGenerator(group);
+  if (index < 0 || index >= gen.list.length) return false;
+  if (gen.list.some((v, i) => v === val && i !== index)) return false;
+  gen.list = gen.list.map((v, i) => (i === index ? val : v));
+  return true;
+}
+
+function removeGroupValue(catId, axId, groupId, index) {
+  const group = findGroup(catId, axId, groupId);
+  if (!group) return false;
+  const gen = literalGenerator(group);
+  if (index < 0 || index >= gen.list.length) return false;
+  gen.list = gen.list.filter((_, i) => i !== index);
+  return true;
+}
+
+// Switches how a group makes its values. The literal list and the range
+// settings are kept, so switching back restores them.
+function setGroupGenerator(catId, axId, groupId, type) {
+  const group = findGroup(catId, axId, groupId);
+  if (!group || !GENERATOR_TYPES.has(type)) return false;
+  group.generator.type = type;
+  if (!Array.isArray(group.generator.list)) group.generator.list = [];
+  if (!group.generator.config) group.generator.config = {};
+  delete group.generator.listText;
+  return true;
+}
+
+// key is start, end or step (numeric, ordinal) or extra (t-shirt).
+function setGeneratorConfig(catId, axId, groupId, key, value) {
+  const group = findGroup(catId, axId, groupId);
+  if (!group || !["start", "end", "step", "extra"].includes(key)) return false;
+  group.generator.config = { ...(group.generator.config || {}), [key]: String(value) };
+  return true;
+}
+
+// Whether a group may override its category's token type: its condition must
+// include the axis right after category.
+function canSetGroupTokenType(group) {
+  const firstAx = typeAxis();
+  return !!group && !isAllGroup(group) && !!firstAx && firstAx.id in group.condition;
+}
+
+// An empty type clears the override.
+function setGroupTokenType(catId, axId, groupId, type) {
+  const group = findGroup(catId, axId, groupId);
+  if (!canSetGroupTokenType(group)) return false;
+  if (!type) delete group.tokenType;
+  else if (DTCG_TYPES.has(type)) group.tokenType = type;
+  else return false;
+  return true;
+}
+
+function setAxisUnused(catId, axId, unused) {
+  const entry = findEntry(catId, axId);
+  if (!entry) return false;
+  if (unused) entry.unused = true;
+  else delete entry.unused;
+  return true;
+}
+
+/* Categories */
+function isValidCategoryName(name, exceptId) {
+  return !!name && !categories.some((c) => c.id !== exceptId && c.name === name);
+}
+
+// Returns the new category's id, or null for a missing or duplicate name.
+function addCategory(name, dtcgType = "") {
+  const slug = slugName(name);
+  if (!isValidCategoryName(slug)) return null;
+  const c = {
+    id: "cat" + ++catSeq,
+    name: slug,
+    dtcgType: DTCG_TYPES.has(dtcgType) ? dtcgType : "",
+    values: {},
+  };
+  initCategoryValues(c);
+  categories.push(c);
+  return c.id;
+}
+
+function renameCategory(catId, name) {
+  const c = categories.find((x) => x.id === catId);
+  const slug = slugName(name);
+  if (!c || !isValidCategoryName(slug, catId)) return false;
+  c.name = slug;
+  return true;
+}
+
+// An empty type clears it.
+function setCategoryType(catId, type) {
+  const c = categories.find((x) => x.id === catId);
+  if (!c || (type && !DTCG_TYPES.has(type))) return false;
+  c.dtcgType = type || "";
+  return true;
+}
+
+function removeCategory(catId) {
+  const before = categories.length;
+  categories = categories.filter((c) => c.id !== catId);
+  return categories.length < before;
+}
+
 /* ── Legacy project files (version 1 and 2) ──────────────────────────────
  * Before groups, an axis value was either flat ({type, config, list}) or
  * branched ({mode: "branched", branches: [{id, value, dtcgType, values}]}),
@@ -1101,5 +1412,34 @@ function convertLegacyValues(rootValues) {
 }
 
 if (typeof module === "object" && module.exports) {
-  module.exports = { loadProjectState, serializeState, allTokens, allTokenNames };
+  module.exports = {
+    loadProjectState,
+    serializeState,
+    allTokens,
+    allTokenNames,
+    setNamespace,
+    insertAxis,
+    renameAxis,
+    moveAxis,
+    canMoveAxis,
+    removeAxis,
+    categoriesWithValuesOn,
+    conditionOptions,
+    conditionSummary,
+    addGroup,
+    removeGroup,
+    toggleConditionValue,
+    addGroupValue,
+    renameGroupValue,
+    removeGroupValue,
+    setGroupGenerator,
+    setGeneratorConfig,
+    canSetGroupTokenType,
+    setGroupTokenType,
+    setAxisUnused,
+    addCategory,
+    renameCategory,
+    setCategoryType,
+    removeCategory,
+  };
 }
