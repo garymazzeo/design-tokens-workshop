@@ -268,22 +268,6 @@
         font-family: var(--mono);
         font-size: 12px;
       }
-      .branch-type-wrap {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        margin-left: auto;
-      }
-      .branch-type-wrap label {
-        font-size: 10px;
-        color: var(--tx-3);
-        white-space: nowrap;
-      }
-      .branch-type-select {
-        width: 132px;
-        font-family: var(--mono);
-        font-size: 11px;
-      }
       .dtcg-type-warning-icon {
         color: var(--warn, #a66b00);
         font-size: 14px;
@@ -303,9 +287,6 @@
         display: none;
         color: var(--tx-3);
         font-size: 10px;
-      }
-      .branch-type-wrap .token-type-extension-note {
-        max-width: 180px;
       }
       @media (max-width: 720px) {
         .cat-type-hint {
@@ -498,50 +479,12 @@
       .cat-mode-toggle {
         display: none;
       }
-      .branch-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-top: 8px;
-      }
-      .branch-card {
-        border: 0.5px solid var(--bd-1);
-        border-radius: var(--r);
-        padding: 10px;
-        background: var(--bg);
-      }
-      .branch-head {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-      .branch-head input {
-        max-width: 180px;
-        font-weight: 500;
-      }
-      .branch-head span {
-        font-size: 11px;
-        color: var(--tx-3);
-        flex: 1;
-      }
       .axis-nest {
         margin-left: 12px;
         padding-left: 12px;
         border-left: 2px solid var(--bd-1);
         display: grid;
         gap: 8px;
-      }
-      .axis-branch-meta {
-        font-size: 11px;
-        color: var(--tx-3);
-        margin-bottom: 6px;
-      }
-      .axis-branch-actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 8px;
       }
       .unused-note {
         font-size: 11px;
@@ -860,7 +803,7 @@
             data-preset="families"
             onclick="loadPreset('families')"
           >
-            Branched axes (border)
+            Grouped scales (border)
           </button>
           <button
             type="button"
@@ -964,10 +907,10 @@
               <strong style="font-weight: 500">Unused</strong> when it doesn't
               apply — e.g.
               <code style="font-family: var(--mono)">space</code> usually has no
-              family axis. Use
-              <strong style="font-weight: 500">Branch this axis</strong> when
-              sibling paths need different scales (e.g. border-radius vs
-              border-width).
+              family axis. Conditional
+              <strong style="font-weight: 500">groups</strong> (e.g. a
+              different scale for border-radius and border-width) are shown
+              under each axis.
             </p>
             <div class="step-body">
               <div class="cat-list" id="cat-list"></div>
@@ -1132,10 +1075,10 @@
               <strong style="font-weight: 500">Unused</strong> when it doesn't
               apply — e.g.
               <code style="font-family: var(--mono)">space</code> usually has no
-              family axis. Use
-              <strong style="font-weight: 500">Branch this axis</strong> when
-              sibling paths need different scales (e.g. border-radius vs
-              border-width).`;
+              family axis. Conditional
+              <strong style="font-weight: 500">groups</strong> (e.g. a
+              different scale for border-radius and border-width) are shown
+              under each axis.`;
         }
 
         document.querySelectorAll("#preset-row [data-preset]").forEach((btn) => {
@@ -1217,7 +1160,7 @@
             slot: "middle",
           };
           axes.splice(insertAt, 0, newAx);
-          categories.forEach((c) => (c.values[newAx.id] = mkAxisVal()));
+          categories.forEach((c) => (c.values[newAx.id] = mkAxisEntry()));
           insertAt++;
         });
         inp.value = "";
@@ -1229,11 +1172,8 @@
         if (!ax || ax.slot !== "middle") return;
         pushHistory();
         axes = axes.filter((a) => a.id !== axId);
-        categories.forEach((c) => {
-          walkBranchedValues(c.values, (values) => {
-            delete values[axId];
-          });
-        });
+        // Conditions on the removed axis are dropped along with it.
+        categories.forEach(normalizeCategory);
         renderAll();
       }
       function renameAxis(axId, val) {
@@ -1260,137 +1200,21 @@
         if (j <= catIdx || j >= maxIdx) return;
         pushHistory();
         [axes[i], axes[j]] = [axes[j], axes[i]];
+        // A condition may only name earlier axes, so moving an axis drops
+        // conditions that now point forward.
+        categories.forEach(normalizeCategory);
         renderAll();
       }
 
 
-      function branchAxis(catId, axId, branchPathStr) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const ax = axes.find((a) => a.id === axId);
-        if (!ax || ax.slot !== "middle") return;
-        const branchPath = parseBranchPath(branchPathStr);
-        const values = getValuesMap(c, branchPath);
-        const av = values[axId] || (values[axId] = mkAxisVal());
-        const existing = genValues(av);
-        pushHistory();
-        const firstBranch = mkBranch(existing[0] || "branch1");
-        firstBranch.values = initSubtreeValues(axId);
-        if (existing.length > 1 && firstBranch.values) {
-          const nextAxes = configurableAxesFrom(axisIndexById(axId) + 1);
-          const firstNext = nextAxes[0];
-          if (firstNext && firstBranch.values[firstNext.id]) {
-            const target = firstBranch.values[firstNext.id];
-            target.type = "custom";
-            target.list = existing.slice(1);
-            target.listText = target.list.join(", ");
-          }
-        }
-        values[axId] = { mode: "branched", branches: [firstBranch] };
-        shadowSubsequentAxes(values, axId);
-        pruneValuesScope(firstBranch.values, axisIndexById(axId) + 1);
-        renderAll();
+      // The ALL group's generator for an axis in a category. Conditional groups
+      // are read-only in this UI until the board redesign lands.
+      function getAxisEntry(category, axId) {
+        return category.values[axId] || (category.values[axId] = mkAxisEntry());
       }
 
-      function addBranchSibling(catId, axId, branchPathStr) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const branchPath = parseBranchPath(branchPathStr);
-        const values = getValuesMap(c, branchPath);
-        const av = values[axId];
-        if (!isBranched(av)) return;
-        const ax = axes.find((a) => a.id === axId);
-        const existing = new Set(av.branches.map((b) => b.value));
-        let n = av.branches.length + 1;
-        let name = (ax ? ax.name : "branch") + n;
-        while (existing.has(name)) {
-          n++;
-          name = (ax ? ax.name : "branch") + n;
-        }
-        pushHistory();
-        const br = mkBranch(name);
-        br.values = initSubtreeValues(axId);
-        pruneValuesScope(br.values, axisIndexById(axId) + 1);
-        av.branches.push(br);
-        renderAll();
-      }
-
-      function removeBranch(catId, axId, branchPathStr, branchId) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const branchPath = parseBranchPath(branchPathStr);
-        const values = getValuesMap(c, branchPath);
-        const av = values[axId];
-        if (!isBranched(av) || av.branches.length <= 1) return;
-        pushHistory();
-        av.branches = av.branches.filter((b) => b.id !== branchId);
-        renderAll();
-      }
-
-      function renameBranchValue(catId, axId, branchPathStr, branchId, val) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const branchPath = parseBranchPath(branchPathStr);
-        const values = getValuesMap(c, branchPath);
-        const av = values[axId];
-        if (!isBranched(av)) return;
-        const br = av.branches.find((b) => b.id === branchId);
-        if (!br) return;
-        br.value = val.trim().toLowerCase().replace(/\s+/g, "-") || br.value;
-        updateBranchDtcgTypeWarning(br);
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-
-      function updateBranchDtcgTypeWarning(br) {
-        const visible = !!(br.dtcgType && isOmittedAxisValue(br.value));
-        const icon = id("dtcg-branch-warning-icon-" + br.id);
-        const text = id("dtcg-branch-warning-text-" + br.id);
-        if (icon) icon.style.display = visible ? "" : "none";
-        if (text) text.style.display = visible ? "" : "none";
-      }
-
-      function collapseBranchedAxis(catId, axId, branchPathStr) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const branchPath = parseBranchPath(branchPathStr);
-        const values = getValuesMap(c, branchPath);
-        const av = values[axId];
-        if (!isBranched(av)) return;
-        if (
-          av.branches.length > 1 &&
-          !confirm(
-            "Collapse to flat? Only the first branch will be kept as a custom list, and subcategory token type metadata will be removed.",
-          )
-        )
-          return;
-        pushHistory();
-        const first = av.branches[0];
-        const flatVals = av.branches.map((b) => b.value).filter(Boolean);
-        values[axId] = {
-          type: "custom",
-          config: {},
-          list: flatVals,
-          listText: flatVals.join(", "),
-        };
-        const fromIdx = axisIndexById(axId);
-        configurableAxesFrom(fromIdx + 1).forEach((ax) => {
-          if (!values[ax.id] || values[ax.id].type === "unused") {
-            values[ax.id] = mkAxisVal();
-          }
-        });
-        if (first && first.values) {
-          const nextAxes = configurableAxesFrom(fromIdx + 1);
-          nextAxes.forEach((ax) => {
-            if (first.values[ax.id]) values[ax.id] = JSON.parse(JSON.stringify(first.values[ax.id]));
-          });
-        }
-        renderAll();
-      }
-
-      function getAxisVal(category, axId, branchPathStr) {
-        const values = getValuesMap(category, parseBranchPath(branchPathStr));
-        return values[axId] || (values[axId] = mkAxisVal());
+      function getAllGroupGenerator(category, axId) {
+        return allGroup(getAxisEntry(category, axId)).generator;
       }
 
       function addCategory() {
@@ -1442,20 +1266,6 @@
         scheduleAutoSave();
       }
 
-      function setBranchDtcgType(catId, axId, branchPathStr, branchId, val) {
-        const c = categories.find((x) => x.id === catId);
-        if (!c) return;
-        const values = getValuesMap(c, parseBranchPath(branchPathStr));
-        const av = values[axId];
-        if (!isBranched(av)) return;
-        const br = av.branches.find((x) => x.id === branchId);
-        if (!br) return;
-        br.dtcgType = DTCG_TYPES.has(val) ? val : "";
-        renderCategories();
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-
       function dtcgTypeOptionsHtml(cur) {
         const fundOpts = DTCG_FUNDAMENTAL_TYPES.map(
           (t) =>
@@ -1484,12 +1294,8 @@
         return `<span id="token-type-extension-note-${esc(idSuffix)}" class="token-type-extension-note" style="display:${visible ? "" : "none"}">Terrazzo extension; output support may require a custom plugin.</span>`;
       }
 
-      function dtcgTypeSelectHtml(item, kind, catId, axId, branchPathStr, branchId) {
+      function dtcgTypeSelectHtml(item) {
         const cur = item.dtcgType || "";
-        if (kind === "branch") {
-          const pathArg = esc(branchPathStr);
-          return `<select id="dtcg-branch-type-${esc(branchId)}" class="branch-type-select" aria-label="Token type for subcategory ${esc(item.value)}" ${historyFieldAttrs("dtcg-branch:" + catId + "|" + axId + "|" + branchPathStr + "|" + branchId)} onchange="setBranchDtcgType('${catId}','${axId}','${pathArg}','${branchId}',this.value)">${dtcgTypeOptionsHtml(cur)}</select>${tokenTypeExtensionNoteHtml(branchId, cur)}`;
-        }
         return `<select id="dtcg-type-${esc(item.id)}" class="cat-type-select" aria-label="Token type for ${esc(item.name)}" ${historyFieldAttrs("dtcg:" + item.id)} onchange="setCategoryDtcgType('${item.id}',this.value)">
           ${dtcgTypeOptionsHtml(cur)}
         </select>${tokenTypeExtensionNoteHtml(item.id, cur)}`;
@@ -1563,19 +1369,10 @@
         }
         el.innerHTML = categories
           .map((c) => {
-            const body = renderAxisSubtree(
-              c,
-              c.values,
-              "",
-              0,
-              firstConfigurableAxisIndex(),
-            );
-            const combinations = renderCombinationPanel(
-              c,
-              c.values,
-              "",
-              firstConfigurableAxisIndex(),
-            );
+            const body = axes
+              .filter(isConfigurableAxis)
+              .map((ax) => renderAxisNode(c, ax))
+              .join("");
             return `
       <div class="cat-card">
         <div class="cat-head">
@@ -1588,7 +1385,6 @@
           <button class="btn-icon btn-ghost" onclick="removeCategory('${c.id}')" title="Remove category">✕</button>
         </div>
         <div class="cat-body">
-          ${combinations}
           ${body}
         </div>
       </div>`;
@@ -1596,232 +1392,46 @@
           .join("");
       }
 
-      function renderCombinationPanel(cat, values, branchPathStr, startAxisIdx) {
-        const defs = combinationAxes(values, startAxisIdx);
-        if (!defs || !defs.length) return "";
-        const cfg = combinationConfig(values);
-        const pathArg = esc(branchPathStr);
-        if (!cfg) {
-          return `<div class="combination-panel" style="margin-bottom:12px;padding:10px;border:1px dashed var(--bd-2);border-radius:var(--r);background:var(--bg-2)">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><strong style="font-size:12px">Combination rules</strong><span style="font-size:11px;color:var(--tx-3)">Limit which axis combinations become tokens.</span><button class="btn-xs" onclick="enableCombinations('${cat.id}','${pathArg}',${startAxisIdx})">Use constrained combinations</button></div>
-          </div>`;
-        }
-        const ruleCount = (cfg.rules || []).reduce((n, rule) => n + combinationProduct(defs, rule.selections || {}).length, 0);
-        const additionCount = (cfg.additions || []).length;
-        return `<div class="combination-panel" style="margin-bottom:12px;padding:10px;border:1px solid var(--bd-2);border-radius:var(--r);background:var(--bg-2)">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px"><strong style="font-size:12px">Constrained combinations</strong><span style="font-size:11px;color:var(--tx-3)">${ruleCount + additionCount} emitted combination${ruleCount + additionCount === 1 ? "" : "s"}</span><button class="btn-xs btn-ghost" onclick="disableCombinations('${cat.id}','${pathArg}')">Return to all permutations</button></div>
-          <div style="display:grid;gap:8px">${(cfg.rules || []).map((rule, i) => renderCombinationRule(cat, values, branchPathStr, startAxisIdx, defs, rule, i)).join("")}</div>
-          <div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn-xs" onclick="addCombinationRule('${cat.id}','${pathArg}',${startAxisIdx})">+ Add generated rule</button><button class="btn-xs" onclick="addCombinationAddition('${cat.id}','${pathArg}',${startAxisIdx})">+ Add explicit combination</button></div>
-          ${cfg.additions && cfg.additions.length ? `<div style="margin-top:10px;display:grid;gap:7px">${cfg.additions.map((addition, i) => renderCombinationAddition(cat, values, branchPathStr, defs, addition, i)).join("")}</div>` : ""}
+      function renderGroupSummary(entry) {
+        const groups = conditionalGroups(entry);
+        if (!groups.length) return "";
+        return `<div class="axis-groups" style="margin-top:8px;display:grid;gap:4px;font-size:11px;color:var(--tx-2)">
+          <div style="color:var(--tx-3)">Conditional groups (read-only for now) — when they match, their values replace the ones above:</div>
+          ${groups
+            .map((g) => {
+              const vals = genValues(g.generator);
+              return `<div>when <strong>${esc(describeCondition(g.condition))}</strong> → ${vals.length ? vals.map((v) => `<span class="val-chip">${esc(v)}</span>`).join(" ") : `<span class="cp-empty">no values (axis skipped)</span>`}${g.tokenType ? ` · token type <code>${esc(g.tokenType)}</code>` : ""}</div>`;
+            })
+            .join("")}
         </div>`;
       }
 
-      function renderCombinationRule(cat, values, branchPathStr, startAxisIdx, defs, rule, ruleIdx) {
-        const pathArg = esc(branchPathStr);
-        return `<div style="padding:8px;border:1px solid var(--bd-1);border-radius:var(--r);background:var(--bg)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:11px;color:var(--tx-2)">Generated rule · ${combinationProduct(defs, rule.selections || {}).length} combination${combinationProduct(defs, rule.selections || {}).length === 1 ? "" : "s"}</span><button class="btn-icon btn-ghost" onclick="removeCombinationRule('${cat.id}','${pathArg}',${ruleIdx})" title="Remove rule">✕</button></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:7px">${defs.map(({ ax, values: options }) => `<label style="display:grid;gap:3px;font-size:10px;color:var(--tx-3)">${esc(ax.name)}<select multiple size="${Math.min(4, Math.max(2, options.length))}" onchange="setCombinationRuleSelection('${cat.id}','${pathArg}',${ruleIdx},'${ax.id}',Array.from(this.selectedOptions).map((o)=>o.value))">${options.map((value) => `<option value="${esc(value)}"${(rule.selections?.[ax.id] || []).includes(value) ? " selected" : ""}>${esc(value)}</option>`).join("")}</select></label>`).join("")}</div></div>`;
-      }
-
-      function renderCombinationAddition(cat, values, branchPathStr, defs, addition, additionIdx) {
-        const pathArg = esc(branchPathStr);
-        return `<div style="padding:8px;border:1px solid var(--bd-1);border-radius:var(--r);background:var(--bg)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:11px;color:var(--tx-2)">Explicit combination</span><button class="btn-icon btn-ghost" onclick="removeCombinationAddition('${cat.id}','${pathArg}',${additionIdx})" title="Remove combination">✕</button></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:7px">${defs.map(({ ax, values: options }) => `<label style="display:grid;gap:3px;font-size:10px;color:var(--tx-3)">${esc(ax.name)}<select onchange="setCombinationAdditionValue('${cat.id}','${pathArg}',${additionIdx},'${ax.id}',this.value)">${options.map((value) => `<option value="${esc(value)}"${addition[ax.id] === value ? " selected" : ""}>${esc(value)}</option>`).join("")}</select></label>`).join("")}</div></div>`;
-      }
-
-      function combinationScope(catId, branchPathStr) {
-        const c = categories.find((x) => x.id === catId);
-        return c ? { c, values: getValuesMap(c, parseBranchPath(branchPathStr)) } : null;
-      }
-
-      function enableCombinations(catId, branchPathStr, startAxisIdx) {
-        const scope = combinationScope(catId, branchPathStr);
-        if (!scope) return;
-        const defs = combinationAxes(scope.values, startAxisIdx);
-        if (!defs) return;
-        const currentCount = combinationProduct(defs).length;
-        const preserve = confirm(`This scope currently generates ${currentCount} combination${currentCount === 1 ? "" : "s"}. Keep all of them as the first generated rule? Choose Cancel to start with 0 combinations.`);
-        pushHistory();
-        scope.values._combinationConfig = mkCombinationConfig();
-        if (preserve) {
-          scope.values._combinationConfig.rules.push({ selections: Object.fromEntries(defs.map(({ ax, values }) => [ax.id, values.slice()])) });
-        }
-        renderAll();
-      }
-
-      function disableCombinations(catId, branchPathStr) {
-        const scope = combinationScope(catId, branchPathStr);
-        if (!scope || !combinationConfig(scope.values)) return;
-        if (!confirm("Return to all permutations? Constrained combination rules will be removed.")) return;
-        pushHistory();
-        delete scope.values._combinationConfig;
-        renderAll();
-      }
-
-      function addCombinationRule(catId, branchPathStr, startAxisIdx) {
-        const scope = combinationScope(catId, branchPathStr);
-        if (!scope) return;
-        const defs = combinationAxes(scope.values, startAxisIdx);
-        if (!defs) return;
-        pushHistory();
-        const cfg = scope.values._combinationConfig || (scope.values._combinationConfig = mkCombinationConfig());
-        cfg.rules.push({ selections: Object.fromEntries(defs.map(({ ax, values }) => [ax.id, values.slice(0, 1)])) });
-        renderAll();
-      }
-
-      function addCombinationAddition(catId, branchPathStr, startAxisIdx) {
-        const scope = combinationScope(catId, branchPathStr);
-        if (!scope) return;
-        const defs = combinationAxes(scope.values, startAxisIdx);
-        if (!defs) return;
-        pushHistory();
-        const cfg = scope.values._combinationConfig || (scope.values._combinationConfig = mkCombinationConfig());
-        cfg.additions.push(Object.fromEntries(defs.map(({ ax, values }) => [ax.id, values[0]])));
-        renderAll();
-      }
-
-      function removeCombinationRule(catId, branchPathStr, ruleIdx) {
-        const scope = combinationScope(catId, branchPathStr);
-        if (!scope) return;
-        pushHistory();
-        scope.values._combinationConfig.rules.splice(ruleIdx, 1);
-        renderAll();
-      }
-
-      function removeCombinationAddition(catId, branchPathStr, additionIdx) {
-        const scope = combinationScope(catId, branchPathStr);
-        if (!scope) return;
-        pushHistory();
-        scope.values._combinationConfig.additions.splice(additionIdx, 1);
-        renderAll();
-      }
-
-      function setCombinationRuleSelection(catId, branchPathStr, ruleIdx, axId, selected) {
-        const scope = combinationScope(catId, branchPathStr);
-        if (!scope) return;
-        const cfg = combinationConfig(scope.values);
-        if (!cfg || !cfg.rules[ruleIdx]) return;
-        cfg.rules[ruleIdx].selections[axId] = selected;
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-
-      function setCombinationAdditionValue(catId, branchPathStr, additionIdx, axId, value) {
-        const scope = combinationScope(catId, branchPathStr);
-        if (!scope) return;
-        const cfg = combinationConfig(scope.values);
-        if (!cfg || !cfg.additions[additionIdx]) return;
-        cfg.additions[additionIdx][axId] = value;
-        renderPreviewAndExport();
-        scheduleAutoSave();
-      }
-
-      function renderAxisSubtree(cat, values, branchPathStr, nestDepth, startAxisIdx) {
-        const parts = [];
-        for (let i = startAxisIdx; i < axes.length; i++) {
-          const ax = axes[i];
-          if (ax.slot === "namespace" || ax.slot === "category") continue;
-          if (nestDepth === 0 && isShadowedAtLevel(values, ax.id)) continue;
-          parts.push(renderAxisNode(cat, ax, values, branchPathStr, nestDepth));
-          const av = values[ax.id];
-          if (isBranched(av)) break;
-        }
-        return parts.join("");
-      }
-
-      function renderAxisNode(cat, ax, values, branchPathStr, nestDepth) {
-        const av = values[ax.id] || (values[ax.id] = mkAxisVal());
-        const pathArg = esc(branchPathStr);
-        const nestClass = nestDepth > 0 ? " axis-nest" : "";
-
-        if (isBranched(av)) {
-          const axIdx = axisIndexById(ax.id);
-          const hasFollowing = configurableAxesFrom(axIdx + 1).length > 0;
-          return `
-    <div class="axis-config${nestClass}">
-      <div class="axis-config-hdr">
-        <span class="axis-config-name">${esc(ax.name)}</span>
-        <span class="axis-branch-meta">branched · ${av.branches.length} branch${av.branches.length !== 1 ? "es" : ""}</span>
-      </div>
-      <div class="branch-list">
-        ${av.branches
-          .map((br) => {
-            const childPath = encodeBranchPath([
-              ...parseBranchPath(branchPathStr),
-              br.id,
-            ]);
-            const childValues = br.values || (br.values = {});
-            const subtree = hasFollowing
-              ? renderAxisSubtree(
-                  cat,
-                  childValues,
-                  childPath,
-                  nestDepth + 1,
-                  axIdx + 1,
-                )
-              : "";
-            const combinations = renderCombinationPanel(
-              cat,
-              childValues,
-              childPath,
-              axIdx + 1,
-            );
-            const branchType = br.dtcgType || "";
-            const branchTypeWarning = !!(branchType && isOmittedAxisValue(br.value));
-            const branchTypeWarningText = "Token type will be omitted from tokens.json because this subcategory is omitted from token names.";
-            return `
-        <div class="branch-card">
-          <div class="branch-head">
-            <input type="text" value="${esc(br.value)}" ${historyFieldAttrs("branch:" + cat.id + "|" + ax.id + "|" + branchPathStr + "|" + br.id)} oninput="renameBranchValue('${cat.id}','${ax.id}','${pathArg}','${br.id}',this.value)" />
-            <span>${esc(ax.name)}</span>
-            <div class="branch-type-wrap">
-              <label for="dtcg-branch-type-${esc(br.id)}">Token type</label>
-              ${dtcgTypeSelectHtml(br, "branch", cat.id, ax.id, branchPathStr, br.id)}
-              <span id="dtcg-branch-warning-icon-${esc(br.id)}" class="dtcg-type-warning-icon" role="img" aria-label="${branchTypeWarningText}" title="${branchTypeWarningText}" style="display:${branchTypeWarning ? "" : "none"}">⚠</span>
-            </div>
-            <button class="btn-icon btn-ghost" onclick="removeBranch('${cat.id}','${ax.id}','${pathArg}','${br.id}')" title="Remove branch" ${av.branches.length <= 1 ? "disabled" : ""}>✕</button>
-          </div>
-          ${combinations}
-          ${subtree}
-          <div id="dtcg-branch-warning-text-${esc(br.id)}" class="dtcg-type-warning" style="display:${branchTypeWarning ? "" : "none"}">${branchTypeWarningText}</div>
-        </div>`;
-          })
-          .join("")}
-      </div>
-      <div class="axis-branch-actions">
-        <button class="btn-xs" onclick="addBranchSibling('${cat.id}','${ax.id}','${pathArg}')">+ Add ${esc(ax.name)}</button>
-        <button class="btn-xs btn-ghost" onclick="collapseBranchedAxis('${cat.id}','${ax.id}','${pathArg}')">Collapse to flat</button>
-      </div>
-    </div>`;
-        }
-
-        const axIdx = axisIndexById(ax.id);
-        const canBranch =
-          ax.slot === "middle" && configurableAxesFrom(axIdx + 1).length > 0;
+      function renderAxisNode(cat, ax) {
+        const entry = getAxisEntry(cat, ax.id);
+        const gen = allGroup(entry).generator;
+        const scaleVal = entry.unused ? { type: "unused", config: {}, list: [] } : gen;
         const flatConfig = renderScaleConfig({
-          scaleVal: av,
+          scaleVal,
           label: ax.name,
-          fieldKeyPrefix: `${cat.id}|${branchPathStr || "root"}|${ax.id}`,
+          fieldKeyPrefix: `${cat.id}|${ax.id}`,
           typeOptions: SCALE_TYPES,
-          countId: axisUIKey(cat.id, ax.id, branchPathStr, "count"),
-          previewId: axisUIKey(cat.id, ax.id, branchPathStr, "preview"),
-          warnId: axisUIKey(cat.id, ax.id, branchPathStr, "warn"),
-          tooManyId: axisUIKey(cat.id, ax.id, branchPathStr, "too-many"),
-          customInputId: axisUIKey(cat.id, ax.id, branchPathStr, "custom"),
-          onTypeChange: `setAxisType('${cat.id}','${ax.id}','${pathArg}',this.value)`,
-          onCfg: (key) =>
-            `setCfg('${cat.id}','${ax.id}','${pathArg}','${key}',this.value)`,
-          onTshirtExtra: `setTshirtExtra('${cat.id}','${ax.id}','${pathArg}',this.value)`,
-          onCustomList: `setCustomList('${cat.id}','${ax.id}','${pathArg}',this.value)`,
+          countId: axisUIKey(cat.id, ax.id, "count"),
+          previewId: axisUIKey(cat.id, ax.id, "preview"),
+          warnId: axisUIKey(cat.id, ax.id, "warn"),
+          tooManyId: axisUIKey(cat.id, ax.id, "too-many"),
+          customInputId: axisUIKey(cat.id, ax.id, "custom"),
+          onTypeChange: `setAxisType('${cat.id}','${ax.id}',this.value)`,
+          onCfg: (key) => `setCfg('${cat.id}','${ax.id}','${key}',this.value)`,
+          onTshirtExtra: `setTshirtExtra('${cat.id}','${ax.id}',this.value)`,
+          onCustomList: `setCustomList('${cat.id}','${ax.id}',this.value)`,
           emptyWarn:
             "No values yet — configure this axis or remove it for this category.",
         });
-        const branchBtn = canBranch
-          ? `<div class="axis-branch-actions"><button class="btn-xs btn-ghost" onclick="branchAxis('${cat.id}','${ax.id}','${pathArg}')">Branch this axis</button></div>`
-          : "";
-        return `<div class="${nestClass ? "axis-nest" : ""}">${flatConfig}${branchBtn}</div>`;
+        return `<div>${flatConfig}${entry.unused ? "" : renderGroupSummary(entry)}</div>`;
       }
 
-      function axisUIKey(catId, axId, branchPathStr, suffix) {
-        const path = branchPathStr || "root";
-        return `axis-${suffix}-${catId}-${path.replace(/\|/g, "-")}-${axId}`;
+      function axisUIKey(catId, axId, suffix) {
+        return `axis-${suffix}-${catId}-${axId}`;
       }
 
       function renderScaleConfig(opts) {
@@ -1889,54 +1499,55 @@
     </div>`;
       }
 
-      function setAxisType(catId, axId, branchPathStr, type) {
+      function setAxisType(catId, axId, type) {
         const c = categories.find((x) => x.id === catId);
         if (!c) return;
         pushHistory();
-        const av = getAxisVal(c, axId, branchPathStr);
-        av.type = type;
-        delete av.mode;
-        delete av.branches;
+        const entry = getAxisEntry(c, axId);
         if (type === "unused") {
-          av.config = {};
-          av.list = [];
-          delete av.listText;
-        } else if (type === "custom" && !av.list) {
+          entry.unused = true;
+          renderAll();
+          return;
+        }
+        delete entry.unused;
+        const av = allGroup(entry).generator;
+        av.type = type;
+        if (type === "custom" && !av.list) {
           av.list = [];
         } else if (type !== "custom") {
           delete av.listText;
         }
         renderAll();
       }
-      function setCfg(catId, axId, branchPathStr, key, val) {
+      function setCfg(catId, axId, key, val) {
         const c = categories.find((x) => x.id === catId);
         if (!c) return;
-        const av = getAxisVal(c, axId, branchPathStr);
+        const av = getAllGroupGenerator(c, axId);
         av.config = av.config || {};
         av.config[key] = val;
-        refreshAxisValuesUI(catId, axId, branchPathStr);
+        refreshAxisValuesUI(catId, axId);
         renderPreviewAndExport();
         scheduleAutoSave();
       }
-      function setTshirtExtra(catId, axId, branchPathStr, val) {
+      function setTshirtExtra(catId, axId, val) {
         const c = categories.find((x) => x.id === catId);
         if (!c) return;
-        const av = getAxisVal(c, axId, branchPathStr);
+        const av = getAllGroupGenerator(c, axId);
         av.config = av.config || {};
         av.config.extra = val;
-        refreshAxisValuesUI(catId, axId, branchPathStr);
+        refreshAxisValuesUI(catId, axId);
         renderPreviewAndExport();
         scheduleAutoSave();
       }
-      function refreshAxisValuesUI(catId, axId, branchPathStr) {
+      function refreshAxisValuesUI(catId, axId) {
         const c = categories.find((x) => x.id === catId);
         if (!c) return;
-        const av = getAxisVal(c, axId, branchPathStr);
+        const av = getAllGroupGenerator(c, axId);
         const values = genValues(av);
-        const countEl = id(axisUIKey(catId, axId, branchPathStr, "count"));
-        const previewEl = id(axisUIKey(catId, axId, branchPathStr, "preview"));
-        const warnEl = id(axisUIKey(catId, axId, branchPathStr, "warn"));
-        const tooManyEl = id(axisUIKey(catId, axId, branchPathStr, "too-many"));
+        const countEl = id(axisUIKey(catId, axId, "count"));
+        const previewEl = id(axisUIKey(catId, axId, "preview"));
+        const warnEl = id(axisUIKey(catId, axId, "warn"));
+        const tooManyEl = id(axisUIKey(catId, axId, "too-many"));
         if (countEl)
           countEl.textContent = `Generated values (${values.length})`;
         if (previewEl) {
@@ -1945,9 +1556,7 @@
             : `<span class="cp-empty">none</span>`;
         }
         if (warnEl) {
-          if (av.type === "unused") {
-            warnEl.style.display = "none";
-          } else if (values.length === 0) {
+          if (values.length === 0) {
             warnEl.style.display = "";
             warnEl.textContent =
               "No values yet — configure this axis or remove it for this category.";
@@ -1964,13 +1573,13 @@
           }
         }
       }
-      function setCustomList(catId, axId, branchPathStr, val) {
+      function setCustomList(catId, axId, val) {
         const c = categories.find((x) => x.id === catId);
         if (!c) return;
-        const av = getAxisVal(c, axId, branchPathStr);
+        const av = getAllGroupGenerator(c, axId);
         av.listText = val;
         av.list = parseCustomList(val);
-        refreshAxisValuesUI(catId, axId, branchPathStr);
+        refreshAxisValuesUI(catId, axId);
         renderPreviewAndExport();
         scheduleAutoSave();
       }
@@ -2043,9 +1652,7 @@
       }
 
       function previewExamplesForCategory(category) {
-        const start = firstConfigurableAxisIndex();
-        if (start < 0) return [];
-        const paths = walkTokenSegments(category, category.values, [], start);
+        const paths = tokenSegmentPaths(category);
         if (!paths.length) return [];
 
         const nsSeg = [];
@@ -2090,7 +1697,7 @@
     <div class="legend">
       ${namespaceEnabled ? `<span><span class="dot dot-ns"></span>namespace</span>` : ""}
       <span><span class="dot dot-cat"></span>category</span>
-      ${axes.some((a) => a.name === "family") || hasBranchedAxes() ? `<span><span class="dot dot-fam"></span>family</span>` : ""}
+      ${axes.some((a) => a.name === "family") || hasConditionalGroups() ? `<span><span class="dot dot-fam"></span>family</span>` : ""}
       <span><span class="dot dot-scale"></span>scale</span>
     </div>`;
 
@@ -2587,27 +2194,27 @@
       }
 
       /* ── Presets ───────────────────────────────────────── */
+      // Presets are written in the version 2 project format and converted to
+      // groups by loadProjectState, like any old project file.
       function loadPreset(key) {
-        axisSeq = 0;
-        catSeq = 0;
-        brSeq = 0;
-        namespaceEnabled = false;
-        namespaceValue = "";
+        const p = { version: 2 };
+        p.namespaceEnabled = false;
+        p.namespaceValue = "";
 
         if (TIER2_PRESETS.has(key)) {
-          tierMode = "tier2";
-          projectTitle = DEFAULT_PROJECT_TITLE_T2;
+          p.tierMode = "tier2";
+          p.projectTitle = DEFAULT_PROJECT_TITLE_T2;
         } else {
-          tierMode = "tier1";
-          projectTitle = DEFAULT_PROJECT_TITLE_T1;
+          p.tierMode = "tier1";
+          p.projectTitle = DEFAULT_PROJECT_TITLE_T1;
         }
 
         if (key === "basic") {
-          axes = [
+          p.axes = [
             { id: "category", name: "category", locked: true, slot: "category" },
             { id: "scale", name: "scale", locked: true, slot: "scale" },
           ];
-          categories = [
+          p.categories = [
             {
               id: "cat1",
               name: "space",
@@ -2629,15 +2236,13 @@
               },
             },
           ];
-          catSeq = 2;
         } else if (key === "full") {
-          axes = [
+          p.axes = [
             { id: "category", name: "category", locked: true, slot: "category" },
             { id: "ax1", name: "family", locked: false, slot: "middle" },
             { id: "scale", name: "scale", locked: true, slot: "scale" },
           ];
-          axisSeq = 1;
-          categories = [
+          p.categories = [
             {
               id: "cat1",
               name: "color",
@@ -2669,11 +2274,10 @@
               },
             },
           ];
-          catSeq = 2;
         } else if (key === "families") {
-          namespaceEnabled = true;
-          namespaceValue = "ds";
-          axes = [
+          p.namespaceEnabled = true;
+          p.namespaceValue = "ds";
+          p.axes = [
             {
               id: "namespace",
               name: "namespace",
@@ -2684,8 +2288,7 @@
             { id: "ax1", name: "family", locked: false, slot: "middle" },
             { id: "scale", name: "scale", locked: true, slot: "scale" },
           ];
-          axisSeq = 1;
-          categories = [
+          p.categories = [
             {
               id: "cat1",
               name: "border",
@@ -2722,17 +2325,14 @@
               },
             },
           ];
-          catSeq = 1;
-          brSeq = 2;
         } else if (key === "semantic-color") {
-          axes = [
+          p.axes = [
             { id: "category", name: "category", locked: true, slot: "category" },
             { id: "ax1", name: "role", locked: false, slot: "middle" },
             { id: "ax2", name: "emphasis", locked: false, slot: "middle" },
             { id: "scale", name: "scale", locked: true, slot: "scale" },
           ];
-          axisSeq = 2;
-          categories = [
+          p.categories = [
             {
               id: "cat1",
               name: "color",
@@ -2752,15 +2352,13 @@
               },
             },
           ];
-          catSeq = 1;
         } else if (key === "typography-compound") {
-          axes = [
+          p.axes = [
             { id: "category", name: "category", locked: true, slot: "category" },
             { id: "ax1", name: "hierarchy", locked: false, slot: "middle" },
             { id: "scale", name: "scale", locked: true, slot: "scale" },
           ];
-          axisSeq = 1;
-          categories = [
+          p.categories = [
             {
               id: "cat1",
               name: "typography",
@@ -2775,12 +2373,15 @@
               },
             },
           ];
-          catSeq = 1;
         } else {
           return;
         }
 
-        syncScaleAxisForTier();
+        const err = loadProjectState(p);
+        if (err) {
+          showPersistenceError(err);
+          return;
+        }
         clearSavedState();
         hideRestoreBanner();
         renderAll();
@@ -2798,7 +2399,7 @@
         categories = [];
         axisSeq = 0;
         catSeq = 0;
-        brSeq = 0;
+        groupSeq = 0;
         syncScaleAxisForTier();
         clearSavedState();
         hideRestoreBanner();

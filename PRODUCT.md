@@ -28,7 +28,7 @@ A single, method-driven toolkit that couples an explicit six-layer naming method
 ## Capabilities and Constraints
 
 - Six-layer naming methodology for design tokens, documented in the handbook and reflected in the interactive tools.
-- Interactive tools: token naming builder (axis / constrained-combination model, DTCG-shaped JSON + CSS stub export), token value builder (typed DTCG/Terrazzo values, alias preservation, JSON export), token naming worksheet (six-question decision record), three-tier token chain builder (primitive → semantic → component), component anatomy mapper, and a design-system naming reference card.
+- Interactive tools: token naming builder (axis / group model, DTCG-shaped JSON + CSS stub export), token value builder (typed DTCG/Terrazzo values, alias preservation, JSON export), token naming worksheet (six-question decision record), three-tier token chain builder (primitive → semantic → component), component anatomy mapper, and a design-system naming reference card.
 - Token sources are (and remain) valid DTCG/Terrazzo, including aliases.
 - Confirmed durable constraint: the project stays plain static HTML/CSS/JS with no framework or build step. The tools are standalone, framework-free documents.
 - Confirmed core direction: a portable Terrazzo build that turns one DTCG token source into two projections — (1) CSS custom properties that preserve live relationships such as `calc()` for arithmetic derivations, and (2) concrete, Figma-compatible Variables. Arithmetic is recorded as a namespaced `$extensions` derivation contract, not embedded in `$value`.

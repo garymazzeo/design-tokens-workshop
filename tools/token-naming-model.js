@@ -10,7 +10,13 @@
  * builder's inline script shares these top-level bindings and the page still
  * works when opened straight from disk. Node loads the same file as CommonJS
  * (see the export at the bottom), which is how scripts/check-naming-parity.mjs
- * runs the model without a browser.
+ * and tests/ run the model without a browser.
+ *
+ * Terms (axis, group, condition, unused axis, …) are defined in CONTEXT.md.
+ * In each category, each configurable axis holds an axis entry:
+ *   { unused?: true, groups: Group[] }
+ *   Group = { id, condition: { [axisId]: string[] }, generator, tokenType? }
+ * Exactly one group per axis is the ALL group, whose condition is empty.
  */
 
 /* ── State ──────────────────────────────────────────── */
@@ -24,10 +30,10 @@ let axes = [
   { id: "category", name: "category", locked: true, slot: "category" },
   { id: "scale", name: "scale", locked: true, slot: "scale" },
 ];
-let categories = []; // {id, name, dtcgType, values:{axisId: flat|branched}}; branches may have dtcgType
+let categories = []; // {id, name, dtcgType, values: {axisId: axis entry}}
 let axisSeq = 0,
   catSeq = 0,
-  brSeq = 0;
+  groupSeq = 0;
 
 const RESERVED_AXIS_NAMES = new Set(["category", "namespace"]);
 
@@ -72,6 +78,13 @@ function isDefaultProjectTitle(title) {
   );
 }
 
+/* ── Axes ─────────────────────────────────────────── */
+// Namespace and category are fixed positions in the formula; every other axis
+// is configured per category.
+function isConfigurableAxis(ax) {
+  return ax.slot !== "namespace" && ax.slot !== "category";
+}
+
 function scaleAxisIndex() {
   return axes.findIndex((a) => a.slot === "scale");
 }
@@ -80,7 +93,23 @@ function categoryAxisIndex() {
   return axes.findIndex((a) => a.slot === "category");
 }
 
-function syncScaleAxisForTier() {
+function axisIndexById(axId) {
+  return axes.findIndex((a) => a.id === axId);
+}
+
+function firstConfigurableAxisIndex() {
+  return axes.findIndex(isConfigurableAxis);
+}
+
+// The axis right after category: only groups whose condition includes it may
+// set a token type.
+function typeAxis() {
+  return axes[firstConfigurableAxisIndex()] || null;
+}
+
+// Tier 1 keeps a locked scale axis last; Tier 2 treats scale as an ordinary
+// axis. Moves and relabels the scale axis to match tierMode.
+function syncScaleAxisSlots() {
   if (tierMode === "tier2") {
     axes.forEach((a) => {
       if (a.slot === "scale") {
@@ -110,18 +139,11 @@ function syncScaleAxisForTier() {
   }
   axes = axes.filter((a) => a.id !== scaleAx.id);
   axes.push(scaleAx);
-  categories.forEach((c) => {
-    normalizeCategory(c);
-    initCategoryValues(c);
-  });
 }
 
-function initCategoryValues(c) {
-  axes.forEach((ax) => {
-    if (ax.slot !== "category" && ax.slot !== "namespace") {
-      if (!c.values[ax.id]) c.values[ax.id] = mkAxisVal();
-    }
-  });
+function syncScaleAxisForTier() {
+  syncScaleAxisSlots();
+  categories.forEach(normalizeCategory);
 }
 
 const SCALE_TYPES = {
@@ -131,259 +153,118 @@ const SCALE_TYPES = {
   tshirt: { label: "T-shirt sizes", desc: "e.g. xs, sm, md, lg, xl" },
   custom: { label: "Custom list", desc: "comma-separated values; use [default], [base], etc. to omit that segment from the name" },
 };
+const GENERATOR_TYPES = new Set(["numeric", "ordinal", "tshirt", "custom"]);
 const TSHIRT_BASE = ["xs", "sm", "md", "lg", "xl"];
 
-/* ── Category management ──────────────────────────── */
-function mkAxisVal() {
-  return { type: "custom", config: {}, list: [] };
+/* ── Groups ───────────────────────────────────────── */
+function mkGenerator(list) {
+  return { type: "custom", config: {}, list: list ? list.slice() : [] };
 }
 
-function mkBranchId() {
-  return "br" + ++brSeq;
+function mkGroup(condition, generator) {
+  return { id: "g" + ++groupSeq, condition: condition || {}, generator: generator || mkGenerator() };
 }
 
-function mkBranch(value) {
-  return { id: mkBranchId(), value, dtcgType: "", values: {} };
+function mkAxisEntry() {
+  return { groups: [mkGroup({}, mkGenerator())] };
 }
 
-function isBranched(av) {
-  return av && av.mode === "branched";
+function isAllGroup(group) {
+  return !group.condition || !Object.keys(group.condition).length;
 }
 
-function parseBranchPath(str) {
-  return str ? String(str).split("|").filter(Boolean) : [];
+function allGroup(entry) {
+  return entry.groups.find(isAllGroup);
 }
 
-function encodeBranchPath(path) {
-  return path.length ? path.join("|") : "";
+function conditionalGroups(entry) {
+  return entry.groups.filter((g) => !isAllGroup(g));
 }
 
-function axisIndexById(axId) {
-  return axes.findIndex((a) => a.id === axId);
+// chosen maps axis id → the raw value (e.g. "[default]") picked on that axis
+// for the token name so far.
+function groupMatches(group, chosen) {
+  return Object.entries(group.condition).every(
+    ([axId, vals]) => Object.prototype.hasOwnProperty.call(chosen, axId) && vals.includes(chosen[axId]),
+  );
 }
 
-function configurableAxesFrom(startIdx) {
-  return axes
-    .slice(startIdx)
-    .filter((a) => a.slot !== "namespace" && a.slot !== "category");
+// The latest axis in the formula that a group's condition names.
+function deepestConditionAxisId(group) {
+  return Object.keys(group.condition).reduce((best, axId) =>
+    best == null || axisIndexById(axId) > axisIndexById(best) ? axId : best,
+  null);
 }
 
-function initSubtreeValues(fromAxId) {
-  const vals = {};
-  const fromIdx = axisIndexById(fromAxId);
-  configurableAxesFrom(fromIdx + 1).forEach((ax) => {
-    vals[ax.id] = mkAxisVal();
-  });
-  return vals;
+function groupValues(groups) {
+  return [...new Set(groups.flatMap((g) => genValues(g.generator)))];
 }
 
-function mkCombinationConfig() {
-  return { rules: [], additions: [] };
-}
-
-function combinationConfig(values) {
-  return values && values._combinationConfig;
-}
-
-function combinationAxes(values, startAxisIdx) {
-  const out = [];
-  for (let i = startAxisIdx; i < axes.length; i++) {
-    const ax = axes[i];
-    if (ax.slot === "namespace" || ax.slot === "category") continue;
-    const av = values[ax.id];
-    if (!av || av.type === "unused") continue;
-    if (isBranched(av)) return null;
-    out.push({ ax, values: genValues(av).filter(Boolean) });
-  }
-  return out;
-}
-
-function combinationProduct(axisDefs, selections) {
-  let paths = [[]];
-  for (const def of axisDefs) {
-    const selected = selections && Array.isArray(selections[def.ax.id])
-      ? selections[def.ax.id]
-      : def.values;
-    if (!selected || !selected.length) return [];
-    paths = paths.flatMap((prefix) =>
-      selected.map((value) => [...prefix, { ax: def.ax, val: tokenPart(value) }]),
-    );
-  }
-  return paths;
-}
-
-function constrainedTokenSegments(values, startAxisIdx) {
-  const cfg = combinationConfig(values);
-  const axisDefs = combinationAxes(values, startAxisIdx);
-  if (!cfg || !axisDefs) return null;
-  const out = [];
-  (cfg.rules || []).forEach((rule) => {
-    out.push(...combinationProduct(axisDefs, rule.selections || {}));
-  });
-  (cfg.additions || []).forEach((addition) => {
-    const paths = combinationProduct(axisDefs, Object.fromEntries(
-      axisDefs.map(({ ax }) => [ax.id, [addition[ax.id]]]),
-    ));
-    out.push(...paths);
-  });
-  const seen = new Set();
-  return out.filter((segments) => {
-    const key = segments.map((s) => `${s.ax.id}:${s.val}`).join("|");
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
+function initCategoryValues(c) {
+  axes.forEach((ax) => {
+    if (isConfigurableAxis(ax) && !c.values[ax.id]) c.values[ax.id] = mkAxisEntry();
   });
 }
 
-function scopeCombinationAxes(values, startAxisIdx) {
-  const defs = combinationAxes(values, startAxisIdx);
-  return defs && defs.length ? defs : [];
-}
-
-function combinationControlId(catId, branchPathStr, suffix) {
-  return `combination-${catId}-${(branchPathStr || "root").replace(/\|/g, "-")}-${suffix}`;
-}
-
-function shadowSubsequentAxes(values, branchedAxId) {
-  const fromIdx = axisIndexById(branchedAxId);
-  configurableAxesFrom(fromIdx + 1).forEach((ax) => {
-    values[ax.id] = { type: "unused", config: {}, list: [] };
-  });
-}
-
-function getValuesMap(category, branchPath) {
-  if (!branchPath.length) return category.values;
-  let values = category.values;
-  for (const brId of branchPath) {
-    const found = findBranchInValues(values, brId);
-    if (!found) return values;
-    if (!found.branch.values) found.branch.values = {};
-    values = found.branch.values;
-  }
-  return values;
-}
-
-function findBranchInValues(values, branchId) {
-  for (const ax of axes) {
-    if (ax.slot === "namespace" || ax.slot === "category") continue;
-    const av = values[ax.id];
-    if (isBranched(av)) {
-      const br = av.branches.find((b) => b.id === branchId);
-      if (br) return { ax, av, branch: br };
-    }
-  }
-  return null;
-}
-
-function isShadowedAtLevel(values, axId) {
-  const axIdx = axisIndexById(axId);
-  for (let i = 0; i < axIdx; i++) {
-    const earlier = axes[i];
-    if (earlier.slot === "namespace" || earlier.slot === "category")
-      continue;
-    const av = values[earlier.id];
-    if (isBranched(av)) return true;
-  }
-  return false;
-}
-
-function pruneValuesScope(values, startAxisIdx) {
-  Object.keys(values).forEach((key) => {
-    const ax = axes.find((a) => a.id === key);
-    if (!ax) return;
-    if (ax.slot === "namespace" || ax.slot === "category") return;
-    if (axisIndexById(ax.id) < startAxisIdx) delete values[key];
-  });
-}
-
-function normalizeValuesScope(values, startAxisIdx) {
-  pruneValuesScope(values, startAxisIdx);
-  for (let i = startAxisIdx; i < axes.length; i++) {
-    const ax = axes[i];
-    if (ax.slot === "namespace" || ax.slot === "category") continue;
-    if (!values[ax.id]) values[ax.id] = mkAxisVal();
-    const av = values[ax.id];
-    if (isBranched(av)) {
-      shadowSubsequentAxes(values, ax.id);
-      av.branches.forEach((br) => {
-        if (!br.values) br.values = {};
-        normalizeValuesScope(br.values, i + 1);
-      });
-      break;
-    }
-  }
-}
-
-function migrateFamiliesMode(c) {
-  if (c.mode !== "families" || !Array.isArray(c.families) || !c.families.length)
-    return;
-  let familyAx =
-    axes.find((a) => a.slot === "middle" && a.name === "family") ||
-    axes.find((a) => a.slot === "middle");
-  if (!familyAx) {
-    const insertAt = scaleAxisIndex();
-    familyAx = {
-      id: "ax" + ++axisSeq,
-      name: "family",
-      locked: false,
-      slot: "middle",
-    };
-    axes.splice(insertAt < 0 ? axes.length : insertAt, 0, familyAx);
-  }
-  if (!c.values) c.values = {};
-  c.values[familyAx.id] = {
-    mode: "branched",
-    branches: c.families.map((f) => ({
-      id: f.id && /^br\d+$/.test(f.id) ? f.id : mkBranchId(),
-      value: f.name,
-      values: { scale: f.scale || mkAxisVal() },
-    })),
-  };
-  shadowSubsequentAxes(c.values, familyAx.id);
-  delete c.mode;
-  delete c.families;
-}
-
+// Brings a loaded or edited category back in line with the current axes: one
+// entry per configurable axis, exactly one ALL group (listed first), and
+// conditions that only name earlier axes. Conditional groups left with no
+// condition (their axes were removed or moved later) are dropped, and so is a
+// token type whose condition no longer includes the axis right after category.
 function normalizeCategory(c) {
-  if (!c.values) c.values = {};
+  if (!c.values || typeof c.values !== "object") c.values = {};
   if (typeof c.dtcgType !== "string" || !DTCG_TYPES.has(c.dtcgType)) {
     c.dtcgType = "";
   }
-  migrateFamiliesMode(c);
-  delete c.mode;
-  delete c.families;
-  normalizeValuesScope(c.values, firstConfigurableAxisIndex());
-  walkBranchedValues(c.values, (values) => {
-    for (const ax of axes) {
-      if (ax.slot === "namespace" || ax.slot === "category") continue;
-      const av = values[ax.id];
-      if (!isBranched(av)) continue;
-      av.branches.forEach((br) => {
-        if (typeof br.dtcgType !== "string" || !DTCG_TYPES.has(br.dtcgType)) {
-          br.dtcgType = "";
-        }
-      });
-    }
+  const configurable = new Set(axes.filter(isConfigurableAxis).map((a) => a.id));
+  Object.keys(c.values).forEach((k) => {
+    if (!configurable.has(k)) delete c.values[k];
+  });
+  const firstAx = typeAxis();
+  axes.forEach((ax, idx) => {
+    if (!isConfigurableAxis(ax)) return;
+    let entry = c.values[ax.id];
+    if (!entry || !Array.isArray(entry.groups)) entry = c.values[ax.id] = mkAxisEntry();
+    if (entry.unused) entry.unused = true; // stored as true or left out
+    else delete entry.unused;
+    const earlier = new Set(
+      axes.slice(0, idx).filter(isConfigurableAxis).map((a) => a.id),
+    );
+    const all = entry.groups.find(isAllGroup) || mkGroup({}, mkGenerator());
+    const conditional = entry.groups.filter((g) => g !== all && !isAllGroup(g));
+    conditional.forEach((g) => {
+      g.condition = Object.fromEntries(
+        Object.entries(g.condition).filter(
+          ([axId, vals]) => earlier.has(axId) && Array.isArray(vals) && vals.length,
+        ),
+      );
+    });
+    delete all.tokenType;
+    // Conditional groups whose every condition was pruned are dropped.
+    entry.groups = [all, ...conditional.filter((g) => !isAllGroup(g))];
+    entry.groups.forEach((g) => {
+      if (!g.generator || !GENERATOR_TYPES.has(g.generator.type)) g.generator = mkGenerator();
+      if (
+        g.tokenType &&
+        (!DTCG_TYPES.has(g.tokenType) || !firstAx || !(firstAx.id in g.condition))
+      ) {
+        delete g.tokenType;
+      }
+      if (g.tokenType === "") delete g.tokenType;
+    });
   });
 }
 
-function walkBranchedValues(values, fn) {
-  fn(values);
-  for (const ax of axes) {
-    if (ax.slot === "namespace" || ax.slot === "category") continue;
-    const av = values[ax.id];
-    if (!isBranched(av)) continue;
-    av.branches.forEach((br) => {
-      if (!br.values) br.values = {};
-      walkBranchedValues(br.values, fn);
-    });
-  }
+function hasConditionalGroups() {
+  return categories.some((c) =>
+    Object.values(c.values).some((entry) => conditionalGroups(entry).length),
+  );
 }
 
-/* ── Scale generation ─────────────────────────────── */
-function genValues(axisVal) {
-  const cfg = axisVal.config || {};
-  switch (axisVal.type) {
+/* ── Value generation ─────────────────────────────── */
+function genValues(generator) {
+  const cfg = generator.config || {};
+  switch (generator.type) {
     case "numeric": {
       const start = parseFloat(cfg.start ?? 4),
         end = parseFloat(cfg.end ?? 64),
@@ -415,7 +296,7 @@ function genValues(axisVal) {
       return [];
     case "custom":
     default:
-      return axisVal.list && axisVal.list.length ? axisVal.list : [];
+      return generator.list && generator.list.length ? generator.list : [];
   }
 }
 
@@ -447,124 +328,59 @@ function normalizeTshirtExtra(val) {
   return n;
 }
 
-/* ── Token helpers ─────────────────────────────────── */
-function firstConfigurableAxisIndex() {
-  return axes.findIndex(
-    (a) => a.slot !== "namespace" && a.slot !== "category",
-  );
-}
-
-function walkTokenPaths(category, values, prefixParts, axisIdx) {
-  if (axisIdx >= axes.length) {
-    const token = joinTokenParts(prefixParts);
-    return token ? [token] : [];
-  }
-
-  const ax = axes[axisIdx];
-  if (ax.slot === "namespace" || ax.slot === "category") {
-    return walkTokenPaths(category, values, prefixParts, axisIdx + 1);
-  }
-
-  const av = values[ax.id];
-  if (!av || av.type === "unused") {
-    return walkTokenPaths(category, values, prefixParts, axisIdx + 1);
-  }
-
-  if (isBranched(av)) {
-    let out = [];
-    for (const br of av.branches) {
-      const seg = tokenPart(br.value);
-      const childValues = br.values || {};
-      const nextPrefix = seg ? [...prefixParts, seg] : prefixParts;
-      out = out.concat(
-        walkTokenPaths(category, childValues, nextPrefix, axisIdx + 1),
-      );
+/* ── Token generation ─────────────────────────────── */
+// Every token in a category as a list of named segments ({ax, val, dtcgType?}),
+// leaving out namespace, category and omitted values. At each axis the values
+// come from the conditional groups matching the token name so far, or from
+// ALL when none match. An axis that is unused, or has no values, adds nothing.
+//
+// A matching group with a token type gives that type to the segment of the
+// latest axis its condition names; the token takes the type of its latest
+// typed segment (see allTokens).
+function tokenSegmentPaths(category) {
+  const out = [];
+  (function walk(axisIdx, segments, chosen, types) {
+    if (axisIdx >= axes.length) {
+      if (segments.length) {
+        out.push(
+          segments.map((s) => (types[s.ax.id] ? { ...s, dtcgType: types[s.ax.id] } : s)),
+        );
+      }
+      return;
     }
-    return out;
-  }
-
-  const rawVals = genValues(av);
-  if (!rawVals.length) {
-    return walkTokenPaths(category, values, prefixParts, axisIdx + 1);
-  }
-
-  let out = [];
-  for (const raw of rawVals) {
-    const seg = tokenPart(raw);
-    const nextPrefix = seg ? [...prefixParts, seg] : prefixParts;
-    out = out.concat(
-      walkTokenPaths(category, values, nextPrefix, axisIdx + 1),
-    );
-  }
-  return out;
-}
-
-function walkTokenSegments(category, values, prefixSegments, axisIdx) {
-  if (axisIdx >= axes.length) {
-    return prefixSegments.length ? [prefixSegments] : [];
-  }
-
-  const constrained = constrainedTokenSegments(values, axisIdx);
-  if (constrained) {
-    return constrained.map((segments) => [...prefixSegments, ...segments]);
-  }
-
-  const ax = axes[axisIdx];
-  if (ax.slot === "namespace" || ax.slot === "category") {
-    return walkTokenSegments(category, values, prefixSegments, axisIdx + 1);
-  }
-
-  const av = values[ax.id];
-  if (!av || av.type === "unused") {
-    return walkTokenSegments(category, values, prefixSegments, axisIdx + 1);
-  }
-
-  if (isBranched(av)) {
-    let out = [];
-    for (const br of av.branches) {
-      const seg = tokenPart(br.value);
-      const childValues = br.values || {};
-      const nextPrefix = seg
-        ? [...prefixSegments, { ax, val: seg, dtcgType: br.dtcgType || "" }]
-        : prefixSegments;
-      out = out.concat(
-        walkTokenSegments(category, childValues, nextPrefix, axisIdx + 1),
-      );
+    const ax = axes[axisIdx];
+    const entry = isConfigurableAxis(ax) ? category.values[ax.id] : null;
+    if (!entry || entry.unused) {
+      walk(axisIdx + 1, segments, chosen, types);
+      return;
     }
-    return out;
-  }
-
-  const rawVals = genValues(av);
-  if (!rawVals.length) {
-    return walkTokenSegments(category, values, prefixSegments, axisIdx + 1);
-  }
-
-  let out = [];
-  for (const raw of rawVals) {
-    const seg = tokenPart(raw);
-    const nextPrefix = seg
-      ? [...prefixSegments, { ax, val: seg }]
-      : prefixSegments;
-    out = out.concat(
-      walkTokenSegments(category, values, nextPrefix, axisIdx + 1),
-    );
-  }
-  return out;
-}
-
-function hasBranchedAxes() {
-  return categories.some((c) => {
-    let found = false;
-    walkBranchedValues(c.values, (values) => {
-      for (const ax of axes) {
-        if (ax.slot === "namespace" || ax.slot === "category") continue;
-        if (isBranched(values[ax.id])) found = true;
+    const matched = conditionalGroups(entry).filter((g) => groupMatches(g, chosen));
+    let nextTypes = types;
+    matched.forEach((g) => {
+      if (g.tokenType && DTCG_TYPES.has(g.tokenType)) {
+        nextTypes = { ...nextTypes, [deepestConditionAxisId(g)]: g.tokenType };
       }
     });
-    return found;
-  });
+    const vals = groupValues(matched.length ? matched : [allGroup(entry)]);
+    if (!vals.length) {
+      walk(axisIdx + 1, segments, chosen, nextTypes);
+      return;
+    }
+    for (const raw of vals) {
+      const seg = tokenPart(raw);
+      walk(
+        axisIdx + 1,
+        seg ? [...segments, { ax, val: seg }] : segments,
+        { ...chosen, [ax.id]: raw },
+        nextTypes,
+      );
+    }
+  })(0, [], {}, {});
+  return out;
 }
 
+// For each axis that appears in the category's names: the axis and every
+// named value it can take, across all its groups.
 function getActiveAxisData(category) {
   const parts = [];
   if (namespaceEnabled && namespaceValue) {
@@ -583,31 +399,13 @@ function getActiveAxisData(category) {
     },
     vals: [category.name],
   });
-
-  function collect(values, axisIdx) {
-    if (axisIdx >= axes.length) return;
-    const ax = axes[axisIdx];
-    if (ax.slot === "namespace" || ax.slot === "category") {
-      collect(values, axisIdx + 1);
-      return;
-    }
-    if (isShadowedAtLevel(values, ax.id)) return;
-    const av = values[ax.id];
-    if (!av || av.type === "unused") {
-      collect(values, axisIdx + 1);
-      return;
-    }
-    if (isBranched(av)) {
-      const vals = av.branches.map((b) => b.value).filter(Boolean);
-      if (vals.length) parts.push({ ax, vals });
-      return;
-    }
-    const flatVals = genValues(av).filter((v) => !isOmittedAxisValue(v));
-    if (flatVals.length) parts.push({ ax, vals: flatVals });
-    collect(values, axisIdx + 1);
-  }
-
-  collect(category.values, firstConfigurableAxisIndex());
+  axes.forEach((ax) => {
+    if (!isConfigurableAxis(ax)) return;
+    const entry = category.values[ax.id];
+    if (!entry || entry.unused) return;
+    const vals = groupValues(entry.groups).filter((v) => !isOmittedAxisValue(v));
+    if (vals.length) parts.push({ ax, vals });
+  });
   return parts;
 }
 
@@ -615,19 +413,15 @@ function allTokensForCategory(category) {
   const prefix = [];
   if (namespaceEnabled && namespaceValue) prefix.push(namespaceValue);
   prefix.push(category.name);
-  const start = firstConfigurableAxisIndex();
-  if (start < 0) return [];
-  return walkTokenSegments(category, category.values, [], start).map((segments) =>
+  return tokenSegmentPaths(category).map((segments) =>
     joinTokenParts([...prefix, ...segments.map((segment) => segment.val)]),
   );
 }
 
 function tokenPathCollisions(category) {
-  const start = firstConfigurableAxisIndex();
-  if (start < 0) return [];
   const seen = new Set();
   const collisions = new Set();
-  walkTokenSegments(category, category.values, [], start).forEach((segments) => {
+  tokenSegmentPaths(category).forEach((segments) => {
     const name = joinTokenParts(segments.map((segment) => segment.val));
     if (seen.has(name)) collisions.add(name);
     seen.add(name);
@@ -715,26 +509,14 @@ function buildDtcgExport() {
       group.$type = c.dtcgType;
     }
 
-    const start = firstConfigurableAxisIndex();
-    const paths =
-      start < 0
-        ? []
-        : walkTokenSegments(c, c.values, [], start);
-
+    const paths = tokenSegmentPaths(c);
     if (!paths.length) {
       applyDtcgLeafPlaceholders(group);
     } else {
-      let anyParts = false;
       paths.forEach((segs) => {
-        const parts = segs.map((s) => s.val).filter(Boolean);
-        if (!parts.length) return;
-        anyParts = true;
-        dtcgEnsurePath(group, parts);
+        dtcgEnsurePath(group, segs.map((s) => s.val));
         dtcgApplySegmentTypes(group, segs);
       });
-      if (!anyParts) {
-        applyDtcgLeafPlaceholders(group);
-      }
     }
 
     nestRoot[c.name] = group;
@@ -781,7 +563,7 @@ function buildExport() {
     categories.forEach((c) => {
       out += `### ${c.name}\n\n`;
       out += `- **Token type**: ${c.dtcgType ? `\`${c.dtcgType}\`` : "_not set_"}\n`;
-      out += exportAxisValues(c, c.values, 0, firstConfigurableAxisIndex());
+      out += exportAxisValues(c);
       out += "\n";
     });
   }
@@ -791,51 +573,42 @@ function buildExport() {
   return out;
 }
 
-function exportAxisValues(category, values, depth, startAxisIdx) {
+function describeCondition(condition) {
+  return Object.entries(condition)
+    .map(([axId, vals]) => {
+      const ax = axes.find((a) => a.id === axId);
+      return `${ax ? ax.name : axId} = ${vals.join(" or ")}`;
+    })
+    .join(" and ");
+}
+
+function describeGenerator(generator) {
+  const vals = genValues(generator);
+  const typeLbl = SCALE_TYPES[generator.type]?.label || generator.type;
+  return `(${typeLbl}): ${vals.length ? vals.join(", ") : "_none_"}`;
+}
+
+function exportAxisValues(category) {
   let out = "";
-  const pad = "  ".repeat(depth);
-  const combinationDefs = combinationAxes(values, startAxisIdx);
-  const combinationCfg = combinationConfig(values);
-  if (combinationCfg && combinationDefs) {
-    out += `${pad}- **Combination rules**: ${(combinationCfg.rules || []).length} generated, ${(combinationCfg.additions || []).length} explicit\n`;
-    (combinationCfg.rules || []).forEach((rule, i) => {
-      const count = combinationProduct(combinationDefs, rule.selections || {}).length;
-      out += `${pad}  - Generated rule ${i + 1} (${count} combination${count !== 1 ? "s" : ""}): ${combinationDefs.map(({ ax }) => `${ax.name}=${(rule.selections?.[ax.id] || []).join(", ")}`).join("; ")}\n`;
-    });
-    (combinationCfg.additions || []).forEach((addition) => {
-      out += `${pad}  - Explicit: ${combinationDefs.map(({ ax }) => `${ax.name}=${addition[ax.id]}`).join("; ")}\n`;
-    });
-    return out;
-  }
-  for (let i = startAxisIdx; i < axes.length; i++) {
-    const ax = axes[i];
-    if (ax.slot === "namespace" || ax.slot === "category") continue;
-    if (depth === 0 && isShadowedAtLevel(values, ax.id)) continue;
-    const av = values[ax.id];
-    if (!av) continue;
-    if (isBranched(av)) {
-      out += `${pad}- **${ax.name}** (branched)\n`;
-      av.branches.forEach((br) => {
-        out += `${pad}  - **${br.value}**\n`;
-        out += `${pad}    - **Token type**: ${br.dtcgType ? `\`${br.dtcgType}\`` : "_not set_"}\n`;
-        if (br.values) {
-          out += exportAxisValues(category, br.values, depth + 2, i + 1);
-        }
-      });
-      break;
+  axes.forEach((ax) => {
+    if (!isConfigurableAxis(ax)) return;
+    const entry = category.values[ax.id];
+    if (!entry) return;
+    if (entry.unused) {
+      out += `- **${ax.name}** (Unused): _skipped_\n`;
+      return;
     }
-    if (av.type === "unused") {
-      out += `${pad}- **${ax.name}** (Unused): _skipped_\n`;
-      continue;
-    }
-    const vals = genValues(av);
-    const typeLbl = SCALE_TYPES[av.type]?.label || av.type;
-    out += `${pad}- **${ax.name}** (${typeLbl}): ${vals.length ? vals.join(", ") : "_none_"}\n`;
-  }
+    out += `- **${ax.name}** ${describeGenerator(allGroup(entry).generator)}\n`;
+    conditionalGroups(entry).forEach((g) => {
+      const type = g.tokenType ? ` · token type \`${g.tokenType}\`` : "";
+      out += `  - when ${describeCondition(g.condition)} ${describeGenerator(g.generator)}${type}\n`;
+    });
+  });
   return out;
 }
 
-const STATE_VERSION = 2;
+/* ── Project files ────────────────────────────────── */
+const STATE_VERSION = 3;
 
 function serializeState() {
   return {
@@ -848,110 +621,29 @@ function serializeState() {
     categories: JSON.parse(JSON.stringify(categories)),
     axisSeq,
     catSeq,
-    brSeq,
+    groupSeq,
   };
 }
 
+// The highest n among ids shaped like prefix + n (e.g. "ax3", "g12"), or 0.
+function maxSeq(ids, prefix) {
+  const re = new RegExp("^" + prefix + "(\\d+)$");
+  return ids.reduce((max, id) => {
+    const m = re.exec(id);
+    return m ? Math.max(max, +m[1]) : max;
+  }, 0);
+}
+
+function allGroupIds() {
+  return categories.flatMap((c) =>
+    Object.values(c.values).flatMap((entry) => (entry.groups || []).map((g) => g.id)),
+  );
+}
+
 function recomputeSeqCounters() {
-  axisSeq = axes.reduce((max, a) => {
-    const m = /^ax(\d+)$/.exec(a.id);
-    return m ? Math.max(max, +m[1]) : max;
-  }, 0);
-  catSeq = categories.reduce((max, c) => {
-    const m = /^cat(\d+)$/.exec(c.id);
-    return m ? Math.max(max, +m[1]) : max;
-  }, 0);
-  brSeq = 0;
-  categories.forEach((c) => {
-    walkBranchedValues(c.values, (values) => {
-      for (const ax of axes) {
-        if (ax.slot === "namespace" || ax.slot === "category") continue;
-        const av = values[ax.id];
-        if (!isBranched(av)) continue;
-        av.branches.forEach((br) => {
-          const m = /^br(\d+)$/.exec(br.id);
-          if (m) brSeq = Math.max(brSeq, +m[1]);
-        });
-      }
-    });
-  });
-}
-
-function validateBranchedAxis(av, axisName, categoryName) {
-  if (!isBranched(av)) return null;
-  if (!av.branches.length)
-    return `Branched axis "${axisName}" in category "${categoryName}" has no branches.`;
-  const names = new Set();
-  for (const br of av.branches) {
-    if (!br.value)
-      return `A branch on "${axisName}" in category "${categoryName}" is missing a value.`;
-    if (names.has(br.value))
-      return `Duplicate branch "${br.value}" on "${axisName}" in category "${categoryName}".`;
-    names.add(br.value);
-  }
-  return null;
-}
-
-function validateCombinationConfig(values, startAxisIdx, categoryName, branchPath) {
-  const cfg = combinationConfig(values);
-  if (!cfg) return null;
-  const defs = combinationAxes(values, startAxisIdx);
-  if (!defs) return "Combination rules cannot contain a branched axis; configure rules inside that branch instead.";
-  for (const [ruleIdx, rule] of (cfg.rules || []).entries()) {
-    for (const { ax, values: options } of defs) {
-      const selected = rule.selections && rule.selections[ax.id];
-      if (!Array.isArray(selected) || !selected.length)
-        return `Generated rule ${ruleIdx + 1} in category "${categoryName}" is missing values for axis "${ax.name}".`;
-      if (selected.some((value) => !options.includes(value)))
-        return `Generated rule ${ruleIdx + 1} in category "${categoryName}" contains a value not defined on axis "${ax.name}".`;
-    }
-  }
-  for (const [additionIdx, addition] of (cfg.additions || []).entries()) {
-    for (const { ax, values: options } of defs) {
-      if (!options.includes(addition[ax.id]))
-        return `Explicit combination ${additionIdx + 1} in category "${categoryName}" contains a value not defined on axis "${ax.name}".`;
-    }
-  }
-  return null;
-}
-
-function validateCategoryValues(values, categoryName, startAxisIdx, branchPath) {
-  if (startAxisIdx == null) startAxisIdx = firstConfigurableAxisIndex();
-  if (!branchPath) branchPath = [];
-  const combinationErr = validateCombinationConfig(values, startAxisIdx, categoryName, branchPath);
-  if (combinationErr) return combinationErr;
-  for (let i = startAxisIdx; i < axes.length; i++) {
-    const ax = axes[i];
-    if (ax.slot === "namespace" || ax.slot === "category") continue;
-    if (startAxisIdx === firstConfigurableAxisIndex() && isShadowedAtLevel(values, ax.id))
-      continue;
-    const av = values[ax.id];
-    if (!av) continue;
-    const err = validateBranchedAxis(av, ax.name, categoryName);
-    if (err) return err;
-    if (isBranched(av)) {
-      for (const br of av.branches) {
-        if (
-          br.dtcgType != null &&
-          br.dtcgType !== "" &&
-          !DTCG_TYPES.has(br.dtcgType)
-        ) {
-          return `Unknown token type "${br.dtcgType}" in category "${categoryName}" at subcategory path "${[...branchPath, br.value || "?"].join(" / ")}".`;
-        }
-        if (br.values) {
-          const nested = validateCategoryValues(
-            br.values,
-            categoryName,
-            i + 1,
-            [...branchPath, br.value || "?"],
-          );
-          if (nested) return nested;
-        }
-      }
-      break;
-    }
-  }
-  return null;
+  axisSeq = maxSeq(axes.map((a) => a.id), "ax");
+  catSeq = maxSeq(categories.map((c) => c.id), "cat");
+  groupSeq = maxSeq(allGroupIds(), "g");
 }
 
 function migrateState(data) {
@@ -971,10 +663,59 @@ function migrateState(data) {
   return migrated;
 }
 
+const isPlainObject = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+
+// Checks one category's axis entries against a list of axes (in formula
+// order). Axes the category doesn't mention are fine; loading fills them in.
+function validateCategoryGroups(c, axisList) {
+  const cat = c.name || "?";
+  const values = c.values || {};
+  if (!isPlainObject(values)) return `Category "${cat}" has invalid axis values.`;
+  const configurable = axisList.filter(isConfigurableAxis);
+  const firstAx = configurable[0];
+  for (const [idx, ax] of configurable.entries()) {
+    const entry = values[ax.id];
+    if (entry == null) continue;
+    const where = `axis "${ax.name}" in category "${cat}"`;
+    if (!isPlainObject(entry) || !Array.isArray(entry.groups))
+      return `The ${where} has no groups.`;
+    const earlier = new Set(configurable.slice(0, idx).map((a) => a.id));
+    let allCount = 0;
+    for (const g of entry.groups) {
+      if (!isPlainObject(g)) return `A group on the ${where} is invalid.`;
+      if (g.condition != null && !isPlainObject(g.condition))
+        return `A group on the ${where} has an invalid condition.`;
+      const cond = g.condition || {};
+      const condAxes = Object.keys(cond);
+      if (!condAxes.length) allCount++;
+      for (const axId of condAxes) {
+        if (!earlier.has(axId)) {
+          const named = axisList.find((a) => a.id === axId);
+          return `A group on the ${where} has a condition on "${named ? named.name : axId}", which is not an earlier axis.`;
+        }
+        const vals = cond[axId];
+        if (!Array.isArray(vals) || !vals.length || vals.some((v) => typeof v !== "string"))
+          return `A group on the ${where} has a condition with no values.`;
+      }
+      if (!isPlainObject(g.generator) || !GENERATOR_TYPES.has(g.generator.type))
+        return `A group on the ${where} has an unknown value generator.`;
+      if (g.tokenType != null && g.tokenType !== "") {
+        if (!DTCG_TYPES.has(g.tokenType))
+          return `Unknown token type "${g.tokenType}" on the ${where}.`;
+        if (!condAxes.includes(firstAx.id))
+          return `A group on the ${where} sets a token type, but its condition doesn't include "${firstAx.name}", the axis right after category.`;
+      }
+    }
+    if (allCount !== 1)
+      return `The ${where} must have exactly one ALL group (found ${allCount}).`;
+  }
+  return null;
+}
+
 function validateState(data) {
   if (!data || typeof data !== "object") return "Invalid project data.";
-  if (data.version !== 1 && data.version !== STATE_VERSION)
-    return "Incompatible file version — expected version 1 or 2.";
+  if (data.version !== 1 && data.version !== 2 && data.version !== STATE_VERSION)
+    return `Incompatible file version — expected version 1 to ${STATE_VERSION}.`;
   if (data.tierMode != null && data.tierMode !== "tier1" && data.tierMode !== "tier2")
     return "Invalid tier mode.";
   if (!Array.isArray(data.axes) || data.axes.length < 1)
@@ -995,25 +736,31 @@ function validateState(data) {
   if (!Array.isArray(data.categories))
     return "Project is missing categories.";
   for (const c of data.categories) {
+    if (!isPlainObject(c)) return "Project has an invalid category.";
     if (
       c.dtcgType != null &&
       c.dtcgType !== "" &&
       !DTCG_TYPES.has(c.dtcgType)
     )
       return `Unknown token type "${c.dtcgType}" in category "${c.name || "?"}".`;
-    const err = validateCategoryValues(c.values || {}, c.name || "?");
-    if (err) return err;
+    if (data.version === STATE_VERSION) {
+      const err = validateCategoryGroups(c, data.axes);
+      if (err) return err;
+    }
   }
   return null;
 }
 
 /* ── Loading ───────────────────────────────────────── */
-// Migrates, validates and loads a project file into the model state.
-// Returns an error message, or null when the project loaded.
+// Migrates, validates and loads a project file into the model state. Files
+// older than STATE_VERSION are converted to groups on the way in (see the
+// legacy section below). Returns an error message, or null when the project
+// loaded; on error the previous state is kept.
 function loadProjectState(data) {
   const migrated = migrateState(data);
   const err = validateState(migrated);
   if (err) return err;
+  const previous = serializeState();
   tierMode = migrated.tierMode === "tier2" ? "tier2" : "tier1";
   namespaceEnabled = !!migrated.namespaceEnabled;
   namespaceValue = String(migrated.namespaceValue || "");
@@ -1022,41 +769,47 @@ function loadProjectState(data) {
     defaultTitleForTier(tierMode);
   axes = JSON.parse(JSON.stringify(migrated.axes));
   categories = JSON.parse(JSON.stringify(migrated.categories));
+  categories.forEach((c) => {
+    if (!isPlainObject(c.values)) c.values = {};
+  });
+  groupSeq = 0;
+  let loadErr = null;
+  if (migrated.version < STATE_VERSION) {
+    loadErr = convertLegacyProject();
+  } else {
+    // Groups that normalising adds must not reuse an id from the file.
+    groupSeq = maxSeq(allGroupIds(), "g");
+    syncScaleAxisForTier();
+  }
+  loadErr =
+    loadErr ||
+    categories.map((c) => validateCategoryGroups(c, axes)).find(Boolean) ||
+    null;
+  if (loadErr) {
+    loadProjectState(previous);
+    return loadErr;
+  }
   recomputeSeqCounters();
   if (typeof migrated.axisSeq === "number")
     axisSeq = Math.max(axisSeq, migrated.axisSeq);
   if (typeof migrated.catSeq === "number")
     catSeq = Math.max(catSeq, migrated.catSeq);
-  if (typeof migrated.brSeq === "number")
-    brSeq = Math.max(brSeq, migrated.brSeq);
-  if (typeof migrated.famSeq === "number")
-    brSeq = Math.max(brSeq, migrated.famSeq);
-  categories.forEach((c) => {
-    normalizeCategory(c);
-    initCategoryValues(c);
-  });
-  syncScaleAxisForTier();
-  return (
-    categories
-      .map((c) => validateCategoryValues(c.values, c.name))
-      .find(Boolean) || null
-  );
+  if (typeof migrated.groupSeq === "number")
+    groupSeq = Math.max(groupSeq, migrated.groupSeq);
+  return null;
 }
 
 // Every token in the project, in export order: its tokens.json path (namespace
 // and category first, omitted values left out) and the token type it gets,
-// which is the type of the nearest branch along the path that sets one, else
-// the category's type.
+// which is the type of its latest typed segment, else the category's type.
 function allTokens() {
-  const start = firstConfigurableAxisIndex();
-  if (start < 0) return [];
   const prefix = namespaceEnabled && namespaceValue ? [namespaceValue] : [];
   return categories.flatMap((c) =>
-    walkTokenSegments(c, c.values, [], start).map((segments) => {
-      const typed = segments.filter((s) => s.val && DTCG_TYPES.has(s.dtcgType));
+    tokenSegmentPaths(c).map((segments) => {
+      const typed = segments.filter((s) => DTCG_TYPES.has(s.dtcgType));
       const type = typed.length ? typed[typed.length - 1].dtcgType : c.dtcgType;
       return {
-        path: [...prefix, c.name, ...segments.map((s) => s.val)].filter(Boolean),
+        path: [...prefix, c.name, ...segments.map((s) => s.val)],
         type: type || "",
       };
     }),
@@ -1068,6 +821,285 @@ function allTokenNames() {
   return categories.flatMap((c) => allTokensForCategory(c));
 }
 
+/* ── Legacy project files (version 1 and 2) ──────────────────────────────
+ * Before groups, an axis value was either flat ({type, config, list}) or
+ * branched ({mode: "branched", branches: [{id, value, dtcgType, values}]}),
+ * where each branch held its own values for every later axis. A values map
+ * could also hold _combinationConfig: generated rules (multi-select blocks
+ * whose combinations were all made) and explicit combinations (exact paths).
+ * Version 1 files could also store a category in "families" mode.
+ *
+ * These functions only run while loading such a file: they normalise and
+ * validate it the way the old builder did, then convert it to groups.
+ */
+function convertLegacyProject() {
+  categories.forEach(legacyNormalizeCategory);
+  syncScaleAxisSlots();
+  categories.forEach(legacyNormalizeCategory);
+  for (const c of categories) {
+    const err = legacyValidateValues(c.values, c.name, firstConfigurableAxisIndex(), []);
+    if (err) return err;
+  }
+  categories.forEach((c) => {
+    c.values = convertLegacyValues(c.values);
+    delete c.mode;
+    delete c.families;
+    normalizeCategory(c);
+  });
+  return null;
+}
+
+function legacyIsBranched(av) {
+  return !!av && av.mode === "branched";
+}
+
+function legacyShadowSubsequentAxes(values, branchedAxId) {
+  axes.slice(axisIndexById(branchedAxId) + 1).filter(isConfigurableAxis).forEach((ax) => {
+    values[ax.id] = { type: "unused", config: {}, list: [] };
+  });
+}
+
+function legacyNormalizeValuesScope(values, startAxisIdx) {
+  Object.keys(values).forEach((key) => {
+    const idx = axisIndexById(key);
+    if (idx >= 0 && isConfigurableAxis(axes[idx]) && idx < startAxisIdx) delete values[key];
+  });
+  for (let i = startAxisIdx; i < axes.length; i++) {
+    const ax = axes[i];
+    if (!isConfigurableAxis(ax)) continue;
+    if (!values[ax.id]) values[ax.id] = mkGenerator();
+    const av = values[ax.id];
+    if (legacyIsBranched(av)) {
+      legacyShadowSubsequentAxes(values, ax.id);
+      av.branches.forEach((br) => {
+        if (!br.values) br.values = {};
+        legacyNormalizeValuesScope(br.values, i + 1);
+      });
+      break;
+    }
+  }
+}
+
+function legacyMigrateFamiliesMode(c) {
+  if (c.mode !== "families" || !Array.isArray(c.families) || !c.families.length)
+    return;
+  let familyAx =
+    axes.find((a) => a.slot === "middle" && a.name === "family") ||
+    axes.find((a) => a.slot === "middle");
+  if (!familyAx) {
+    const insertAt = scaleAxisIndex();
+    familyAx = {
+      id: "ax" + (maxSeq(axes.map((a) => a.id), "ax") + 1),
+      name: "family",
+      locked: false,
+      slot: "middle",
+    };
+    axes.splice(insertAt < 0 ? axes.length : insertAt, 0, familyAx);
+  }
+  c.values[familyAx.id] = {
+    mode: "branched",
+    branches: c.families.map((f) => ({
+      value: f.name,
+      values: { scale: f.scale || mkGenerator() },
+    })),
+  };
+  legacyShadowSubsequentAxes(c.values, familyAx.id);
+}
+
+function legacyNormalizeCategory(c) {
+  if (typeof c.dtcgType !== "string" || !DTCG_TYPES.has(c.dtcgType)) {
+    c.dtcgType = "";
+  }
+  legacyMigrateFamiliesMode(c);
+  delete c.mode;
+  delete c.families;
+  legacyNormalizeValuesScope(c.values, firstConfigurableAxisIndex());
+}
+
+// The axes a combination scope ranges over, with their values; null when the
+// scope contains a branched axis (its combination rules were then ignored).
+function legacyCombinationAxes(values, startAxisIdx) {
+  const out = [];
+  for (let i = startAxisIdx; i < axes.length; i++) {
+    const ax = axes[i];
+    if (!isConfigurableAxis(ax)) continue;
+    const av = values[ax.id];
+    if (!av || av.type === "unused") continue;
+    if (legacyIsBranched(av)) return null;
+    out.push({ ax, values: genValues(av).filter(Boolean) });
+  }
+  return out;
+}
+
+function legacyValidateValues(values, categoryName, startAxisIdx, branchPath) {
+  const cfg = values._combinationConfig;
+  if (cfg) {
+    const defs = legacyCombinationAxes(values, startAxisIdx);
+    if (!defs) return "Combination rules cannot contain a branched axis; configure rules inside that branch instead.";
+    for (const [ruleIdx, rule] of (cfg.rules || []).entries()) {
+      for (const { ax, values: options } of defs) {
+        const selected = rule.selections && rule.selections[ax.id];
+        if (!Array.isArray(selected) || !selected.length)
+          return `Generated rule ${ruleIdx + 1} in category "${categoryName}" is missing values for axis "${ax.name}".`;
+        if (selected.some((value) => !options.includes(value)))
+          return `Generated rule ${ruleIdx + 1} in category "${categoryName}" contains a value not defined on axis "${ax.name}".`;
+      }
+    }
+    for (const [additionIdx, addition] of (cfg.additions || []).entries()) {
+      for (const { ax, values: options } of defs) {
+        if (!options.includes(addition[ax.id]))
+          return `Explicit combination ${additionIdx + 1} in category "${categoryName}" contains a value not defined on axis "${ax.name}".`;
+      }
+    }
+  }
+  for (let i = startAxisIdx; i < axes.length; i++) {
+    const ax = axes[i];
+    if (!isConfigurableAxis(ax)) continue;
+    const av = values[ax.id];
+    if (!legacyIsBranched(av)) continue;
+    if (!Array.isArray(av.branches) || !av.branches.length)
+      return `Branched axis "${ax.name}" in category "${categoryName}" has no branches.`;
+    const names = new Set();
+    for (const br of av.branches) {
+      if (!br.value)
+        return `A branch on "${ax.name}" in category "${categoryName}" is missing a value.`;
+      if (names.has(br.value))
+        return `Duplicate branch "${br.value}" on "${ax.name}" in category "${categoryName}".`;
+      names.add(br.value);
+      if (br.dtcgType != null && br.dtcgType !== "" && !DTCG_TYPES.has(br.dtcgType))
+        return `Unknown token type "${br.dtcgType}" in category "${categoryName}" at subcategory path "${[...branchPath, br.value].join(" / ")}".`;
+      const nested = legacyValidateValues(br.values || {}, categoryName, i + 1, [...branchPath, br.value]);
+      if (nested) return nested;
+    }
+    break;
+  }
+  return null;
+}
+
+function legacyGenerator(av) {
+  const gen = {
+    type: GENERATOR_TYPES.has(av.type) ? av.type : "custom",
+    config: { ...(av.config || {}) },
+    list: Array.isArray(av.list) ? av.list.slice() : [],
+  };
+  if (av.listText != null) gen.listText = av.listText;
+  return gen;
+}
+
+function conditionKey(condition) {
+  return JSON.stringify(
+    Object.keys(condition).sort().map((k) => [k, condition[k].slice().sort()]),
+  );
+}
+
+// Converts one category's legacy values map to axis entries. Each branch and
+// combination scope becomes conditional groups whose condition is the path of
+// branch values (and, for combinations, the earlier values in the rule) that
+// leads to it. The result makes exactly the same token names and types.
+function convertLegacyValues(rootValues) {
+  const out = {};
+  axes.filter(isConfigurableAxis).forEach((ax) => (out[ax.id] = mkAxisEntry()));
+
+  function emit(ax, condition, generator, unused) {
+    const entry = out[ax.id];
+    if (!Object.keys(condition).length) {
+      if (unused) entry.unused = true;
+      else allGroup(entry).generator = generator;
+      return;
+    }
+    entry.groups.push(mkGroup(condition, unused ? mkGenerator() : generator));
+  }
+
+  const typedBranches = [];
+
+  function convertScope(values, condition, startIdx) {
+    const cfg = values._combinationConfig;
+    const defs = cfg && legacyCombinationAxes(values, startIdx);
+    if (defs) {
+      convertCombinations(values, cfg, defs, condition, startIdx);
+      return;
+    }
+    for (let i = startIdx; i < axes.length; i++) {
+      const ax = axes[i];
+      if (!isConfigurableAxis(ax)) continue;
+      const av = values[ax.id];
+      if (legacyIsBranched(av)) {
+        emit(ax, condition, mkGenerator(av.branches.map((b) => b.value)));
+        av.branches.forEach((br) => {
+          const sub = { ...condition, [ax.id]: [br.value] };
+          convertScope(br.values || {}, sub, i + 1);
+          if (br.dtcgType) typedBranches.push({ condition: sub, fromIdx: i + 1, type: br.dtcgType });
+        });
+        return;
+      }
+      emit(ax, condition, av ? legacyGenerator(av) : mkGenerator(), !!av && av.type === "unused");
+    }
+  }
+
+  // Every rule (and explicit combination) is a product of per-axis choices.
+  // Axis j gets one group per distinct set of choices on the axes before it,
+  // holding the union of the choices on axis j.
+  function convertCombinations(values, cfg, defs, condition, startIdx) {
+    const inDefs = new Set(defs.map((d) => d.ax.id));
+    axes.slice(startIdx).forEach((ax) => {
+      if (isConfigurableAxis(ax) && !inDefs.has(ax.id)) emit(ax, condition, mkGenerator(), true);
+    });
+    const rules = [
+      ...(cfg.rules || []).map((r) => defs.map((d) => (r.selections && r.selections[d.ax.id]) || d.values)),
+      ...(cfg.additions || []).map((a) => defs.map((d) => [a[d.ax.id]])),
+    ];
+    defs.forEach((d, j) => {
+      const merged = new Map();
+      rules.forEach((sel) => {
+        const cond = { ...condition };
+        for (let k = 0; k < j; k++) cond[defs[k].ax.id] = sel[k].slice();
+        const key = conditionKey(cond);
+        if (!merged.has(key)) merged.set(key, { cond, values: [] });
+        const group = merged.get(key);
+        sel[j].forEach((v) => {
+          if (!group.values.includes(v)) group.values.push(v);
+        });
+      });
+      if (!merged.size) emit(d.ax, condition, mkGenerator(), false);
+      merged.forEach(({ cond, values: vals }) => emit(d.ax, cond, mkGenerator(vals), false));
+    });
+  }
+
+  convertScope(rootValues, {}, firstConfigurableAxisIndex());
+
+  // A branch's token type moves to the group on the next axis whose condition
+  // ends with that branch. Groups may only set a type when their condition
+  // includes the axis right after category, so for a branch deeper in the
+  // formula the type goes on an extra group with no values whose condition
+  // also lists every value that axis has today. It only ever matches where the
+  // branch's own group does, so it changes no names, and the branch's values
+  // don't depend on that list if the first axis is edited later.
+  // Types that can't be expressed this way are dropped: a branch on the last
+  // axis, or a deeper branch when the first axis is unused or has no values.
+  const firstAx = typeAxis();
+  typedBranches.forEach(({ condition, fromIdx, type }) => {
+    const next = axes.slice(fromIdx).find(isConfigurableAxis);
+    if (!next) return;
+    const entry = out[next.id];
+    const group = entry.groups.find(
+      (g) => !isAllGroup(g) && conditionKey(g.condition) === conditionKey(condition),
+    );
+    if (!group) return;
+    if (firstAx.id in condition) {
+      group.tokenType = type;
+      return;
+    }
+    const firstEntry = out[firstAx.id];
+    const firstValues = firstEntry.unused ? [] : genValues(allGroup(firstEntry).generator);
+    if (!firstValues.length) return;
+    const typed = mkGroup({ [firstAx.id]: firstValues.slice(), ...condition }, mkGenerator());
+    typed.tokenType = type;
+    entry.groups.push(typed);
+  });
+
+  return out;
+}
+
 if (typeof module === "object" && module.exports) {
-  module.exports = { loadProjectState, allTokens, allTokenNames };
+  module.exports = { loadProjectState, serializeState, allTokens, allTokenNames };
 }
