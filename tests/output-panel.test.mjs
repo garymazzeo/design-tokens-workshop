@@ -2,7 +2,7 @@
 // tab (Tokens Preview, DTCG JSON, CSS Variables, Markdown Spec), the header's
 // token count and collision warnings, and the preview's filter.
 //
-// The tab outputs are checked against the recorded fixtures for every preset
+// The tab outputs for every preset are checked against its recorded fixture
 // in docs/fixtures/naming-builder/.
 //
 // Usage: node --test tests/*.test.mjs
@@ -18,13 +18,15 @@ const fixturesDir = join(
   dirname(fileURLToPath(import.meta.url)),
   "../docs/fixtures/naming-builder",
 );
-const PRESETS = ["basic", "full", "families", "semantic-color", "typography-compound"];
+const PRESETS = model.PRESETS.map((p) => p.key);
 
 const fixture = (name, file) => readFileSync(join(fixturesDir, name, file), "utf8");
 const cssNames = (css) => [...css.matchAll(/^\s*--([^:\s]+)\s*:/gm)].map((m) => m[1]);
 
+// Loads a preset as the header's dropdown does. Each preset's fixture
+// directory has the same name.
 function loadFixture(name) {
-  const err = model.loadProjectState(JSON.parse(fixture(name, "project.json")));
+  const err = model.loadProjectState(model.presetProject(name));
   assert.equal(err, null, `${name} did not load: ${err}`);
 }
 

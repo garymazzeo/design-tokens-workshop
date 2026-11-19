@@ -1,0 +1,315 @@
+{
+  "version": 3,
+  "tierMode": "tier2",
+  "projectTitle": "Tier 2 Tokens",
+  "namespaceEnabled": true,
+  "namespaceValue": "mds",
+  "axes": [
+    {
+      "id": "namespace",
+      "name": "namespace",
+      "locked": true,
+      "slot": "namespace"
+    },
+    {
+      "id": "category",
+      "name": "category",
+      "locked": true,
+      "slot": "category"
+    },
+    {
+      "id": "family",
+      "name": "family",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "variant",
+      "name": "variant",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "role",
+      "name": "role",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "prominence",
+      "name": "prominence",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "scale",
+      "name": "scale",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "state",
+      "name": "state",
+      "locked": false,
+      "slot": "middle"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat1",
+      "name": "color",
+      "dtcgType": "color",
+      "values": {
+        "family": {
+          "groups": [
+            {
+              "id": "color-family-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": [
+                  "brand",
+                  "feedback",
+                  "neutral"
+                ]
+              }
+            }
+          ]
+        },
+        "variant": {
+          "groups": [
+            {
+              "id": "color-variant-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": []
+              }
+            },
+            {
+              "id": "color-variant-1",
+              "condition": {
+                "family": [
+                  "brand"
+                ]
+              },
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": [
+                  "primary",
+                  "secondary",
+                  "accent"
+                ]
+              }
+            },
+            {
+              "id": "color-variant-2",
+              "condition": {
+                "family": [
+                  "feedback"
+                ]
+              },
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": [
+                  "critical",
+                  "caution",
+                  "positive",
+                  "info"
+                ]
+              }
+            }
+          ]
+        },
+        "role": {
+          "groups": [
+            {
+              "id": "color-role-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": [
+                  "container",
+                  "on-container",
+                  "text",
+                  "icon",
+                  "border"
+                ]
+              }
+            },
+            {
+              "id": "color-role-1",
+              "condition": {
+                "family": [
+                  "feedback"
+                ]
+              },
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": [
+                  "container",
+                  "text",
+                  "icon"
+                ]
+              }
+            }
+          ]
+        },
+        "prominence": {
+          "groups": [
+            {
+              "id": "color-prominence-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": [
+                  "[base]",
+                  "bold",
+                  "subtle"
+                ]
+              }
+            }
+          ]
+        },
+        "scale": {
+          "unused": true,
+          "groups": [
+            {
+              "id": "color-scale-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": []
+              }
+            }
+          ]
+        },
+        "state": {
+          "groups": [
+            {
+              "id": "color-state-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": [
+                  "[default]",
+                  "hover",
+                  "focus",
+                  "active",
+                  "disabled"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cat2",
+      "name": "space",
+      "dtcgType": "dimension",
+      "values": {
+        "family": {
+          "groups": [
+            {
+              "id": "space-family-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": [
+                  "inset",
+                  "stack",
+                  "inline"
+                ]
+              }
+            }
+          ]
+        },
+        "variant": {
+          "unused": true,
+          "groups": [
+            {
+              "id": "space-variant-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": []
+              }
+            }
+          ]
+        },
+        "role": {
+          "unused": true,
+          "groups": [
+            {
+              "id": "space-role-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": []
+              }
+            }
+          ]
+        },
+        "prominence": {
+          "unused": true,
+          "groups": [
+            {
+              "id": "space-prominence-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": []
+              }
+            }
+          ]
+        },
+        "scale": {
+          "groups": [
+            {
+              "id": "space-scale-all",
+              "condition": {},
+              "generator": {
+                "type": "tshirt",
+                "config": {
+                  "extra": "0"
+                },
+                "list": []
+              }
+            }
+          ]
+        },
+        "state": {
+          "unused": true,
+          "groups": [
+            {
+              "id": "space-state-all",
+              "condition": {},
+              "generator": {
+                "type": "custom",
+                "config": {},
+                "list": []
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "axisSeq": 0,
+  "catSeq": 2,
+  "groupSeq": 0
+}

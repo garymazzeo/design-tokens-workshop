@@ -40,9 +40,6 @@
         --hue-2: #047857;
         --hue-3: #b45309;
         --hue-4: #be185d;
-        --t1: var(--accent);
-        --t1-bg: var(--accent-weak);
-        --t1-bd: var(--accent-bd);
         --t2: #047857;
         --t2-bg: #ecfdf5;
         --r: 6px;
@@ -108,6 +105,7 @@
         line-height: 1.5;
       }
       input[type="text"],
+      input[type="search"],
       input[type="number"],
       select,
       textarea {
@@ -192,153 +190,271 @@
         border-color: var(--bd-1);
         color: var(--tx);
       }
-      .btn-xs {
-        height: 24px;
-        padding: 0 8px;
-        font-size: 11px;
-      }
-      .btn-icon {
-        width: 28px;
-        height: 28px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-      }
 
       .page {
         background: var(--bg);
         min-width: 0;
       }
-      .hdr {
-        padding: 20px 24px 16px;
-      }
-      .hdr-eye {
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.09em;
-        text-transform: uppercase;
-        color: var(--tx-3);
-        margin-bottom: 4px;
-      }
-      .hdr-h1 {
-        font-size: 22px;
-        font-weight: 500;
-        margin-bottom: 0.3rem;
-      }
-      .hdr-title-input {
-        display: block;
-        width: 100%;
-        font: inherit;
-        color: inherit;
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid transparent;
-        border-radius: 0;
-        padding: 0;
-        margin-bottom: 0.3rem;
-      }
-      .hdr-title-input:focus {
-        outline: none;
-        border-bottom-color: var(--focus);
-      }
-      .hdr-desc {
-        font-size: 14px;
-        color: var(--tx-2);
-        line-height: 1.6;
-        margin-bottom: 0.85rem;
-      }
-      .hdr-row {
+      /* Header */
+      .app-hdr {
         display: flex;
-        gap: 8px;
         align-items: center;
         flex-wrap: wrap;
-      }
-      .hdr-row > span {
-        font-size: 12px;
-        color: var(--tx-3);
-      }
-      .tier-toggle {
-        display: inline-flex;
-        gap: 4px;
-        padding: 2px;
-        background: var(--bg-2);
-        border: 0.5px solid var(--bd-1);
-        border-radius: var(--r);
-      }
-      .tier-toggle button {
-        height: 28px;
-        border: none;
-        background: transparent;
-        color: var(--tx-3);
-      }
-      .tier-toggle button:hover {
+        gap: 12px 16px;
+        padding: 12px 24px;
         background: var(--bg);
-        color: var(--tx);
-        border: none;
+        border-bottom: 1px solid var(--bd-1);
       }
-      .tier-toggle button.is-active {
-        background: var(--bg);
-        color: var(--tx);
-        box-shadow: 0 0 0 0.5px var(--bd-2);
-      }
-      .tier-toggle button.is-active.tier-t1 {
-        color: var(--t1);
-      }
-      .tier-toggle button.is-active.tier-t2 {
-        color: var(--t2);
-      }
-      .restore-banner {
-        position: fixed;
-        bottom: calc(var(--out-h, 0px) + 1.5rem);
-        left: 50%;
-        z-index: 1000;
-        font-size: 12px;
-        color: var(--tx);
-        background: var(--t1-bg);
-        border: 0.5px solid var(--t1-bd);
-        border-left: 3px solid var(--t1);
-        border-radius: var(--r-lg);
-        padding: 10px 10px 10px 14px;
+      .brand {
         display: flex;
         align-items: center;
         gap: 12px;
-        max-width: min(520px, calc(100vw - 3rem));
-        box-shadow:
-          0 4px 8px -1px rgba(24, 95, 165, 0.12),
-          0 12px 24px -4px rgba(0, 0, 0, 0.12);
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transform: translateX(-50%) translateY(10px);
-        transition:
-          opacity 0.45s ease,
-          visibility 0.45s ease,
-          transform 0.45s ease;
-      }
-      .restore-banner.is-visible {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        transform: translateX(-50%) translateY(0);
-      }
-      .restore-banner[hidden] {
-        display: none;
-      }
-      .restore-banner-text {
-        flex: 1;
         min-width: 0;
-        font-weight: 500;
+        flex: 1 1 320px;
       }
-      .restore-banner-actions {
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        color: var(--accent-tx);
+        border: 1.5px solid var(--accent-bd);
+        border-radius: 9px;
+        background: var(--accent-weak);
+      }
+      .brand-text {
+        flex-shrink: 0;
+        line-height: 1.25;
+      }
+      .brand-name {
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .brand-sub {
+        font-size: 12px;
+        color: var(--tx-3);
+        text-decoration: none;
+      }
+      .brand-sub:hover {
+        color: var(--tx-2);
+        text-decoration: underline;
+      }
+      .title-input {
+        flex: 1;
+        min-width: 120px;
+        max-width: 280px;
+        height: 32px;
+        font-size: 13px;
+        font-weight: 600;
+        border-color: transparent;
+        background: transparent;
+      }
+      .title-input:hover {
+        border-color: var(--bd-2);
+      }
+      .title-input:focus {
+        background: var(--bg);
+      }
+      .tier-switch {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        background: var(--bg-3);
+        border: 1px solid var(--bd-1);
+        border-radius: 10px;
+      }
+      .tier-switch button {
+        height: auto;
+        min-width: 104px;
+        padding: 5px 14px;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        background: transparent;
+        color: var(--tx-2);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.25;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .tier-switch button span {
+        font-size: 11px;
+        font-weight: 400;
+      }
+      .tier-switch button:hover {
+        color: var(--tx);
+        background: transparent;
+        border-color: transparent;
+      }
+      .tier-switch button[aria-pressed="true"] {
+        background: var(--bg);
+        color: var(--accent-tx);
+        font-weight: 600;
+        border-color: var(--bd-1);
+        box-shadow: var(--shadow-sm);
+      }
+      .preset-select {
+        width: auto;
+        max-width: 280px;
+        height: 34px;
+      }
+      .hdr-tools {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 10px;
+        margin-left: auto;
+      }
+      .hdr-history {
+        display: flex;
+        gap: 2px;
+      }
+      .hdr-icon {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        border-color: transparent;
+        background: transparent;
+        color: var(--tx-2);
+        font-size: 16px;
+      }
+      .hdr-icon:hover:not(:disabled) {
+        color: var(--tx);
+      }
+      .save-status {
+        font-size: 12px;
+        color: var(--tx-3);
+        white-space: nowrap;
+      }
+      .save-status.is-saved::before {
+        content: "✓ ";
+        color: var(--t2);
+      }
+      .save-status.is-error {
+        color: var(--warn-tx);
+      }
+      .hdr-btn {
+        height: 34px;
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: var(--shadow-sm);
+      }
+      .hdr-btn.is-primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--on-accent);
+      }
+      .hdr-btn.is-primary:hover {
+        background: var(--accent-tx);
+        border-color: var(--accent-tx);
+      }
+      .menu-wrap {
+        position: relative;
+      }
+      .menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        z-index: 850;
+        min-width: 220px;
+        padding: 4px;
+        background: var(--bg);
+        border: 1px solid var(--bd-2);
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+      }
+      .menu[hidden] {
+        display: none;
+      }
+      .menu [role="menuitem"] {
+        border: none;
+        background: transparent;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        text-align: left;
+        font-size: 13px;
+        height: 32px;
+        padding: 0 10px;
+      }
+      .menu [role="menuitem"] span {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--tx-3);
+      }
+      .menu [role="menuitem"]:hover,
+      .menu [role="menuitem"]:focus {
+        background: var(--bg-2);
+        outline: none;
+      }
+      .menu [role="menuitem"]:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--focus);
+      }
+      .menu [role="menuitem"].is-danger {
+        color: var(--danger);
+      }
+      .menu [role="menuitem"]:disabled {
+        background: transparent;
+      }
+      @media (max-width: 899px) {
+        .app-hdr {
+          padding: 12px 16px;
+        }
+        .hdr-tools {
+          margin-left: 0;
+          flex-wrap: wrap;
+        }
+      }
+
+      /* Restore banner: shown when a session is restored from this browser. */
+      .restore-bar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        padding: 8px 24px;
+        font-size: 13px;
+        color: var(--accent-tx);
+        background: var(--accent-weak);
+        border-bottom: 1px solid var(--accent-bd);
+      }
+      .restore-bar[hidden] {
+        display: none;
+      }
+      .restore-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--hue-1);
         flex-shrink: 0;
       }
-      .restore-banner-dismiss {
-        color: var(--tx-3);
+      .restore-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .restore-actions {
+        display: flex;
+        gap: 4px;
+      }
+      .restore-btn {
+        height: 28px;
+        border-color: transparent;
+        background: transparent;
+        color: var(--tx-2);
+      }
+      .restore-btn.is-strong {
+        color: var(--accent-tx);
+        font-weight: 600;
       }
       button:disabled {
         opacity: 0.45;
@@ -1125,7 +1241,7 @@
         border-bottom: 1px solid var(--bd-1);
         background: var(--bg-2);
       }
-      .out-filter {
+      input.out-filter {
         max-width: 360px;
         font-family: var(--mono);
         font-size: 12px;
@@ -1235,102 +1351,85 @@
   </head>
   <body>
     <div class="page">
-      <div class="hdr">
-        <p class="hdr-eye" id="hdr-eye">Token Naming Building · Axis Cartesian Mapping</p>
-        <input
-          id="project-title"
-          class="hdr-h1 hdr-title-input"
-          type="text"
-          value="Tier 1 Tokens"
-          maxlength="80"
-          onfocus="historyOnFieldFocus('projectTitle')"
-          onblur="historyOnFieldBlur('projectTitle')"
-          oninput="setProjectTitle(this.value)"
-        />
-        <p class="hdr-desc" id="hdr-desc">
-          Define the axes that make up your token names, then populate each
-          category with axis values. Export a naming convention reference and
-          DTCG-shaped JSON (names and types only — values are added elsewhere).
-        </p>
-        <div class="hdr-row" style="margin-bottom: 10px">
-          <span>Tier:</span>
-          <div class="tier-toggle" role="group" aria-label="Token tier">
-            <button
-              type="button"
-              id="tier-btn-1"
-              class="tier-t1 is-active"
-              onclick="setTierMode('tier1')"
-            >
-              Tier 1 · Primitive
-            </button>
-            <button
-              type="button"
-              id="tier-btn-2"
-              class="tier-t2"
-              onclick="setTierMode('tier2')"
-            >
-              Tier 2 · Semantic
-            </button>
-          </div>
-        </div>
-        <div class="hdr-row" id="preset-row">
-          <span>Load example:</span>
-          <button type="button" data-preset="basic" onclick="loadPreset('basic')">
-            Basic (category + scale)
-          </button>
-          <button type="button" data-preset="full" onclick="loadPreset('full')">
-            Category + family + scale
-          </button>
-          <button
-            type="button"
-            data-preset="families"
-            onclick="loadPreset('families')"
-          >
-            Grouped scales (border)
-          </button>
-          <button
-            type="button"
-            data-preset="semantic-color"
-            onclick="loadPreset('semantic-color')"
-            hidden
-          >
-            Semantic color
-          </button>
-          <button
-            type="button"
-            data-preset="typography-compound"
-            onclick="loadPreset('typography-compound')"
-            hidden
-          >
-            Typography compound
-          </button>
-          <button class="btn-ghost" onclick="clearAll()">Clear</button>
-        </div>
-        <div class="hdr-row">
-          <span>Edit:</span>
-          <button id="undo-btn" onclick="undo()" disabled title="Undo (⌘Z)">
-            Undo
-          </button>
-          <button id="redo-btn" onclick="redo()" disabled title="Redo (⇧⌘Z)">
-            Redo
-          </button>
-        </div>
-        <div class="hdr-row">
-          <span>Save:</span>
-          <button onclick="downloadProject()">Export project</button>
-          <button onclick="triggerImportProject()">Import project</button>
-          <button id="copy-share-link-btn" onclick="copyShareLink()">
-            Copy share link
-          </button>
-          <input
-            type="file"
-            id="import-project-input"
-            accept=".json,application/json"
-            hidden
-            onchange="handleImportProject(event)"
-          />
+      <div id="restore-banner" class="restore-bar" role="status" hidden>
+        <span class="restore-dot" aria-hidden="true"></span>
+        <span class="restore-text" id="restore-text">Restored your last session from this browser.</span>
+        <div class="restore-actions">
+          <button type="button" class="restore-btn" onclick="hideRestoreBanner()">Dismiss</button>
+          <button type="button" class="restore-btn is-strong" onclick="clearAll()">Reset to Default</button>
         </div>
       </div>
+
+      <header class="app-hdr">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+          </span>
+          <div class="brand-text">
+            <p class="brand-name">Token Naming Builder</p>
+            <a class="brand-sub" href="../index.html">Design Tokens Workshop</a>
+          </div>
+          <input
+            id="project-title"
+            class="title-input"
+            type="text"
+            value="Tier 1 Tokens"
+            maxlength="80"
+            aria-label="Project title"
+            spellcheck="false"
+            onfocus="historyOnFieldFocus('projectTitle')"
+            onblur="historyOnFieldBlur('projectTitle')"
+            oninput="setProjectTitle(this.value)"
+          />
+        </div>
+
+        <div class="tier-switch" role="group" aria-label="Token tier">
+          <button type="button" id="tier-btn-1" aria-pressed="true" onclick="setTierMode('tier1')">
+            Tier 1<span>Primitive</span>
+          </button>
+          <button type="button" id="tier-btn-2" aria-pressed="false" onclick="setTierMode('tier2')">
+            Tier 2<span>Semantic</span>
+          </button>
+        </div>
+
+        <select id="preset-select" class="preset-select" aria-label="Load a preset" onchange="onPresetSelect(this)"></select>
+
+        <div class="hdr-tools">
+          <div class="hdr-history">
+            <button type="button" class="hdr-icon" id="undo-btn" onclick="undo()" disabled aria-label="Undo" title="Undo (⌘Z)">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+            </button>
+            <button type="button" class="hdr-icon" id="redo-btn" onclick="redo()" disabled aria-label="Redo" title="Redo (⇧⌘Z)">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>
+            </button>
+          </div>
+          <span class="save-status" id="save-status" role="status"></span>
+          <button type="button" class="hdr-btn" onclick="triggerImportProject()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
+            Import
+          </button>
+          <input type="file" id="import-project-input" accept=".json,application/json" hidden onchange="handleImportProject(event)" />
+          <div class="menu-wrap">
+            <button type="button" class="hdr-btn is-primary" id="export-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="export-menu">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
+              Export <span aria-hidden="true">▾</span>
+            </button>
+            <div class="menu" id="export-menu" role="menu" aria-labelledby="export-btn" hidden>
+              <button type="button" role="menuitem" tabindex="-1" data-menu-act="css">CSS variables <span>.css</span></button>
+              <button type="button" role="menuitem" tabindex="-1" data-menu-act="dtcg">Design tokens <span>.tokens.json</span></button>
+              <button type="button" role="menuitem" tabindex="-1" data-menu-act="spec">Markdown spec <span>.md</span></button>
+              <button type="button" role="menuitem" tabindex="-1" data-menu-act="project">Project file <span>.json</span></button>
+            </div>
+          </div>
+          <div class="menu-wrap">
+            <button type="button" class="hdr-icon" id="more-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="more-menu" aria-label="More actions">⋯</button>
+            <div class="menu" id="more-menu" role="menu" aria-labelledby="more-btn" hidden>
+              <button type="button" role="menuitem" tabindex="-1" data-menu-act="share" id="copy-share-link-btn">Copy share link</button>
+              <button type="button" role="menuitem" tabindex="-1" data-menu-act="clear" class="is-danger">Clear project</button>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <section class="formula-bar" aria-label="Formula">
         <span class="formula-label" id="formula-label">Formula syntax</span>
@@ -1409,23 +1508,6 @@
       </div>
     </section>
 
-    <div id="restore-banner" class="restore-banner" hidden role="status">
-      <span class="restore-banner-text">Restored your last session.</span>
-      <div class="restore-banner-actions">
-        <button type="button" class="btn-xs btn-ghost" onclick="startFresh()">
-          Start fresh
-        </button>
-        <button
-          type="button"
-          class="btn-icon btn-ghost restore-banner-dismiss"
-          onclick="hideRestoreBanner()"
-          aria-label="Dismiss"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-
     <div id="popover" class="popover" role="dialog" aria-labelledby="pop-title" hidden></div>
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
@@ -1445,37 +1527,51 @@
       }
 
       function updateTierModeUI() {
-        const btn1 = id("tier-btn-1");
-        const btn2 = id("tier-btn-2");
-        if (btn1) btn1.classList.toggle("is-active", tierMode === "tier1");
-        if (btn2) btn2.classList.toggle("is-active", tierMode === "tier2");
-
-        const eye = id("hdr-eye");
-        if (eye) {
-          eye.textContent =
-            tierMode === "tier2"
-              ? "Workshop tool · Tier 2 · Semantic naming"
-              : "Workshop tool · Tier 1 · Primitive naming";
-        }
-
-        document.querySelectorAll("#preset-row [data-preset]").forEach((btn) => {
-          const key = btn.getAttribute("data-preset");
-          const show =
-            (tierMode === "tier1" && TIER1_PRESETS.has(key)) ||
-            (tierMode === "tier2" && TIER2_PRESETS.has(key));
-          btn.hidden = !show;
-        });
+        id("tier-btn-1").setAttribute("aria-pressed", String(tierMode === "tier1"));
+        id("tier-btn-2").setAttribute("aria-pressed", String(tierMode === "tier2"));
+        renderPresetSelect();
       }
 
-      function seedDefaultCategory() {
-        if (categories.length) return;
-        categories.push({
-          id: "cat" + ++catSeq,
-          name: "color",
-          dtcgType: "color",
-          values: {},
+      // The preset dropdown lists the current tier's presets. It always shows
+      // its prompt; choosing a preset loads it and resets the dropdown.
+      function renderPresetSelect() {
+        const select = id("preset-select");
+        if (select.dataset.tier === tierMode) return;
+        select.dataset.tier = tierMode;
+        select.innerHTML =
+          `<option value="">Load a ${tierMode === "tier2" ? "Tier 2" : "Tier 1"} preset…</option>` +
+          presetsForTier(tierMode)
+            .map((p) => `<option value="${esc(p.key)}">${esc(p.label)}</option>`)
+            .join("");
+      }
+
+      // Some browsers fire change while the arrow keys move through a closed
+      // select. Choices made with the arrows wait for Enter; anything else
+      // (a click, or Enter in the open list) loads straight away.
+      let presetArrowBrowsing = false;
+
+      function onPresetSelect(select) {
+        if (presetArrowBrowsing) return;
+        const key = select.value;
+        select.value = "";
+        if (key) loadPreset(key);
+      }
+
+      function initPresetSelect() {
+        const select = id("preset-select");
+        select.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowUp" || e.key === "ArrowDown") presetArrowBrowsing = true;
+          else if (e.key === "Enter" && presetArrowBrowsing) {
+            e.preventDefault();
+            presetArrowBrowsing = false;
+            onPresetSelect(select);
+          }
         });
-        initCategoryValues(categories[0]);
+        select.addEventListener("mousedown", () => (presetArrowBrowsing = false));
+        select.addEventListener("blur", () => {
+          presetArrowBrowsing = false;
+          select.value = "";
+        });
       }
 
       function dtcgTypeOptionsHtml(cur) {
@@ -2522,6 +2618,9 @@
       /* ── Persistence ───────────────────────────────────── */
       const STORAGE_KEY = "tier-naming-builder:v2";
       const STORAGE_KEY_LEGACY = "tier1-axis-builder:v1";
+      // When the project was last saved, kept beside it so the header can say
+      // how long ago that was after a reload.
+      const STORAGE_KEY_SAVED_AT = "tier-naming-builder:v2:savedAt";
       const SHARE_HASH_MAX = 6000;
       let persistEnabled = false;
       let autoSaveTimer = null;
@@ -2603,11 +2702,51 @@
         return true;
       }
 
+      // When this session last saved (ms), or null before the first save;
+      // saveFailed is set while this browser won't store the project.
+      let lastSavedAt = null;
+      let saveFailed = false;
+
       function saveToStorage() {
         if (!persistEnabled) return;
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState()));
-        } catch (e) {}
+          lastSavedAt = Date.now();
+          localStorage.setItem(STORAGE_KEY_SAVED_AT, String(lastSavedAt));
+          saveFailed = false;
+        } catch (e) {
+          saveFailed = true;
+        }
+        renderSaveStatus();
+      }
+
+      function loadSavedAt() {
+        try {
+          const t = Number(localStorage.getItem(STORAGE_KEY_SAVED_AT));
+          return t > 0 ? t : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function savedAgo(ms) {
+        const s = Math.max(0, Math.round(ms / 1000));
+        if (s < 45) return "just now";
+        const m = Math.round(s / 60);
+        if (m < 60) return `${m}m ago`;
+        const h = Math.round(m / 60);
+        if (h < 24) return `${h}h ago`;
+        return new Date(Date.now() - ms).toLocaleDateString();
+      }
+
+      function renderSaveStatus() {
+        const el = id("save-status");
+        el.classList.toggle("is-error", saveFailed);
+        el.classList.toggle("is-saved", !saveFailed && !!lastSavedAt);
+        if (saveFailed) el.textContent = "Not saved: this browser won't store it";
+        else if (lastSavedAt) el.textContent = `Auto-saved · ${savedAgo(Date.now() - lastSavedAt)}`;
+        else el.textContent = persistEnabled ? "Auto-save on" : "";
+        el.title = lastSavedAt ? `Saved in this browser at ${new Date(lastSavedAt).toLocaleTimeString()}` : "";
       }
 
       function loadFromStorage() {
@@ -2626,6 +2765,7 @@
         try {
           localStorage.removeItem(STORAGE_KEY);
           localStorage.removeItem(STORAGE_KEY_LEGACY);
+          localStorage.removeItem(STORAGE_KEY_SAVED_AT);
         } catch (e) {}
       }
 
@@ -2635,41 +2775,16 @@
         autoSaveTimer = setTimeout(saveToStorage, 300);
       }
 
-      let restoreBannerTimer = null;
-
       function showRestoreBanner() {
-        const el = id("restore-banner");
-        if (!el) return;
-        clearTimeout(restoreBannerTimer);
-        el.hidden = false;
-        el.classList.remove("is-visible");
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => el.classList.add("is-visible"));
-        });
-        restoreBannerTimer = setTimeout(hideRestoreBanner, 10000);
+        const configured = axes.filter(isConfigurableAxis).length;
+        const cats = `${categories.length} ${categories.length === 1 ? "category" : "categories"}`;
+        const axesText = `${configured} ${configured === 1 ? "axis" : "axes"}`;
+        id("restore-text").textContent = `Restored your last session from this browser (${cats}, ${axesText}).`;
+        id("restore-banner").hidden = false;
       }
 
       function hideRestoreBanner() {
-        const el = id("restore-banner");
-        if (!el || el.hidden) return;
-        clearTimeout(restoreBannerTimer);
-        restoreBannerTimer = null;
-        el.classList.remove("is-visible");
-        const finishHide = () => {
-          el.hidden = true;
-        };
-        el.addEventListener(
-          "transitionend",
-          (evt) => {
-            if (evt.target === el && evt.propertyName === "opacity") finishHide();
-          },
-          { once: true },
-        );
-        setTimeout(finishHide, 500);
-      }
-
-      function startFresh() {
-        clearAll();
+        id("restore-banner").hidden = true;
       }
 
       async function downloadProject() {
@@ -2790,6 +2905,7 @@
         if (stored) {
           const err = validateState(stored);
           if (!err && applyState(stored)) {
+            lastSavedAt = loadSavedAt();
             showRestoreBanner();
             persistEnabled = true;
             clearHistory();
@@ -2804,219 +2920,112 @@
         clearHistory();
       }
 
-      /* ── Presets ───────────────────────────────────────── */
-      // Presets are written in the version 2 project format and converted to
-      // groups by loadProjectState, like any old project file.
+      /* ── Header menus ──────────────────────────────────── */
+      // Export and ⋯ are menu buttons: click or ArrowDown opens the menu with
+      // focus on its first item; arrows, Home and End move; Escape closes and
+      // returns focus; clicking outside or tabbing away closes it.
+      const MENU_ACTIONS = {
+        css: downloadCssExport,
+        dtcg: downloadDtcgExport,
+        spec: downloadExport,
+        project: downloadProject,
+        share: copyShareLink,
+        clear: clearAll,
+      };
+      let openMenuBtn = null;
+
+      function menuItems(menu) {
+        return [...menu.querySelectorAll('[role="menuitem"]:not(:disabled)')];
+      }
+
+      function openMenu(btn, focusLast) {
+        if (openMenuBtn && openMenuBtn !== btn) closeMenu(false);
+        const menu = id(btn.getAttribute("aria-controls"));
+        menu.hidden = false;
+        btn.setAttribute("aria-expanded", "true");
+        openMenuBtn = btn;
+        const items = menuItems(menu);
+        (focusLast ? items[items.length - 1] : items[0])?.focus();
+      }
+
+      function closeMenu(returnFocus) {
+        if (!openMenuBtn) return;
+        const btn = openMenuBtn;
+        openMenuBtn = null;
+        id(btn.getAttribute("aria-controls")).hidden = true;
+        btn.setAttribute("aria-expanded", "false");
+        if (returnFocus) btn.focus();
+      }
+
+      function initMenus() {
+        ["export-btn", "more-btn"].forEach((btnId) => {
+          const btn = id(btnId);
+          const menu = id(btn.getAttribute("aria-controls"));
+          btn.addEventListener("click", () =>
+            openMenuBtn === btn ? closeMenu(false) : openMenu(btn),
+          );
+          btn.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+              e.preventDefault();
+              openMenu(btn, e.key === "ArrowUp");
+            }
+          });
+          menu.addEventListener("click", (e) => {
+            const item = e.target.closest("[data-menu-act]");
+            if (!item || item.disabled) return;
+            closeMenu(true);
+            MENU_ACTIONS[item.dataset.menuAct]();
+          });
+          menu.addEventListener("keydown", (e) => {
+            const items = menuItems(menu);
+            const i = items.indexOf(document.activeElement);
+            let j = null;
+            if (e.key === "ArrowDown") j = (i + 1) % items.length;
+            else if (e.key === "ArrowUp") j = (i - 1 + items.length) % items.length;
+            else if (e.key === "Home") j = 0;
+            else if (e.key === "End") j = items.length - 1;
+            else if (e.key === "Escape") {
+              e.preventDefault();
+              e.stopPropagation();
+              return closeMenu(true);
+            } else if (e.key === "Tab") return closeMenu(false);
+            if (j === null) return;
+            e.preventDefault();
+            items[j].focus();
+          });
+        });
+        document.addEventListener("mousedown", (e) => {
+          if (openMenuBtn && !e.target.closest(".menu-wrap")) closeMenu(false);
+        });
+      }
+
+      /* ── Presets and Clear ─────────────────────────────── */
+      // The presets and the cleared project live in the model. Loading a
+      // preset, Clear and Reset to Default each replace the project as one
+      // undo step.
       function loadPreset(key) {
-        const p = { version: 2 };
-        p.namespaceEnabled = false;
-        p.namespaceValue = "";
-
-        if (TIER2_PRESETS.has(key)) {
-          p.tierMode = "tier2";
-          p.projectTitle = DEFAULT_PROJECT_TITLE_T2;
-        } else {
-          p.tierMode = "tier1";
-          p.projectTitle = DEFAULT_PROJECT_TITLE_T1;
-        }
-
-        if (key === "basic") {
-          p.axes = [
-            { id: "category", name: "category", locked: true, slot: "category" },
-            { id: "scale", name: "scale", locked: true, slot: "scale" },
-          ];
-          p.categories = [
-            {
-              id: "cat1",
-              name: "space",
-              dtcgType: "dimension",
-              values: {
-                scale: {
-                  type: "numeric",
-                  config: { start: "4", end: "64", step: "4" },
-                  list: [],
-                },
-              },
-            },
-            {
-              id: "cat2",
-              name: "border-radius",
-              dtcgType: "dimension",
-              values: {
-                scale: { type: "tshirt", config: { extra: "0" }, list: [] },
-              },
-            },
-          ];
-        } else if (key === "full") {
-          p.axes = [
-            { id: "category", name: "category", locked: true, slot: "category" },
-            { id: "ax1", name: "family", locked: false, slot: "middle" },
-            { id: "scale", name: "scale", locked: true, slot: "scale" },
-          ];
-          p.categories = [
-            {
-              id: "cat1",
-              name: "color",
-              dtcgType: "color",
-              values: {
-                ax1: {
-                  type: "custom",
-                  config: {},
-                  list: ["blue", "red", "green", "gray"],
-                },
-                scale: {
-                  type: "ordinal",
-                  config: { start: "100", end: "900", step: "100" },
-                  list: [],
-                },
-              },
-            },
-            {
-              id: "cat2",
-              name: "space",
-              dtcgType: "dimension",
-              values: {
-                ax1: { type: "unused", config: {}, list: [] },
-                scale: {
-                  type: "numeric",
-                  config: { start: "4", end: "64", step: "4" },
-                  list: [],
-                },
-              },
-            },
-          ];
-        } else if (key === "families") {
-          p.namespaceEnabled = true;
-          p.namespaceValue = "ds";
-          p.axes = [
-            {
-              id: "namespace",
-              name: "namespace",
-              locked: true,
-              slot: "namespace",
-            },
-            { id: "category", name: "category", locked: true, slot: "category" },
-            { id: "ax1", name: "family", locked: false, slot: "middle" },
-            { id: "scale", name: "scale", locked: true, slot: "scale" },
-          ];
-          p.categories = [
-            {
-              id: "cat1",
-              name: "border",
-              dtcgType: "dimension",
-              values: {
-                ax1: {
-                  mode: "branched",
-                  branches: [
-                    {
-                      id: "br1",
-                      value: "radius",
-                      values: {
-                        scale: {
-                          type: "tshirt",
-                          config: { extra: "0" },
-                          list: [],
-                        },
-                      },
-                    },
-                    {
-                      id: "br2",
-                      value: "width",
-                      values: {
-                        scale: {
-                          type: "numeric",
-                          config: { start: "1", end: "4", step: "1" },
-                          list: [],
-                        },
-                      },
-                    },
-                  ],
-                },
-                scale: { type: "unused", config: {}, list: [] },
-              },
-            },
-          ];
-        } else if (key === "semantic-color") {
-          p.axes = [
-            { id: "category", name: "category", locked: true, slot: "category" },
-            { id: "ax1", name: "role", locked: false, slot: "middle" },
-            { id: "ax2", name: "emphasis", locked: false, slot: "middle" },
-            { id: "scale", name: "scale", locked: true, slot: "scale" },
-          ];
-          p.categories = [
-            {
-              id: "cat1",
-              name: "color",
-              dtcgType: "color",
-              values: {
-                ax1: {
-                  type: "custom",
-                  config: {},
-                  list: ["action", "text", "surface"],
-                },
-                ax2: {
-                  type: "custom",
-                  config: {},
-                  list: ["primary", "secondary", "subtle"],
-                },
-                scale: { type: "unused", config: {}, list: [] },
-              },
-            },
-          ];
-        } else if (key === "typography-compound") {
-          p.axes = [
-            { id: "category", name: "category", locked: true, slot: "category" },
-            { id: "ax1", name: "hierarchy", locked: false, slot: "middle" },
-            { id: "scale", name: "scale", locked: true, slot: "scale" },
-          ];
-          p.categories = [
-            {
-              id: "cat1",
-              name: "typography",
-              dtcgType: "typography",
-              values: {
-                ax1: {
-                  type: "custom",
-                  config: {},
-                  list: ["display", "heading", "body", "caption"],
-                },
-                scale: { type: "tshirt", config: { extra: "0" }, list: [] },
-              },
-            },
-          ];
-        } else {
-          return;
-        }
-
-        const err = loadProjectState(p);
+        const project = presetProject(key);
+        if (!project) return;
+        pushHistory();
+        const err = loadProjectState(project);
         if (err) {
+          undoStack.pop();
+          updateUndoRedoUI();
           showPersistenceError(err);
           return;
         }
-        clearSavedState();
+        activeCatId = null;
         hideRestoreBanner();
         renderAll();
-        clearHistory();
       }
 
       function clearAll() {
-        projectTitle = defaultTitleForTier(tierMode);
-        namespaceEnabled = false;
-        namespaceValue = "";
-        axes = [
-          { id: "category", name: "category", locked: true, slot: "category" },
-          { id: "scale", name: "scale", locked: true, slot: "scale" },
-        ];
-        categories = [];
-        axisSeq = 0;
-        catSeq = 0;
-        groupSeq = 0;
-        syncScaleAxisForTier();
-        clearSavedState();
+        pushHistory();
+        clearProject();
+        activeCatId = null;
         hideRestoreBanner();
-        seedDefaultCategory();
         renderAll();
-        clearHistory();
+        showToast("Project cleared.");
       }
 
       /* ── Helpers ───────────────────────────────────────── */
@@ -3048,7 +3057,11 @@
         true,
       );
       initOutputPanel();
+      initMenus();
+      initPresetSelect();
       initApp();
+      renderSaveStatus();
+      setInterval(renderSaveStatus, 30000);
     </script>
   </body>
 </html>

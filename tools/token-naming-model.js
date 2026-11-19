@@ -62,9 +62,6 @@ const DTCG_TYPES = new Set([
 ]);
 const DTCG_LEAF_DESCRIPTION = "Naming placeholder — value TBD";
 
-const TIER1_PRESETS = new Set(["basic", "full", "families"]);
-const TIER2_PRESETS = new Set(["semantic-color", "typography-compound"]);
-
 function defaultTitleForTier(mode) {
   return mode === "tier2"
     ? DEFAULT_PROJECT_TITLE_T2
@@ -1462,10 +1459,225 @@ function convertLegacyValues(rootValues) {
   return out;
 }
 
+/* ── Presets ───────────────────────────────────────── */
+// The examples in the header's preset dropdown, in the order it lists them.
+// The five original presets are written in the version 2 project format and
+// converted to groups by loadProjectState, like any old project file; newer
+// presets are written with groups.
+const PRESETS = [
+  { key: "basic", tier: "tier1", label: "Basic (category + scale)" },
+  { key: "full", tier: "tier1", label: "Category + family + scale" },
+  { key: "families", tier: "tier1", label: "Grouped scales (border)" },
+  { key: "semantic-color", tier: "tier2", label: "Semantic color" },
+  { key: "typography-compound", tier: "tier2", label: "Typography compound" },
+  { key: "multi-brand-semantic", tier: "tier2", label: "Multi-brand semantic (Mosaic-style)" },
+];
+
+function presetsForTier(mode) {
+  return PRESETS.filter((p) => p.tier === mode);
+}
+
+const CATEGORY_AXIS = { id: "category", name: "category", locked: true, slot: "category" };
+const NAMESPACE_AXIS = { id: "namespace", name: "namespace", locked: true, slot: "namespace" };
+const SCALE_AXIS = { id: "scale", name: "scale", locked: true, slot: "scale" };
+const v2List = (...list) => ({ type: "custom", config: {}, list });
+const v2Range = (type, start, end, step) => ({ type, config: { start, end, step }, list: [] });
+const V2_TSHIRT = { type: "tshirt", config: { extra: "0" }, list: [] };
+const V2_UNUSED = { type: "unused", config: {}, list: [] };
+
+// A version 3 axis entry: an ALL group of literal values plus conditional
+// groups given as [condition, values].
+function presetEntry(prefix, all, conditional = [], generator) {
+  const groups = [
+    { id: `${prefix}-all`, condition: {}, generator: generator || { type: "custom", config: {}, list: all } },
+    ...conditional.map(([condition, list], i) => ({
+      id: `${prefix}-${i + 1}`,
+      condition,
+      generator: { type: "custom", config: {}, list },
+    })),
+  ];
+  return { groups };
+}
+const presetUnused = (prefix) => ({ unused: true, groups: [{ id: `${prefix}-all`, condition: {}, generator: { type: "custom", config: {}, list: [] } }] });
+
+const PRESET_PROJECTS = {
+  basic: {
+    version: 2,
+    axes: [CATEGORY_AXIS, SCALE_AXIS],
+    categories: [
+      { id: "cat1", name: "space", dtcgType: "dimension", values: { scale: v2Range("numeric", "4", "64", "4") } },
+      { id: "cat2", name: "border-radius", dtcgType: "dimension", values: { scale: V2_TSHIRT } },
+    ],
+  },
+  full: {
+    version: 2,
+    axes: [CATEGORY_AXIS, { id: "ax1", name: "family", locked: false, slot: "middle" }, SCALE_AXIS],
+    categories: [
+      {
+        id: "cat1",
+        name: "color",
+        dtcgType: "color",
+        values: { ax1: v2List("blue", "red", "green", "gray"), scale: v2Range("ordinal", "100", "900", "100") },
+      },
+      { id: "cat2", name: "space", dtcgType: "dimension", values: { ax1: V2_UNUSED, scale: v2Range("numeric", "4", "64", "4") } },
+    ],
+  },
+  families: {
+    version: 2,
+    namespaceEnabled: true,
+    namespaceValue: "ds",
+    axes: [NAMESPACE_AXIS, CATEGORY_AXIS, { id: "ax1", name: "family", locked: false, slot: "middle" }, SCALE_AXIS],
+    categories: [
+      {
+        id: "cat1",
+        name: "border",
+        dtcgType: "dimension",
+        values: {
+          ax1: {
+            mode: "branched",
+            branches: [
+              { id: "br1", value: "radius", values: { scale: V2_TSHIRT } },
+              { id: "br2", value: "width", values: { scale: v2Range("numeric", "1", "4", "1") } },
+            ],
+          },
+          scale: V2_UNUSED,
+        },
+      },
+    ],
+  },
+  "semantic-color": {
+    version: 2,
+    axes: [
+      CATEGORY_AXIS,
+      { id: "ax1", name: "role", locked: false, slot: "middle" },
+      { id: "ax2", name: "emphasis", locked: false, slot: "middle" },
+      SCALE_AXIS,
+    ],
+    categories: [
+      {
+        id: "cat1",
+        name: "color",
+        dtcgType: "color",
+        values: {
+          ax1: v2List("action", "text", "surface"),
+          ax2: v2List("primary", "secondary", "subtle"),
+          scale: V2_UNUSED,
+        },
+      },
+    ],
+  },
+  "typography-compound": {
+    version: 2,
+    axes: [CATEGORY_AXIS, { id: "ax1", name: "hierarchy", locked: false, slot: "middle" }, SCALE_AXIS],
+    categories: [
+      {
+        id: "cat1",
+        name: "typography",
+        dtcgType: "typography",
+        values: { ax1: v2List("display", "heading", "body", "caption"), scale: V2_TSHIRT },
+      },
+    ],
+  },
+  // Mosaic (mds) is example content: a multi-brand semantic color system.
+  // Variants depend on the family, feedback colors need fewer roles, and the
+  // base prominence and default state add nothing to a name.
+  "multi-brand-semantic": {
+    version: STATE_VERSION,
+    namespaceEnabled: true,
+    namespaceValue: "mds",
+    axes: [
+      NAMESPACE_AXIS,
+      CATEGORY_AXIS,
+      { id: "family", name: "family", locked: false, slot: "middle" },
+      { id: "variant", name: "variant", locked: false, slot: "middle" },
+      { id: "role", name: "role", locked: false, slot: "middle" },
+      { id: "prominence", name: "prominence", locked: false, slot: "middle" },
+      { id: "scale", name: "scale", locked: false, slot: "middle" },
+      { id: "state", name: "state", locked: false, slot: "middle" },
+    ],
+    categories: [
+      {
+        id: "cat1",
+        name: "color",
+        dtcgType: "color",
+        values: {
+          family: presetEntry("color-family", ["brand", "feedback", "neutral"]),
+          variant: presetEntry("color-variant", [], [
+            [{ family: ["brand"] }, ["primary", "secondary", "accent"]],
+            [{ family: ["feedback"] }, ["critical", "caution", "positive", "info"]],
+          ]),
+          role: presetEntry("color-role", ["container", "on-container", "text", "icon", "border"], [
+            [{ family: ["feedback"] }, ["container", "text", "icon"]],
+          ]),
+          prominence: presetEntry("color-prominence", ["[base]", "bold", "subtle"]),
+          scale: presetUnused("color-scale"),
+          state: presetEntry("color-state", ["[default]", "hover", "focus", "active", "disabled"]),
+        },
+      },
+      {
+        id: "cat2",
+        name: "space",
+        dtcgType: "dimension",
+        values: {
+          family: presetEntry("space-family", ["inset", "stack", "inline"]),
+          variant: presetUnused("space-variant"),
+          role: presetUnused("space-role"),
+          prominence: presetUnused("space-prominence"),
+          scale: presetEntry("space-scale", [], [], { type: "tshirt", config: { extra: "0" }, list: [] }),
+          state: presetUnused("space-state"),
+        },
+      },
+    ],
+  },
+};
+
+// The project file for a preset, ready for loadProjectState, or null for an
+// unknown key. Each preset states its own file version; the tier, default
+// title and an empty namespace are filled in. Each call returns a fresh copy.
+function presetProject(key) {
+  const preset = PRESETS.find((p) => p.key === key);
+  if (!preset) return null;
+  const p = JSON.parse(JSON.stringify(PRESET_PROJECTS[key]));
+  return {
+    tierMode: preset.tier,
+    projectTitle: defaultTitleForTier(preset.tier),
+    namespaceEnabled: false,
+    namespaceValue: "",
+    ...p,
+  };
+}
+
+/* ── Clear ─────────────────────────────────────────── */
+// The empty project Clear and "Reset to Default" leave: one color category
+// with no values, no namespace, and the default title for the current tier.
+function clearProject() {
+  projectTitle = defaultTitleForTier(tierMode);
+  namespaceEnabled = false;
+  namespaceValue = "";
+  axes = [CATEGORY_AXIS, SCALE_AXIS].map((a) => ({ ...a }));
+  categories = [];
+  axisSeq = 0;
+  catSeq = 0;
+  groupSeq = 0;
+  syncScaleAxisForTier();
+  seedDefaultCategory();
+}
+
+function seedDefaultCategory() {
+  if (categories.length) return;
+  const c = { id: "cat" + ++catSeq, name: "color", dtcgType: "color", values: {} };
+  initCategoryValues(c);
+  categories.push(c);
+}
+
 if (typeof module === "object" && module.exports) {
   module.exports = {
     loadProjectState,
     serializeState,
+    PRESETS,
+    presetsForTier,
+    presetProject,
+    clearProject,
     allTokens,
     allTokenNames,
     buildCssExport,
