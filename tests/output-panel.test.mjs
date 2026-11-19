@@ -28,40 +28,6 @@ function loadFixture(name) {
   assert.equal(err, null, `${name} did not load: ${err}`);
 }
 
-// The families preset was recorded before groups replaced branched axes, so
-// its Markdown described the branched family axis. With groups (ADR 0001) the
-// same tokens are described as conditional groups on the scale axis.
-const MARKDOWN_GROUPS_CHANGE = {
-  families: [
-    [
-      [
-        "- **family** (branched)",
-        "  - **radius**",
-        "    - **Token type**: _not set_",
-        "    - **scale** (T-shirt sizes): xs, sm, md, lg, xl",
-        "  - **width**",
-        "    - **Token type**: _not set_",
-        "    - **scale** (Numeric range): 1, 2, 3, 4",
-      ].join("\n"),
-      [
-        "- **family** (Custom list): radius, width",
-        "- **scale** (Custom list): _none_",
-        "  - when family = radius (T-shirt sizes): xs, sm, md, lg, xl",
-        "  - when family = width (Numeric range): 1, 2, 3, 4",
-      ].join("\n"),
-    ],
-  ],
-};
-
-function expectedMarkdown(name) {
-  let md = fixture(name, "naming.md");
-  for (const [before, after] of MARKDOWN_GROUPS_CHANGE[name] || []) {
-    assert.ok(md.includes(before), `${name}/naming.md no longer has the branched block`);
-    md = md.replace(before, after);
-  }
-  return md;
-}
-
 for (const name of PRESETS) {
   test(`${name}: CSS Variables tab matches tokens.css`, () => {
     loadFixture(name);
@@ -75,7 +41,7 @@ for (const name of PRESETS) {
 
   test(`${name}: Markdown Spec tab matches naming.md`, () => {
     loadFixture(name);
-    assert.equal(model.buildExport(), expectedMarkdown(name));
+    assert.equal(model.buildExport(), fixture(name, "naming.md"));
   });
 
   test(`${name}: Tokens Preview lists the tokens.css names in order`, () => {

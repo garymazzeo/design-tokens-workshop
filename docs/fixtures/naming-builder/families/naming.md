@@ -22,13 +22,10 @@
 ### border
 
 - **Token type**: `dimension`
-- **family** (branched)
-  - **radius**
-    - **Token type**: _not set_
-    - **scale** (T-shirt sizes): xs, sm, md, lg, xl
-  - **width**
-    - **Token type**: _not set_
-    - **scale** (Numeric range): 1, 2, 3, 4
+- **family** (Custom list): radius, width
+- **scale** (Custom list): _none_
+  - when family = radius (T-shirt sizes): xs, sm, md, lg, xl
+  - when family = width (Numeric range): 1, 2, 3, 4
 
 ---
 
