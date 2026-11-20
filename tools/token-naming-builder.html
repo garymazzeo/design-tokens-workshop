@@ -194,6 +194,9 @@
       .page {
         background: var(--bg);
         min-width: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
       /* Header */
       .app-hdr {
@@ -609,6 +612,7 @@
 
       /* Board: scrolls sideways in its own container. */
       .board-wrap {
+        flex: 1 0 auto;
         background: var(--board);
         overflow-x: auto;
         overscroll-behavior-x: contain;
@@ -710,6 +714,9 @@
       .col-name {
         flex: 1;
         min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         font-family: var(--mono);
         font-size: 13px;
         font-weight: 600;
@@ -736,25 +743,17 @@
         text-transform: uppercase;
         letter-spacing: 0.06em;
       }
-      .col-tools {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        margin-top: 6px;
-      }
-      .unused-toggle {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 11.5px;
-        color: var(--tx-2);
-        cursor: pointer;
-        margin-right: auto;
-      }
-      .unused-toggle input {
-        width: 14px;
-        height: 14px;
+      /* One header row: grip, use checkbox, name (may be cut short), trash. */
+      .use-axis {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        margin: 0 4px 0 2px;
         accent-color: var(--accent);
+        cursor: pointer;
+      }
+      .col-trash {
+        flex-shrink: 0;
       }
       .icon-btn {
         width: 26px;
@@ -808,7 +807,7 @@
         border: 1px solid var(--bd-1);
         border-radius: 8px;
         padding: 10px;
-        background: var(--bg);
+        background: var(--bg-2);
         display: grid;
         gap: 8px;
       }
@@ -821,6 +820,11 @@
         align-items: center;
         gap: 6px;
         min-height: 26px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--bd-1);
+      }
+      .group.is-conditional .group-head {
+        border-bottom-color: var(--accent-bd);
       }
       .group-label {
         font-family: var(--mono);
@@ -890,7 +894,7 @@
         display: flex;
         align-items: center;
       }
-      .value-input {
+      input.value-input {
         font-family: var(--mono);
         height: 32px;
         padding-right: 30px;
@@ -927,16 +931,16 @@
         padding: 2px 7px;
         border: 1px solid var(--bd-1);
         border-radius: 4px;
-        background: var(--bg-2);
+        background: var(--bg);
       }
-      .add-value {
+      input.add-value {
         height: 30px;
         border: 1px dashed var(--bd-2);
         background: transparent;
         text-align: center;
         font-size: 12.5px;
       }
-      .add-value::placeholder {
+      input.add-value::placeholder {
         color: var(--tx-2);
       }
       .add-value:focus {
@@ -952,6 +956,9 @@
         width: 100%;
         height: 32px;
         font-size: 12.5px;
+        border: 1px dashed var(--bd-2);
+        background: transparent;
+        color: var(--tx-2);
       }
       .col-insert {
         border: 1px dashed var(--bd-2);
@@ -1103,7 +1110,7 @@
       }
 
       /* Output panel: docked at the bottom, collapsible and resizable. */
-      .page {
+      .board-wrap {
         padding-bottom: var(--out-h, 0px);
       }
       .out {
@@ -1164,23 +1171,49 @@
         border-bottom: none;
       }
       .out-toggle {
-        border: none;
-        background: transparent;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        color: var(--tx-2);
+        border: 1px solid var(--bd-1);
+        background: var(--bg);
+      }
+      .out-toggle:hover {
+        color: var(--tx);
+      }
+      .out-chevron {
+        display: block;
+        transition: transform 0.15s;
+      }
+      .out-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        padding: 0 6px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
       }
-      .out-toggle:hover {
-        border: none;
+      /* The dot glows briefly each time the generated tokens change. */
+      .out-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
       }
-      .out-chevron {
-        display: inline-block;
-        transition: transform 0.15s;
+      .out-dot.is-pulsing {
+        animation: out-dot-glow 0.9s ease-out;
+      }
+      @keyframes out-dot-glow {
+        0% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.65), 0 0 4px 1px rgba(16, 185, 129, 0.8);
+        }
+        100% {
+          box-shadow: 0 0 0 9px rgba(16, 185, 129, 0), 0 0 0 0 rgba(16, 185, 129, 0);
+        }
       }
       .out.is-collapsed .out-chevron {
         transform: rotate(-90deg);
@@ -1525,8 +1558,9 @@
         aria-valuemin="120" title="Drag to resize"></div>
       <header class="out-head">
         <button type="button" class="out-toggle" id="out-toggle" aria-controls="out-body" aria-expanded="true">
-          <span class="out-chevron" aria-hidden="true">▾</span> Output
+          <svg class="out-chevron" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 5.5h10L8 11.5z" fill="currentColor"/></svg>
         </button>
+        <h2 class="out-title"><span class="out-dot" id="out-dot" aria-hidden="true"></span>Live Cartesian Permutation Engine</h2>
         <span class="out-count" id="out-count" aria-live="polite"></span>
         <button type="button" class="out-warn" id="out-warn" hidden></button>
         <div class="out-actions">
@@ -1676,6 +1710,10 @@
         return c;
       }
 
+      function isScaleAxis(ax) {
+        return ax.slot === "scale" || ax.id === "scale" || ax.name === "scale";
+      }
+
       function boardAxes() {
         return axes.filter(isConfigurableAxis);
       }
@@ -1819,20 +1857,21 @@
               aria-label="Move the ${esc(ax.name)} axis. Drag, or use the left and right arrow keys"
               aria-describedby="board-status" title="Drag to move (or ← →)">${GRIP_ICON}</button>`
           : "";
-        const tools = `
-          <label class="unused-toggle" title="Leave this axis out of ${esc(c.name)} names">
-            <input type="checkbox" data-act="toggle-unused" ${a} data-fk="unused:${esc(ax.id)}" ${unused ? "checked" : ""} /> Unused
-          </label>
-          ${middle ? `<button type="button" class="icon-btn is-danger" data-act="remove-axis" ${a} data-fk="remove:${esc(ax.id)}" aria-label="Remove the ${esc(ax.name)} axis from the project" title="Remove axis from the project">${TRASH_ICON}</button>` : ""}`;
+        // The checkbox is positive: ticked means the axis is in this
+        // category's names; unticked marks it Unused.
+        const useBox = `<input type="checkbox" class="use-axis" data-act="toggle-used" ${a} data-fk="used:${esc(ax.id)}" ${unused ? "" : "checked"}
+            aria-label="Use ${esc(ax.name)} in ${esc(c.name)} names" title="Use ${esc(ax.name)} in ${esc(c.name)} names (untick to mark it Unused)" />`;
+        const trash = middle
+          ? `<button type="button" class="icon-btn is-danger col-trash" data-act="remove-axis" ${a} data-fk="remove:${esc(ax.id)}" aria-label="Remove the ${esc(ax.name)} axis from the project" title="Remove axis from the project">${TRASH_ICON}</button>`
+          : "";
         const body = unused
-          ? `<p class="col-unused-note">Unused for <strong>${esc(c.name)}</strong>: its names skip this axis. Untick Unused to bring it back.</p>`
+          ? `<p class="col-unused-note">Unused for <strong>${esc(c.name)}</strong>: its names skip this axis. Tick the box to bring it back.</p>`
           : [allGroup(entry), ...conds].map((g) => renderGroup(c, ax, g, conds.length)).join("") +
             renderAddGroup(c, ax);
         return `
         <section class="col${unused ? " is-unused" : ""}" data-col="${esc(ax.id)}" aria-label="${esc(ax.name)} axis">
           <header class="col-head">
-            <div class="col-title">${grip}${name}</div>
-            <div class="col-tools">${tools}</div>
+            <div class="col-title">${grip}${useBox}${name}${trash}</div>
             <div class="col-summary">${summary}</div>
           </header>
           <div class="col-body">${body}</div>
@@ -1840,9 +1879,9 @@
       }
 
       function renderAddGroup(c, ax) {
-        const can = conditionOptions(c.id, ax.id).length > 0;
-        return `<button type="button" class="add-group" data-act="new-group" data-ax="${esc(ax.id)}" data-fk="addgroup:${esc(ax.id)}" aria-haspopup="dialog"
-          ${can ? "" : 'disabled title="Groups need an earlier axis with values"'}>+ add group</button>`;
+        // Groups need an earlier axis with values to make a condition from.
+        if (!conditionOptions(c.id, ax.id).length) return "";
+        return `<button type="button" class="add-group" data-act="new-group" data-ax="${esc(ax.id)}" data-fk="addgroup:${esc(ax.id)}" aria-haspopup="dialog">+ add group</button>`;
       }
 
       function renderGroup(c, ax, g, conditionalCount) {
@@ -1858,7 +1897,10 @@
              <span class="group-count">${plural(vals.length, "value")}</span>
              <button type="button" class="icon-btn is-danger" data-act="remove-group" ${ref} data-fk="rmgroup:${gk}" aria-label="Remove the group for ${esc(describeCondition(g.condition))}">✕</button>`;
 
-        const genSelect = `<select data-act="set-generator" ${ref} data-fk="gen:${gk}" aria-label="How these ${esc(ax.name)} values are made">
+        // Ranges and t-shirt sizes are for the scale axis. Other axes are
+        // literal lists, unless an older project gave a group a generator.
+        const showGenerator = isScaleAxis(ax) || gen.type !== "custom";
+        const genSelect = !showGenerator ? "" : `<select data-act="set-generator" ${ref} data-fk="gen:${gk}" aria-label="How these ${esc(ax.name)} values are made">
           ${Object.entries(GENERATOR_LABELS).map(([k, label]) => `<option value="${k}"${gen.type === k ? " selected" : ""}>${label}</option>`).join("")}
         </select>`;
         const cfg = gen.config || {};
@@ -1889,18 +1931,18 @@
               </li>`;
             })
             .join("")}</ul>
-            <input type="text" class="add-value" placeholder="+ add value" data-act="add-value" ${ref} data-fk="add:${gk}" aria-label="Add a ${esc(ax.name)} value; use [brackets] to leave it out of names" spellcheck="false" />`;
+            <input type="text" class="add-value" placeholder="+ add ${esc(ax.name)}" data-act="add-value" ${ref} data-fk="add:${gk}" aria-label="Add a ${esc(ax.name)} value; use [brackets] to leave it out of names" spellcheck="false" />`;
         } else {
           // Adding a value turns a generated range into a literal list of its values.
           values = `<ul class="values is-generated" aria-label="${esc(ax.name)} values">${vals.map((v) => `<li class="value-chip">${esc(v)}</li>`).join("")}</ul>
-            <input type="text" class="add-value" placeholder="+ add value" data-act="add-value" ${ref} data-fk="add:${gk}" aria-label="Add a ${esc(ax.name)} value; this turns the range into a literal list" title="Adding a value turns this range into a literal list" spellcheck="false" />`;
+            <input type="text" class="add-value" placeholder="+ add ${esc(ax.name)}" data-act="add-value" ${ref} data-fk="add:${gk}" aria-label="Add a ${esc(ax.name)} value; this turns the range into a literal list" title="Adding a value turns this range into a literal list" spellcheck="false" />`;
         }
         const empty = vals.length
           ? ""
           : `<p class="group-empty">${isAll ? "No values: this axis adds nothing to names." : "No values: names this group matches skip this axis."}</p>`;
         return `<div class="group${isAll ? "" : " is-conditional"}" role="group" aria-label="${isAll ? "ALL group" : "Group for " + esc(describeCondition(g.condition))}">
           <div class="group-head">${head}</div>
-          <div class="group-settings">${genSelect}${range}${typeSelect}</div>
+          ${genSelect || range || typeSelect ? `<div class="group-settings">${genSelect}${range}${typeSelect}</div>` : ""}
           ${values}${empty}
         </div>`;
       }
@@ -2185,8 +2227,8 @@
                 false,
               );
             return;
-          case "toggle-unused":
-            return edit(() => setAxisUnused(c.id, axId, el.checked));
+          case "toggle-used":
+            return edit(() => setAxisUnused(c.id, axId, !el.checked));
           case "set-generator":
             return edit(() => setGroupGenerator(c.id, axId, groupId, el.value));
           case "set-config":
@@ -2586,7 +2628,8 @@
         id("out-resize").hidden = collapsed;
         const toggle = id("out-toggle");
         toggle.setAttribute("aria-expanded", String(!collapsed));
-        toggle.setAttribute("aria-label", collapsed ? "Expand output panel" : "Collapse output panel");
+        toggle.setAttribute("aria-label", collapsed ? "Show output panel" : "Hide output panel");
+        toggle.title = collapsed ? "Show output" : "Hide output";
         if (!collapsed) renderOutputBody();
       }
 
@@ -2598,7 +2641,22 @@
         if (focus) id("out-tab-" + tab).focus();
       }
 
+      // Glows the header dot when the generated tokens (names or types) change.
+      let outSignature = null;
+      function pulseOutputDot() {
+        const signature = JSON.stringify(allTokens());
+        if (signature === outSignature) return;
+        const first = outSignature === null;
+        outSignature = signature;
+        if (first) return;
+        const dot = id("out-dot");
+        dot.classList.remove("is-pulsing");
+        void dot.offsetWidth; // restart the animation
+        dot.classList.add("is-pulsing");
+      }
+
       function renderOutputPanel() {
+        pulseOutputDot();
         const count = tokenCount();
         id("out-count").textContent = plural(count, "token");
 
