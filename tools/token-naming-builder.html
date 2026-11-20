@@ -788,9 +788,11 @@
       .col-summary .is-warn {
         color: var(--warn-tx);
       }
+      /* minmax(0, 1fr): cards never grow wider than the column. */
       .col-body {
         padding: 12px;
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         gap: 12px;
       }
       .col-unused-note {
@@ -804,11 +806,13 @@
 
       /* Groups */
       .group {
+        min-width: 0;
         border: 1px solid var(--bd-1);
         border-radius: 8px;
         padding: 10px;
         background: var(--bg-2);
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         gap: 8px;
       }
       .group.is-conditional {
@@ -838,8 +842,19 @@
         color: var(--tx-3);
         margin-left: auto;
         font-family: var(--mono);
+        white-space: nowrap;
+      }
+      .group-count {
+        flex-shrink: 0;
+      }
+      .group-note {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .cond-chip {
+        flex: 0 1 auto;
+        min-width: 0;
         height: 24px;
         max-width: 140px;
         padding: 0 8px;
