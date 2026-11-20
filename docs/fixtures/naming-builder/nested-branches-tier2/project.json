@@ -1,0 +1,287 @@
+{
+  "version": 2,
+  "tierMode": "tier2",
+  "projectTitle": "Nested Branches",
+  "namespaceEnabled": false,
+  "namespaceValue": "",
+  "axes": [
+    {
+      "id": "category",
+      "name": "category",
+      "locked": true,
+      "slot": "category"
+    },
+    {
+      "id": "ax1",
+      "name": "family",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "ax2",
+      "name": "role",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "ax3",
+      "name": "emphasis",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "ax4",
+      "name": "state",
+      "locked": false,
+      "slot": "middle"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat1",
+      "name": "color",
+      "dtcgType": "color",
+      "values": {
+        "ax1": {
+          "mode": "branched",
+          "branches": [
+            {
+              "id": "br1",
+              "value": "brand",
+              "dtcgType": "",
+              "values": {
+                "ax2": {
+                  "mode": "branched",
+                  "branches": [
+                    {
+                      "id": "br2",
+                      "value": "surface",
+                      "dtcgType": "",
+                      "values": {
+                        "ax3": {
+                          "type": "custom",
+                          "config": {},
+                          "list": [
+                            "[default]",
+                            "strong"
+                          ]
+                        },
+                        "ax4": {
+                          "type": "custom",
+                          "config": {},
+                          "list": [
+                            "[default]",
+                            "hover"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "br3",
+                      "value": "text",
+                      "dtcgType": "",
+                      "values": {
+                        "ax3": {
+                          "type": "custom",
+                          "config": {},
+                          "list": [
+                            "subtle",
+                            "[default]"
+                          ]
+                        },
+                        "ax4": {
+                          "type": "unused",
+                          "config": {},
+                          "list": []
+                        }
+                      }
+                    }
+                  ]
+                },
+                "ax3": {
+                  "type": "unused",
+                  "config": {},
+                  "list": []
+                },
+                "ax4": {
+                  "type": "unused",
+                  "config": {},
+                  "list": []
+                }
+              }
+            },
+            {
+              "id": "br4",
+              "value": "feedback",
+              "dtcgType": "",
+              "values": {
+                "ax2": {
+                  "type": "custom",
+                  "config": {},
+                  "list": [
+                    "text",
+                    "icon"
+                  ]
+                },
+                "ax3": {
+                  "type": "unused",
+                  "config": {},
+                  "list": []
+                },
+                "ax4": {
+                  "type": "custom",
+                  "config": {},
+                  "list": [
+                    "[default]",
+                    "disabled"
+                  ]
+                },
+                "_combinationConfig": {
+                  "rules": [
+                    {
+                      "selections": {
+                        "ax2": [
+                          "text"
+                        ],
+                        "ax4": [
+                          "[default]",
+                          "disabled"
+                        ]
+                      }
+                    }
+                  ],
+                  "additions": [
+                    {
+                      "ax2": "icon",
+                      "ax4": "[default]"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "ax2": {
+          "type": "unused",
+          "config": {},
+          "list": []
+        },
+        "ax3": {
+          "type": "unused",
+          "config": {},
+          "list": []
+        },
+        "ax4": {
+          "type": "unused",
+          "config": {},
+          "list": []
+        }
+      }
+    },
+    {
+      "id": "cat2",
+      "name": "typography",
+      "dtcgType": "typography",
+      "values": {
+        "ax1": {
+          "mode": "branched",
+          "branches": [
+            {
+              "id": "br5",
+              "value": "heading",
+              "dtcgType": "typography",
+              "values": {
+                "ax2": {
+                  "type": "custom",
+                  "config": {},
+                  "list": [
+                    "xl",
+                    "lg",
+                    "md"
+                  ]
+                },
+                "ax3": {
+                  "type": "custom",
+                  "config": {},
+                  "list": [
+                    "[default]",
+                    "strong"
+                  ]
+                },
+                "ax4": {
+                  "type": "unused",
+                  "config": {},
+                  "list": []
+                },
+                "_combinationConfig": {
+                  "rules": [
+                    {
+                      "selections": {
+                        "ax2": [
+                          "xl",
+                          "lg"
+                        ],
+                        "ax3": [
+                          "[default]"
+                        ]
+                      }
+                    }
+                  ],
+                  "additions": [
+                    {
+                      "ax2": "md",
+                      "ax3": "strong"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "id": "br6",
+              "value": "weight",
+              "dtcgType": "fontWeight",
+              "values": {
+                "ax2": {
+                  "type": "custom",
+                  "config": {},
+                  "list": [
+                    "regular",
+                    "bold"
+                  ]
+                },
+                "ax3": {
+                  "type": "unused",
+                  "config": {},
+                  "list": []
+                },
+                "ax4": {
+                  "type": "unused",
+                  "config": {},
+                  "list": []
+                }
+              }
+            }
+          ]
+        },
+        "ax2": {
+          "type": "unused",
+          "config": {},
+          "list": []
+        },
+        "ax3": {
+          "type": "unused",
+          "config": {},
+          "list": []
+        },
+        "ax4": {
+          "type": "unused",
+          "config": {},
+          "list": []
+        }
+      }
+    }
+  ],
+  "axisSeq": 4,
+  "catSeq": 2,
+  "brSeq": 6
+}

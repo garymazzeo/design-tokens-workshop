@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14T00:00:00.000Z",
+  "title": "Design System: Design Tokens Workshop",
+  "extensions": {
+    "colorMeta": {
+      "blueprint-blue": { "role": "primary", "displayName": "Blueprint Blue", "canonical": "#185fa5", "tonalRamp": ["oklch(0.25 0.07 240)", "oklch(0.32 0.085 240)", "oklch(0.39 0.10 240)", "oklch(0.46 0.11 240)", "oklch(0.54 0.115 235)", "oklch(0.64 0.105 235)", "oklch(0.78 0.065 235)", "oklch(0.92 0.025 235)"] },
+      "field-green": { "role": "secondary", "displayName": "Field Green", "canonical": "#3b6d11", "tonalRamp": ["oklch(0.28 0.09 130)", "oklch(0.36 0.10 130)", "oklch(0.44 0.11 130)", "oklch(0.52 0.115 125)", "oklch(0.61 0.105 125)", "oklch(0.70 0.09 125)", "oklch(0.82 0.055 125)", "oklch(0.93 0.02 120)"] },
+      "drafting-violet": { "role": "tertiary", "displayName": "Drafting Violet", "canonical": "#534ab7", "tonalRamp": ["oklch(0.26 0.08 285)", "oklch(0.34 0.09 285)", "oklch(0.42 0.105 283)", "oklch(0.50 0.115 283)", "oklch(0.58 0.11 280)", "oklch(0.68 0.095 280)", "oklch(0.80 0.06 280)", "oklch(0.92 0.025 280)"] },
+      "paper-white": { "role": "neutral", "displayName": "Paper White", "canonical": "#ffffff" },
+      "warm-paper": { "role": "neutral", "displayName": "Warm Paper", "canonical": "#f4f3ef" },
+      "parchment": { "role": "neutral", "displayName": "Parchment", "canonical": "#eceae4" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#1a1a18", "tonalRamp": ["oklch(0.14 0.01 70)", "oklch(0.24 0.012 70)", "oklch(0.34 0.014 70)", "oklch(0.45 0.014 70)", "oklch(0.56 0.012 75)", "oklch(0.68 0.01 80)", "oklch(0.81 0.008 85)", "oklch(0.94 0.006 90)"] },
+      "stone": { "role": "neutral", "displayName": "Stone", "canonical": "#56564f" },
+      "slate": { "role": "neutral", "displayName": "Slate", "canonical": "#8a8a82" },
+      "ice-blue-wash": { "role": "neutral", "displayName": "Ice Blue Wash", "canonical": "#e6f1fb" },
+      "leaf-wash": { "role": "neutral", "displayName": "Leaf Wash", "canonical": "#eaf3de" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero brand statement; max ~14ch." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles." },
+      "title": { "displayName": "Title", "purpose": "Card and tool titles." },
+      "body": { "displayName": "Body", "purpose": "Long-form reading." },
+      "label": { "displayName": "Label/Eyebrow", "purpose": "Section eyebrows and metadata; uppercase." },
+      "mono": { "displayName": "Mono", "purpose": "Token names, layer indices, measurements." }
+    },
+    "shadows": [
+      { "name": "hover-soft", "value": "0 8px 24px rgba(26,26,24,.06)", "purpose": "Soft lift under hovering tool cards and panels; dark mode uses rgba(0,0,0,.25)." }
+    ],
+    "motion": [
+      { "name": "ease-rise", "value": "cubic-bezier(.22,1,.36,1)", "purpose": "Entrance reveal easing for hero/section elements." },
+      { "name": "ease-state", "value": "cubic-bezier(.4,0,.2,1)", "purpose": "Hover and state transitions (0.15s - 0.18s)." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "560px", "purpose": "Collapse multi-column rows (number, name, description, action)." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled Ink button; the single primary call-to-action.",
+      "html": "<button class=\"ds-btn-primary\">Read the handbook</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;padding:.7rem 1.15rem;background:var(--tx,#1a1a18);color:var(--bg,#fff);font-family:var(--sans);font-size:15px;font-weight:600;border:.5px solid var(--tx,#1a1a18);border-radius:var(--r,8px);cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}.ds-btn-primary:hover{background:transparent;color:var(--tx,#1a1a18);border-color:var(--bd-3,rgba(26,26,24,.38));transform:translateY(-1px)}.ds-btn-primary:active{transform:translateY(0)}.ds-btn-primary:focus-visible{outline:2px solid var(--t1,#185fa5);outline-offset:2px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ghost button with a hairline border.",
+      "html": "<button class=\"ds-btn-secondary\">Explore the tools</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;padding:.7rem 1.15rem;background:transparent;color:var(--tx,#1a1a18);font-family:var(--sans);font-size:15px;font-weight:600;border:.5px solid var(--bd-2,rgba(26,26,24,.2));border-radius:var(--r,8px);cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease}.ds-btn-secondary:hover{background:var(--bg,#fff);border-color:var(--bd-3,rgba(26,26,24,.38));transform:translateY(-1px)}.ds-btn-secondary:focus-visible{outline:2px solid var(--t1,#185fa5);outline-offset:2px}"
+    },
+    {
+      "name": "Information Link",
+      "kind": "chip",
+      "refersTo": "info-link",
+      "description": "Text link with a hairline underline; recolors to Blueprint Blue.",
+      "html": "<a class=\"ds-link\" href=\"#\">Layer 4 worksheet →</a>",
+      "css": ".ds-link{display:inline-flex;align-items:center;gap:.35rem;color:var(--tx-info,#185fa5);font-family:var(--sans);font-size:13px;font-weight:600;text-decoration:none;border-bottom:.5px solid color-mix(in srgb,var(--tx-info,#185fa5) 35%,transparent);transition:border-color .15s ease}.ds-link:hover{border-bottom-color:var(--tx-info,#185fa5)}.ds-link:focus-visible{outline:2px solid var(--t1,#185fa5);outline-offset:2px}"
+    },
+
+    {
+      "name": "Tool Card",
+      "kind": "card",
+      "refersTo": "tool-card",
+      "description": "Signature listing surface for the workshop tools.",
+      "html": "<a class=\"ds-tool-card\" href=\"#\"><span class=\"ds-tool-meta\"><span class=\"ds-tool-tag\">Workshop tool</span><span class=\"ds-tool-layer\">Layer 3</span></span><span class=\"ds-tool-title\">Three-tier token chain builder</span><span class=\"ds-tool-desc\">Build a complete token chain from primitive to semantic to component.</span></a>",
+      "css": ".ds-tool-card{display:block;text-decoration:none;color:var(--tx,#1a1a18);background:var(--bg-2,#f4f3ef);border:.5px solid var(--bd-1,rgba(26,26,24,.09));border-radius:var(--r-lg,12px);padding:1.1rem 1.2rem;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease,background .18s ease}.ds-tool-card:hover{background:var(--bg,#fff);border-color:var(--bd-2,rgba(26,26,24,.2));transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,26,24,.06)}.ds-tool-meta{display:flex;flex-wrap:wrap;gap:.45rem .65rem;margin-bottom:.35rem}.ds-tool-tag{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx-3,#8a8a82)}.ds-tool-layer{font-family:var(--mono);font-size:11px;font-weight:500;padding:.15rem .4rem;border-radius:4px;background:var(--t3-bg,#eeedfe);color:var(--t3,#534ab7);border:.5px solid var(--t3-bd,rgba(83,74,183,.3))}.ds-tool-title{display:block;font-family:var(--display);font-optical-sizing:auto;font-weight:600;font-size:1.2rem;letter-spacing:-0.01em;margin-bottom:.3rem}.ds-tool-desc{display:block;color:var(--tx-2,#56564f);font-size:.95rem}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Token value field synthesised from the system tokens.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Token name</span><input class=\"ds-input\" placeholder=\"{color.blue.50}\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:.4rem;font-family:var(--sans)}.ds-field-label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx-3,#8a8a82)}.ds-input{padding:.6rem .75rem;background:var(--bg-2,#f4f3ef);color:var(--tx,#1a1a18);font-family:var(--mono);font-size:13px;border:.5px solid var(--bd-2,rgba(26,26,24,.2));border-radius:var(--r,8px)}.ds-input::placeholder{color:var(--tx-3,#8a8a82)}.ds-input:focus{outline:2px solid var(--t1,#185fa5);outline-offset:1px;border-color:var(--t1-bd,rgba(24,95,165,.3))}"
+    }
+  ],
+  "narrative": {
+
+    "northStar": "The Systems Workbench",
+    "overview": "The Design Tokens Workshop is a precision workbench for naming and building design tokens as rules in a system. The interface is disciplined and legible first: ink on cream paper, hairline rules, a measured grid, and an inspection-lens metaphor that invites the eye to examine structure rather than linger on decoration. The paper grain of the incumbent build is retained as surface texture, but the voice is that of a careful craftsman taking measurements — clear hierarchy, restrained accent, and a calm editorial pace suited to long, intentional reading. Warm cream fields and near-black ink do the heavy lifting; a single blue accent marks interaction while green (success) and violet (tertiary) cover status without competing. Type pairs an optical serif display (Fraunces), a quiet humanist sans (Source Sans 3), and a monospace (IBM Plex Mono) reserved for token vocabulary.",
+    "keyCharacteristics": [
+      "Ink-on-cream, editorial restraint — paper warmth without ornament.",
+      "Measurement language: grid-paper hero, hairline 0.5px rules, inspection lens.",
+      "Serif display for identity + humanist sans for reading + mono for tokens.",
+      "Three-tier accent discipline: blue (primary), green (success), violet (tertiary).",
+      "Flat depth: tonal paper layering and soft hover shadows instead of heavy elevation.",
+      "Full automatic dark layer and prefers-reduced-motion support."
+    ],
+    "rules": [
+      { "name": "The Workbench Rule", "body": "One interaction accent at a time. Blueprint Blue is the only color that signals 'do something'; green and violet signal outcome and tier, never primary interaction.", "section": "colors" },
+      { "name": "The Mono Means Token Rule", "body": "If a string is a token, a layer index, or a measurement, it is typeset in IBM Plex Mono. Optical sans text means human prose; mono means system vocabulary.", "section": "typography" },
+      { "name": "The Hairline Rule", "body": "Rules and borders are 0.5px translucent Ink strokes, never solid heavy borders. The page reads as measured on paper, not framed in boxes.", "section": "layout" }
+    ],
+    "dos": [
+      "Do keep one interaction accent (Blueprint Blue) per screen; let Ink and Paper carry everything else.",
+      "Do typeset tokens, layer indices, and measurements in IBM Plex Mono.",
+      "Do use hairline 0.5px translucent borders and gentle 8-12px radii for the quiet, paper feel.",
+      "Do respect prefers-color-scheme (ship the dark layer) and prefers-reduced-motion (collapse reveals).",
+      "Do keep the torn-paper edges subtle and supporting, never the focal point."
+    ],
+    "donts": [
+      "Don't introduce competing accent colors or gradients that pull focus from Blueprint Blue.",
+      "Don't use heavy shadows or strong elevation; depth comes from tonal paper layering.",
+      "Don't render prose or token values with decorative, hard-to-read weights (Fraunces is display-only, 500-700).",
+      "Don't place multiple interactive calls-to-action at equal emphasis on a single surface."
+    ]
+  }
+}
+
