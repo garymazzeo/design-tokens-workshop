@@ -1,0 +1,100 @@
+{
+  "version": 2,
+  "tierMode": "tier1",
+  "projectTitle": "Legacy v1",
+  "namespaceEnabled": false,
+  "namespaceValue": "",
+  "axes": [
+    {
+      "id": "category",
+      "name": "category",
+      "locked": true,
+      "slot": "category"
+    },
+    {
+      "id": "ax1",
+      "name": "family",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "scale",
+      "name": "scale",
+      "locked": true,
+      "slot": "scale"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat1",
+      "name": "color",
+      "values": {
+        "ax1": {
+          "mode": "branched",
+          "branches": [
+            {
+              "id": "br3",
+              "value": "blue",
+              "values": {
+                "scale": {
+                  "type": "ordinal",
+                  "config": {
+                    "start": "100",
+                    "end": "500",
+                    "step": "200"
+                  },
+                  "list": []
+                }
+              },
+              "dtcgType": ""
+            },
+            {
+              "id": "br4",
+              "value": "gray",
+              "values": {
+                "scale": {
+                  "type": "tshirt",
+                  "config": {
+                    "extra": "0"
+                  },
+                  "list": []
+                }
+              },
+              "dtcgType": ""
+            }
+          ]
+        },
+        "scale": {
+          "type": "unused",
+          "config": {},
+          "list": []
+        }
+      },
+      "dtcgType": ""
+    },
+    {
+      "id": "cat2",
+      "name": "space",
+      "values": {
+        "scale": {
+          "type": "numeric",
+          "config": {
+            "start": "2",
+            "end": "8",
+            "step": "2"
+          },
+          "list": []
+        },
+        "ax1": {
+          "type": "custom",
+          "config": {},
+          "list": []
+        }
+      },
+      "dtcgType": ""
+    }
+  ],
+  "axisSeq": 1,
+  "catSeq": 2,
+  "brSeq": 4
+}

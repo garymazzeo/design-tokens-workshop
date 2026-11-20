@@ -1,0 +1,123 @@
+{
+  "version": 2,
+  "tierMode": "tier1",
+  "projectTitle": "Branches and Combinations",
+  "namespaceEnabled": true,
+  "namespaceValue": "mds",
+  "axes": [
+    { "id": "namespace", "name": "namespace", "locked": true, "slot": "namespace" },
+    { "id": "category", "name": "category", "locked": true, "slot": "category" },
+    { "id": "ax1", "name": "family", "locked": false, "slot": "middle" },
+    { "id": "ax2", "name": "role", "locked": false, "slot": "middle" },
+    { "id": "ax3", "name": "state", "locked": false, "slot": "middle" },
+    { "id": "scale", "name": "scale", "locked": true, "slot": "scale" }
+  ],
+  "categories": [
+    {
+      "id": "cat1",
+      "name": "color",
+      "dtcgType": "color",
+      "values": {
+        "ax1": {
+          "mode": "branched",
+          "branches": [
+            {
+              "id": "br1",
+              "value": "brand",
+              "dtcgType": "",
+              "values": {
+                "ax2": { "type": "custom", "config": {}, "list": ["surface", "text", "border"] },
+                "ax3": { "type": "custom", "config": {}, "list": ["[default]", "hover", "pressed"] },
+                "scale": { "type": "ordinal", "config": { "start": "100", "end": "300", "step": "100" }, "list": [] },
+                "_combinationConfig": {
+                  "rules": [
+                    { "selections": { "ax2": ["surface", "text"], "ax3": ["[default]", "hover"], "scale": ["100", "200"] } }
+                  ],
+                  "additions": [
+                    { "ax2": "border", "ax3": "pressed", "scale": "300" },
+                    { "ax2": "surface", "ax3": "hover", "scale": "100" }
+                  ]
+                }
+              }
+            },
+            {
+              "id": "br2",
+              "value": "feedback",
+              "dtcgType": "",
+              "values": {
+                "ax2": { "type": "custom", "config": {}, "list": ["text", "icon"] },
+                "ax3": { "type": "unused", "config": {}, "list": [] },
+                "scale": { "type": "custom", "config": {}, "list": ["[base]", "strong"] }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cat2",
+      "name": "border",
+      "dtcgType": "dimension",
+      "values": {
+        "ax1": {
+          "mode": "branched",
+          "branches": [
+            {
+              "id": "br3",
+              "value": "radius",
+              "dtcgType": "dimension",
+              "values": {
+                "ax2": { "type": "unused", "config": {}, "list": [] },
+                "ax3": { "type": "unused", "config": {}, "list": [] },
+                "scale": { "type": "tshirt", "config": { "extra": "2" }, "list": [] }
+              }
+            },
+            {
+              "id": "br4",
+              "value": "width",
+              "dtcgType": "dimension",
+              "values": {
+                "ax2": { "type": "unused", "config": {}, "list": [] },
+                "ax3": { "type": "unused", "config": {}, "list": [] },
+                "scale": { "type": "numeric", "config": { "start": "1", "end": "4", "step": "1" }, "list": [] }
+              }
+            },
+            {
+              "id": "br5",
+              "value": "style",
+              "dtcgType": "strokeStyle",
+              "values": {
+                "ax2": { "type": "unused", "config": {}, "list": [] },
+                "ax3": { "type": "unused", "config": {}, "list": [] },
+                "scale": { "type": "custom", "config": {}, "list": ["solid", "dashed"] }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cat3",
+      "name": "space",
+      "dtcgType": "dimension",
+      "values": {
+        "ax1": { "type": "custom", "config": {}, "list": ["inline", "stack"] },
+        "ax2": { "type": "unused", "config": {}, "list": [] },
+        "ax3": { "type": "unused", "config": {}, "list": [] },
+        "scale": { "type": "numeric", "config": { "start": "4", "end": "16", "step": "4" }, "list": [] },
+        "_combinationConfig": {
+          "rules": [
+            { "selections": { "ax1": ["inline"], "scale": ["4", "8"] } },
+            { "selections": { "ax1": ["stack"], "scale": ["8", "12", "16"] } }
+          ],
+          "additions": [
+            { "ax1": "inline", "scale": "16" }
+          ]
+        }
+      }
+    }
+  ],
+  "axisSeq": 3,
+  "catSeq": 3,
+  "brSeq": 5
+}

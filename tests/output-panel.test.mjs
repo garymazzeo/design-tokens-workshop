@@ -1,0 +1,151 @@
+// Tests for what the Token Naming Builder's output panel shows: one string per
+// tab (Tokens Preview, DTCG JSON, CSS Variables, Markdown Spec), the header's
+// token count and collision warnings, and the preview's filter.
+//
+// The tab outputs for every preset are checked against its recorded fixture
+// in docs/fixtures/naming-builder/.
+//
+// Usage: node --test tests/*.test.mjs
+
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import model from "../tools/token-naming-model.js";
+
+const fixturesDir = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "../docs/fixtures/naming-builder",
+);
+const PRESETS = model.PRESETS.map((p) => p.key);
+
+const fixture = (name, file) => readFileSync(join(fixturesDir, name, file), "utf8");
+const cssNames = (css) => [...css.matchAll(/^\s*--([^:\s]+)\s*:/gm)].map((m) => m[1]);
+
+// Loads a preset as the header's dropdown does. Each preset's fixture
+// directory has the same name.
+function loadFixture(name) {
+  const err = model.loadProjectState(model.presetProject(name));
+  assert.equal(err, null, `${name} did not load: ${err}`);
+}
+
+for (const name of PRESETS) {
+  test(`${name}: CSS Variables tab matches tokens.css`, () => {
+    loadFixture(name);
+    assert.equal(model.buildCssExport(), fixture(name, "tokens.css"));
+  });
+
+  test(`${name}: DTCG JSON tab matches tokens.json`, () => {
+    loadFixture(name);
+    assert.equal(model.buildDtcgExport(), fixture(name, "tokens.json"));
+  });
+
+  test(`${name}: Markdown Spec tab matches naming.md`, () => {
+    loadFixture(name);
+    assert.equal(model.buildExport(), fixture(name, "naming.md"));
+  });
+
+  test(`${name}: Tokens Preview lists the tokens.css names in order`, () => {
+    loadFixture(name);
+    const names = cssNames(fixture(name, "tokens.css"));
+    const preview = model.tokenPreview();
+    assert.deepEqual(
+      preview.flatMap((c) => c.tokens.map((t) => t.name)),
+      names,
+    );
+    assert.equal(model.buildTokenList(), names.join("\n") + "\n");
+    assert.equal(model.tokenCount(), names.length);
+  });
+}
+
+test("each preview token is split into its parts, namespace and category first", () => {
+  loadFixture("semantic-color");
+  model.setNamespace("mds");
+  const [color] = model.tokenPreview();
+  const first = color.tokens[0];
+  assert.equal(first.name, first.parts.map((p) => p.val).join("-"));
+  assert.deepEqual(first.parts.slice(0, 2), [
+    { axisId: "namespace", val: "mds" },
+    { axisId: "category", val: color.name },
+  ]);
+  assert.ok(first.parts.slice(2).every((p) => p.axisId !== "category"));
+});
+
+test("preview categories carry their count and token type", () => {
+  loadFixture("full");
+  const preview = model.tokenPreview();
+  const json = JSON.parse(fixture("full", "tokens.json"));
+  assert.deepEqual(
+    preview.map((c) => c.name),
+    Object.keys(json).filter((k) => !k.startsWith("$")),
+  );
+  preview.forEach((c) => {
+    assert.equal(c.count, c.tokens.length);
+    assert.equal(c.type, json[c.name].$type || "");
+  });
+});
+
+test("the filter keeps tokens whose name contains the query, ignoring case", () => {
+  loadFixture("full");
+  const all = model.tokenPreview().flatMap((c) => c.tokens.map((t) => t.name));
+  const query = all[3].split("-").slice(-1)[0];
+  const filtered = model.tokenPreview("  " + query.toUpperCase() + " ");
+  const names = filtered.flatMap((c) => c.tokens.map((t) => t.name));
+  assert.ok(names.length > 0 && names.length < all.length);
+  assert.deepEqual(names, all.filter((n) => n.includes(query)));
+  assert.ok(filtered.every((c) => c.tokens.length > 0), "empty categories drop out");
+  assert.equal(model.buildTokenList(query), names.join("\n") + "\n");
+});
+
+test("the filter keeps each category's full count", () => {
+  loadFixture("full");
+  const full = model.tokenPreview();
+  const all = full.flatMap((c) => c.tokens.map((t) => t.name));
+  const filtered = model.tokenPreview(all[0]);
+  const cat = filtered.find((c) => c.name === full[0].name);
+  assert.equal(cat.count, full[0].count);
+});
+
+test("a filter that matches nothing gives no categories and an empty list", () => {
+  loadFixture("basic");
+  assert.deepEqual(model.tokenPreview("no-such-token-anywhere"), []);
+  assert.equal(model.buildTokenList("no-such-token-anywhere"), "");
+});
+
+test("collisions are reported per category and for the whole project", () => {
+  const err = model.loadProjectState({
+    version: 3,
+    tierMode: "tier2",
+    projectTitle: "Test",
+    namespaceEnabled: false,
+    namespaceValue: "",
+    axes: [
+      { id: "category", name: "category", locked: true, slot: "category" },
+      { id: "ax1", name: "role", locked: false, slot: "middle" },
+      { id: "ax2", name: "state", locked: false, slot: "middle" },
+    ],
+    categories: [
+      {
+        id: "cat1",
+        name: "color",
+        dtcgType: "color",
+        values: {
+          ax1: { groups: [{ id: "g1", condition: {}, generator: { type: "custom", config: {}, list: ["text", "text-hover"] } }] },
+          ax2: { groups: [{ id: "g2", condition: {}, generator: { type: "custom", config: {}, list: ["[default]", "hover"] } }] },
+        },
+      },
+    ],
+  });
+  assert.equal(err, null);
+  const [color] = model.tokenPreview();
+  assert.deepEqual(color.collisions, ["text-hover"]);
+  assert.deepEqual(model.tokenCollisions(), ["color.text-hover"]);
+});
+
+test("no collisions in any preset", () => {
+  for (const name of PRESETS) {
+    loadFixture(name);
+    assert.deepEqual(model.tokenCollisions(), [], name);
+  }
+});

@@ -1,0 +1,85 @@
+{
+  "version": 2,
+  "tierMode": "tier1",
+  "projectTitle": "Tier 1 Tokens",
+  "namespaceEnabled": true,
+  "namespaceValue": "ds",
+  "axes": [
+    {
+      "id": "namespace",
+      "name": "namespace",
+      "locked": true,
+      "slot": "namespace"
+    },
+    {
+      "id": "category",
+      "name": "category",
+      "locked": true,
+      "slot": "category"
+    },
+    {
+      "id": "ax1",
+      "name": "family",
+      "locked": false,
+      "slot": "middle"
+    },
+    {
+      "id": "scale",
+      "name": "scale",
+      "locked": true,
+      "slot": "scale"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat1",
+      "name": "border",
+      "dtcgType": "dimension",
+      "values": {
+        "ax1": {
+          "mode": "branched",
+          "branches": [
+            {
+              "id": "br1",
+              "value": "radius",
+              "values": {
+                "scale": {
+                  "type": "tshirt",
+                  "config": {
+                    "extra": "0"
+                  },
+                  "list": []
+                }
+              },
+              "dtcgType": ""
+            },
+            {
+              "id": "br2",
+              "value": "width",
+              "values": {
+                "scale": {
+                  "type": "numeric",
+                  "config": {
+                    "start": "1",
+                    "end": "4",
+                    "step": "1"
+                  },
+                  "list": []
+                }
+              },
+              "dtcgType": ""
+            }
+          ]
+        },
+        "scale": {
+          "type": "unused",
+          "config": {},
+          "list": []
+        }
+      }
+    }
+  ],
+  "axisSeq": 1,
+  "catSeq": 1,
+  "brSeq": 2
+}

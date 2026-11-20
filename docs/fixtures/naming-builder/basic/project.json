@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "tierMode": "tier1",
+  "projectTitle": "Tier 1 Tokens",
+  "namespaceEnabled": false,
+  "namespaceValue": "",
+  "axes": [
+    {
+      "id": "category",
+      "name": "category",
+      "locked": true,
+      "slot": "category"
+    },
+    {
+      "id": "scale",
+      "name": "scale",
+      "locked": true,
+      "slot": "scale"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat1",
+      "name": "space",
+      "dtcgType": "dimension",
+      "values": {
+        "scale": {
+          "type": "numeric",
+          "config": {
+            "start": "4",
+            "end": "64",
+            "step": "4"
+          },
+          "list": []
+        }
+      }
+    },
+    {
+      "id": "cat2",
+      "name": "border-radius",
+      "dtcgType": "dimension",
+      "values": {
+        "scale": {
+          "type": "tshirt",
+          "config": {
+            "extra": "0"
+          },
+          "list": []
+        }
+      }
+    }
+  ],
+  "axisSeq": 0,
+  "catSeq": 2,
+  "brSeq": 0
+}
