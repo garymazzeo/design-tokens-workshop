@@ -632,6 +632,7 @@
         align-items: center;
       }
       .col {
+        position: relative;
         width: 220px;
         flex: 0 0 auto;
         background: var(--bg);
@@ -644,6 +645,58 @@
         border-style: dashed;
         border-color: var(--bd-2);
         box-shadow: none;
+      }
+      /* Moving columns: the grip drags, and ← → move from the keyboard. */
+      .col-grip {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        margin-left: -4px;
+        border: none;
+        background: transparent;
+        color: var(--tx-3);
+        cursor: grab;
+        touch-action: none;
+      }
+      .col-grip svg {
+        width: 16px;
+        height: 16px;
+      }
+      .col-grip:hover {
+        color: var(--tx);
+        background: var(--bg-2);
+      }
+      .col.is-dragging {
+        z-index: 5;
+        opacity: 0.92;
+        box-shadow: var(--shadow-lg);
+        border-color: var(--accent-bd);
+      }
+      .col.is-dragging .col-grip,
+      body.is-axis-dragging {
+        cursor: grabbing;
+      }
+      body.is-axis-dragging {
+        user-select: none;
+      }
+      .col.drop-before::before,
+      .col.drop-after::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        border-radius: 2px;
+        background: var(--accent);
+      }
+      .col.drop-before::before {
+        left: -10px;
+      }
+      .col.drop-after::after {
+        right: -10px;
       }
       .col-head {
         padding: 10px 10px 8px 12px;
@@ -1462,6 +1515,7 @@
 
       <main class="board-wrap" id="board-wrap">
         <div class="board" id="board" role="tabpanel" tabindex="-1"></div>
+        <span class="visually-hidden" id="board-status" role="status"></span>
       </main>
     </div>
 
@@ -1610,6 +1664,7 @@
         ordinal: "Ordinal (100–900)",
         tshirt: "T-shirt sizes",
       };
+      const GRIP_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg>`;
       const TRASH_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>`;
 
       function activeCategory() {
@@ -1758,23 +1813,25 @@
         const summary = unused
           ? `Unused for ${esc(c.name)}`
           : `${valueCount ? plural(valueCount, "value") : `<span class="is-warn">no values</span>`} · ${conds.length ? plural(conds.length, "group") + " + ALL" : "ALL only"}`;
-        const moveBtn = (dir, glyph, word) =>
-          `<button type="button" class="icon-btn" data-act="move-axis" data-dir="${dir}" ${a} data-fk="move:${esc(ax.id)}:${dir}"
-            aria-label="Move ${esc(ax.name)} ${word}" title="Move ${word}" ${canMoveAxis(ax.id, dir) ? "" : "disabled"}>${glyph}</button>`;
+        // The grip moves the column: drag it, or use ← → (Home/End) on it.
+        const grip = middle
+          ? `<button type="button" class="col-grip" data-grip ${a} data-fk="grip:${esc(ax.id)}"
+              aria-label="Move the ${esc(ax.name)} axis. Drag, or use the left and right arrow keys"
+              aria-describedby="board-status" title="Drag to move (or ← →)">${GRIP_ICON}</button>`
+          : "";
         const tools = `
           <label class="unused-toggle" title="Leave this axis out of ${esc(c.name)} names">
             <input type="checkbox" data-act="toggle-unused" ${a} data-fk="unused:${esc(ax.id)}" ${unused ? "checked" : ""} /> Unused
           </label>
-          ${middle ? moveBtn(-1, "↑", "earlier") + moveBtn(1, "↓", "later") : ""}
           ${middle ? `<button type="button" class="icon-btn is-danger" data-act="remove-axis" ${a} data-fk="remove:${esc(ax.id)}" aria-label="Remove the ${esc(ax.name)} axis from the project" title="Remove axis from the project">${TRASH_ICON}</button>` : ""}`;
         const body = unused
           ? `<p class="col-unused-note">Unused for <strong>${esc(c.name)}</strong>: its names skip this axis. Untick Unused to bring it back.</p>`
           : [allGroup(entry), ...conds].map((g) => renderGroup(c, ax, g, conds.length)).join("") +
             renderAddGroup(c, ax);
         return `
-        <section class="col${unused ? " is-unused" : ""}" aria-label="${esc(ax.name)} axis">
+        <section class="col${unused ? " is-unused" : ""}" data-col="${esc(ax.id)}" aria-label="${esc(ax.name)} axis">
           <header class="col-head">
-            <div class="col-title">${name}</div>
+            <div class="col-title">${grip}${name}</div>
             <div class="col-tools">${tools}</div>
             <div class="col-summary">${summary}</div>
           </header>
@@ -2098,13 +2155,6 @@
             return c && openPopover({ kind: "category" }, el);
           case "insert-axis":
             return openPopover({ kind: "insert-axis" }, el);
-          case "move-axis": {
-            const dir = Number(el.dataset.dir);
-            if (!canMoveAxis(axId, dir) || !confirmConditionLoss(axId, dir)) return;
-            // Stay on this button unless the axis can't move further that way.
-            pendingFocusFk = canMoveAxis(axId, 2 * dir) ? el.dataset.fk : `move:${axId}:${-dir}`;
-            return edit(() => moveAxis(axId, dir));
-          }
           case "remove-axis":
             return uiRemoveAxis(axId);
           case "new-group":
@@ -2163,19 +2213,170 @@
 
       // Moving an axis past another drops conditions that would then point
       // forward; say which groups go before doing it.
-      function confirmConditionLoss(axId, dir) {
-        const i = axisIndexById(axId);
-        const other = axes[i + dir];
-        const [earlier, later] = dir < 0 ? [other, axes[i]] : [axes[i], other];
-        const lost = categories.filter((c) => {
-          const entry = c.values[later.id];
-          return entry && conditionalGroups(entry).some((g) => earlier.id in g.condition);
-        });
-        if (!lost.length) return true;
-        return confirm(
-          `Moving "${axes[i].name}" puts "${later.name}" before "${earlier.name}". Groups on ${later.name} whose condition uses ${earlier.name} will lose that part of their condition (groups left with no condition are removed) in: ${lost.map((c) => c.name).join(", ")}.\n\nYou can undo this. Continue?`,
-        );
+      /* Moving axes: drag a column's grip, or press ← → on it */
+      // Board columns map to the formula after namespace and category, which
+      // never move, so column position p is formula index offset + p.
+      function boardIndexOffset() {
+        return axes.length - boardAxes().length;
       }
+
+      // Moves an axis as one undo step. If some groups lose part of their
+      // condition, a toast says where, with Undo.
+      function uiMoveAxis(axId, index) {
+        if (!canMoveAxisTo(axId, index)) return false;
+        const ax = axes.find((a) => a.id === axId);
+        const lost = conditionsLostByMove(axId, index);
+        pendingFocusFk = "grip:" + axId;
+        edit(() => moveAxisTo(axId, index));
+        const cols = boardAxes();
+        id("board-status").textContent =
+          `${ax.name} moved to column ${cols.indexOf(ax) + 1} of ${cols.length}.`;
+        if (lost.length) {
+          showToast(`Moved ${ax.name}. Groups lost part of their condition in: ${lost.join(", ")}.`);
+        }
+        return true;
+      }
+
+      function onGripKeydown(e) {
+        const axId = e.target.dataset.ax;
+        const i = axisIndexById(axId);
+        const offset = boardIndexOffset();
+        const scaleIdx = scaleAxisIndex();
+        const last = (scaleIdx >= 0 ? scaleIdx : axes.length) - 1;
+        let to = null;
+        if (e.key === "ArrowLeft") to = i - 1;
+        else if (e.key === "ArrowRight") to = i + 1;
+        else if (e.key === "Home") to = offset;
+        else if (e.key === "End") to = last;
+        if (to === null) return;
+        e.preventDefault();
+        uiMoveAxis(axId, to);
+      }
+
+      // Pointer drag: the column follows the pointer, a bar shows where it
+      // will land, and the board scrolls when the pointer nears its edges.
+      // Escape cancels.
+      let axisDrag = null;
+      const DRAG_THRESHOLD = 4;
+      const EDGE_SCROLL = 48;
+
+      function onGripPointerDown(e) {
+        if (e.button !== 0) return;
+        const grip = e.target.closest("[data-grip]");
+        e.preventDefault();
+        grip.focus();
+        grip.setPointerCapture(e.pointerId);
+        axisDrag = {
+          grip,
+          axId: grip.dataset.ax,
+          col: grip.closest(".col"),
+          startX: e.clientX,
+          startScroll: id("board-wrap").scrollLeft,
+          x: e.clientX,
+          started: false,
+          target: null,
+          raf: 0,
+        };
+        grip.addEventListener("pointermove", onGripPointerMove);
+        grip.addEventListener("pointerup", onGripPointerUp);
+        grip.addEventListener("pointercancel", cancelAxisDrag);
+      }
+
+      function onGripPointerMove(e) {
+        const d = axisDrag;
+        if (!d) return;
+        d.x = e.clientX;
+        if (!d.started) {
+          if (Math.abs(d.x - d.startX) < DRAG_THRESHOLD) return;
+          d.started = true;
+          d.col.classList.add("is-dragging");
+          document.body.classList.add("is-axis-dragging");
+          document.addEventListener("keydown", onAxisDragKeydown, true);
+          d.raf = requestAnimationFrame(axisDragFrame);
+        }
+        updateAxisDrag(d);
+      }
+
+      // Each frame scrolls the board while the pointer is near an edge.
+      function axisDragFrame() {
+        const d = axisDrag;
+        if (!d) return;
+        const wrap = id("board-wrap");
+        const box = wrap.getBoundingClientRect();
+        const before = wrap.scrollLeft;
+        if (d.x < box.left + EDGE_SCROLL) wrap.scrollLeft -= 12;
+        else if (d.x > box.right - EDGE_SCROLL) wrap.scrollLeft += 12;
+        if (wrap.scrollLeft !== before) updateAxisDrag(d);
+        d.raf = requestAnimationFrame(axisDragFrame);
+      }
+
+      function updateAxisDrag(d) {
+        const dx = d.x - d.startX + (id("board-wrap").scrollLeft - d.startScroll);
+        d.col.style.transform = `translateX(${dx}px)`;
+        showAxisDropTarget(d);
+      }
+
+      // Where the dragged column would land: before the first other column
+      // whose middle is right of the pointer.
+      function showAxisDropTarget(d) {
+        const others = [...id("board").querySelectorAll(".col[data-col]")].filter((c) => c !== d.col);
+        let p = others.findIndex((c) => {
+          const r = c.getBoundingClientRect();
+          return d.x < r.left + r.width / 2;
+        });
+        if (p < 0) p = others.length;
+        const index = boardIndexOffset() + p;
+        others.forEach((c) => c.classList.remove("drop-before", "drop-after"));
+        d.target = canMoveAxisTo(d.axId, index) ? index : null;
+        if (d.target === null) return;
+        if (p < others.length) others[p].classList.add("drop-before");
+        else others[others.length - 1].classList.add("drop-after");
+      }
+
+      function endAxisDrag() {
+        const d = axisDrag;
+        axisDrag = null;
+        cancelAnimationFrame(d.raf);
+        d.grip.removeEventListener("pointermove", onGripPointerMove);
+        d.grip.removeEventListener("pointerup", onGripPointerUp);
+        d.grip.removeEventListener("pointercancel", cancelAxisDrag);
+        document.removeEventListener("keydown", onAxisDragKeydown, true);
+        document.body.classList.remove("is-axis-dragging");
+        d.col.classList.remove("is-dragging");
+        d.col.style.transform = "";
+        id("board").querySelectorAll(".drop-before, .drop-after").forEach((c) =>
+          c.classList.remove("drop-before", "drop-after"),
+        );
+        return d;
+      }
+
+      function onGripPointerUp(e) {
+        if (!axisDrag) return;
+        if (axisDrag.started) {
+          axisDrag.x = e.clientX;
+          updateAxisDrag(axisDrag);
+        }
+        const d = endAxisDrag();
+        if (d.started && d.target !== null) uiMoveAxis(d.axId, d.target);
+      }
+
+      function cancelAxisDrag() {
+        if (axisDrag) endAxisDrag();
+      }
+
+      function onAxisDragKeydown(e) {
+        if (e.key !== "Escape") return;
+        e.preventDefault();
+        e.stopPropagation();
+        cancelAxisDrag();
+      }
+
+      document.getElementById("board").addEventListener("pointerdown", (e) => {
+        if (e.target.closest("[data-grip]")) onGripPointerDown(e);
+      });
+      document.getElementById("board").addEventListener("keydown", (e) => {
+        if (e.target.matches && e.target.matches("[data-grip]")) onGripKeydown(e);
+      });
 
       function uiRemoveAxis(axId) {
         const ax = axes.find((a) => a.id === axId);

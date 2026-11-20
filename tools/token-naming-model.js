@@ -921,20 +921,53 @@ function renameAxis(axId, name) {
 // Swaps an axis with its neighbour (dir -1 earlier, +1 later). Category stays
 // first and Tier 1's scale stays last. A condition may only name earlier axes,
 // so conditions that would point forward are dropped.
-function canMoveAxis(axId, dir) {
+// Moving an axis: index is where it ends up in the formula. Only middle axes
+// move, and they stay after category, and before scale when Tier 1 keeps
+// scale last.
+function canMoveAxisTo(axId, index) {
   const i = axisIndexById(axId);
-  const j = i + dir;
-  if (i < 0 || axes[i].slot !== "middle") return false;
+  if (i < 0 || axes[i].slot !== "middle" || index === i) return false;
   const scaleIdx = scaleAxisIndex();
-  return j > categoryAxisIndex() && j < (scaleIdx >= 0 ? scaleIdx : axes.length);
+  return index > categoryAxisIndex() && index < (scaleIdx >= 0 ? scaleIdx : axes.length);
+}
+
+function axesAfterMove(axId, index) {
+  const order = axes.filter((a) => a.id !== axId);
+  order.splice(index, 0, axes[axisIndexById(axId)]);
+  return order;
+}
+
+// The categories where moving an axis would leave some group with a condition
+// on an axis that no longer comes before it. That part of the condition is
+// dropped, and a group left with no condition is removed.
+function conditionsLostByMove(axId, index) {
+  if (!canMoveAxisTo(axId, index)) return [];
+  const position = new Map(axesAfterMove(axId, index).map((a, k) => [a.id, k]));
+  return categories
+    .filter((c) =>
+      Object.entries(c.values).some(([onAxis, entry]) =>
+        conditionalGroups(entry).some((g) =>
+          Object.keys(g.condition).some((condAxis) => position.get(condAxis) > position.get(onAxis)),
+        ),
+      ),
+    )
+    .map((c) => c.name);
+}
+
+function moveAxisTo(axId, index) {
+  if (!canMoveAxisTo(axId, index)) return false;
+  axes = axesAfterMove(axId, index);
+  categories.forEach(normalizeCategory);
+  return true;
+}
+
+// One step earlier (dir -1) or later (dir 1).
+function canMoveAxis(axId, dir) {
+  return canMoveAxisTo(axId, axisIndexById(axId) + dir);
 }
 
 function moveAxis(axId, dir) {
-  if (!canMoveAxis(axId, dir)) return false;
-  const i = axisIndexById(axId);
-  [axes[i], axes[i + dir]] = [axes[i + dir], axes[i]];
-  categories.forEach(normalizeCategory);
-  return true;
+  return moveAxisTo(axId, axisIndexById(axId) + dir);
 }
 
 // Names of the categories that hold at least one value on an axis, including
@@ -1692,6 +1725,9 @@ if (typeof module === "object" && module.exports) {
     renameAxis,
     moveAxis,
     canMoveAxis,
+    moveAxisTo,
+    canMoveAxisTo,
+    conditionsLostByMove,
     removeAxis,
     categoriesWithValuesOn,
     conditionOptions,

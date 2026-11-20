@@ -216,3 +216,93 @@ test("categories can be renamed, retyped and removed; names stay unique", () => 
 function allGroupId(category, axId) {
   return category.values[axId].groups.find((g) => !Object.keys(g.condition).length).id;
 }
+
+/* ── Moving an axis to any position (drag and drop) ──── */
+
+// family, role and state, each with values; state has a group conditioned
+// on family. Tier 1 adds a locked scale axis last.
+function loadThree(tierMode = "tier2") {
+  const axes = [
+    { id: "category", name: "category", locked: true, slot: "category" },
+    { id: "ax1", name: "family", locked: false, slot: "middle" },
+    { id: "ax2", name: "role", locked: false, slot: "middle" },
+    { id: "ax3", name: "state", locked: false, slot: "middle" },
+  ];
+  if (tierMode === "tier1") axes.push({ id: "scale", name: "scale", locked: true, slot: "scale" });
+  const err = model.loadProjectState({
+    version: 3,
+    tierMode,
+    axes,
+    categories: [
+      {
+        id: "cat1",
+        name: "color",
+        dtcgType: "color",
+        values: {
+          ax1: { groups: [ALL(list("brand", "feedback"))] },
+          ax2: { groups: [ALL(list("text"))] },
+          ax3: {
+            groups: [
+              ALL(list("hover")),
+              { id: "g1", condition: { ax1: ["feedback"] }, generator: list("active") },
+            ],
+          },
+          ...(tierMode === "tier1" ? { scale: { groups: [ALL(list("100"))] } } : {}),
+        },
+      },
+      {
+        id: "cat2",
+        name: "space",
+        dtcgType: "dimension",
+        values: {
+          ax1: { groups: [ALL(list("inset"))] },
+          ax2: { groups: [ALL(list("x"))] },
+          ax3: { groups: [ALL(list("y"))] },
+          ...(tierMode === "tier1" ? { scale: { groups: [ALL(list("4"))] } } : {}),
+        },
+      },
+    ],
+  });
+  assert.equal(err, null);
+}
+const axisNames = () => model.serializeState().axes.map((a) => a.name);
+
+test("moveAxisTo moves an axis several places at once", () => {
+  loadThree();
+  assert.ok(model.moveAxisTo("ax2", 3));
+  assert.deepEqual(axisNames(), ["category", "family", "state", "role"]);
+  assert.ok(names().includes("color-feedback-active-text"), "conditions that stay earlier are kept");
+  assert.ok(model.moveAxisTo("ax2", 1));
+  assert.deepEqual(axisNames(), ["category", "role", "family", "state"]);
+  assert.ok(names().includes("color-text-feedback-active"));
+});
+
+test("moveAxisTo keeps axes after category, and before scale in Tier 1", () => {
+  loadThree("tier1");
+  assert.equal(model.canMoveAxisTo("ax1", 0), false, "nothing moves before category");
+  assert.equal(model.canMoveAxisTo("ax1", 4), false, "nothing moves after scale in Tier 1");
+  assert.equal(model.canMoveAxisTo("ax1", 1), false, "staying put is not a move");
+  assert.equal(model.canMoveAxisTo("scale", 1), false, "scale is fixed in Tier 1");
+  assert.equal(model.canMoveAxisTo("category", 2), false, "category is fixed");
+  assert.equal(model.moveAxisTo("ax1", 4), false);
+  assert.ok(model.moveAxisTo("ax1", 3));
+  assert.deepEqual(axisNames(), ["category", "role", "state", "family", "scale"]);
+});
+
+test("conditionsLostByMove names the categories whose groups would lose part of a condition", () => {
+  loadThree();
+  assert.deepEqual(model.conditionsLostByMove("ax1", 2), [], "family still comes before state");
+  assert.deepEqual(model.conditionsLostByMove("ax1", 3), ["color"]);
+  assert.deepEqual(model.conditionsLostByMove("ax3", 1), ["color"]);
+  assert.deepEqual(model.conditionsLostByMove("ax2", 1), []);
+  assert.ok(model.moveAxisTo("ax3", 1));
+  assert.equal(entry("ax3").groups.length, 1, "the group with no condition left is removed");
+});
+
+test("one-step moves still work and match canMoveAxis", () => {
+  loadThree();
+  assert.equal(model.canMoveAxis("ax1", -1), false);
+  assert.ok(model.canMoveAxis("ax1", 1));
+  assert.ok(model.moveAxis("ax1", 1));
+  assert.deepEqual(axisNames(), ["category", "role", "family", "state"]);
+});
