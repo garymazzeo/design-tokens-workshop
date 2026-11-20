@@ -952,6 +952,14 @@
         color: var(--tx-3);
         font-style: italic;
       }
+      .restore-states {
+        width: 100%;
+        height: 30px;
+        font-size: 12.5px;
+        color: var(--accent-tx);
+        border: 1px solid var(--accent-bd);
+        background: var(--accent-weak);
+      }
       .convert-literal {
         width: 100%;
         height: 30px;
@@ -1947,13 +1955,19 @@
             <button type="button" class="convert-literal" data-act="convert-literal" ${ref} data-fk="convert:${gk}"
               title="Keep these values as a literal list you can add to, rename and remove from">Convert to literal list</button>`;
         }
+        // A state axis whose ALL list has drifted from the default states.
+        const restore =
+          isAll && canRestoreDefaultStates(c.id, ax.id)
+            ? `<button type="button" class="restore-states" data-act="restore-states" ${ref} data-fk="restore:${gk}"
+                title="${esc(DEFAULT_STATES.join(", "))}">↺ Restore default states</button>`
+            : "";
         const empty = vals.length
           ? ""
           : `<p class="group-empty">${isAll ? "No values: this axis adds nothing to names." : "No values: names this group matches skip this axis."}</p>`;
         return `<div class="group${isAll ? "" : " is-conditional"}" role="group" aria-label="${isAll ? "ALL group" : "Group for " + esc(describeCondition(g.condition))}">
           <div class="group-head">${head}</div>
           ${genSelect || range || typeSelect ? `<div class="group-settings">${genSelect}${range}${typeSelect}</div>` : ""}
-          ${values}${empty}
+          ${values}${empty}${restore}
         </div>`;
       }
 
@@ -2213,6 +2227,10 @@
             return openPopover({ kind: "new-group", axId, draft: {} }, el);
           case "edit-condition":
             return openPopover({ kind: "condition", axId, groupId }, el);
+          case "restore-states":
+            pendingFocusFk = "add:" + groupId;
+            if (edit(() => restoreDefaultStates(c.id, axId))) showToast("Restored the default states.");
+            return;
           case "convert-literal":
             pendingFocusFk = "add:" + groupId;
             return edit(() => convertToLiteralList(c.id, axId, groupId));

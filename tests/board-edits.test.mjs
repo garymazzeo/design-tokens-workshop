@@ -319,3 +319,56 @@ test("one-step moves still work and match canMoveAxis", () => {
   assert.ok(model.moveAxis("ax1", 1));
   assert.deepEqual(axisNames(), ["category", "role", "family", "state"]);
 });
+
+/* ── Default states ──────────────────────────────────── */
+
+const STATES = ["default", "hover", "focus", "focus-visible", "active", "disabled", "visited"];
+const allValues = (axId, catId = "cat1") =>
+  entry(axId, catId).groups.find((g) => !Object.keys(g.condition).length).generator.list;
+
+test("inserting an axis named state fills every category with the default states", () => {
+  load();
+  const axId = model.insertAxis("State");
+  assert.deepEqual(model.DEFAULT_STATES, STATES);
+  assert.deepEqual(allValues(axId), STATES);
+  assert.ok(names().includes("color-brand-text-default"), "default stays in names");
+  assert.ok(names().includes("color-feedback-icon-focus-visible"));
+  const other = model.insertAxis("density");
+  assert.deepEqual(allValues(other), [], "other new axes start empty");
+});
+
+test("the restore button shows only on a state axis whose ALL list differs from the defaults", () => {
+  load();
+  const axId = model.insertAxis("state");
+  assert.equal(model.canRestoreDefaultStates("cat1", axId), false, "untouched");
+  const gAll = entry(axId).groups[0].id;
+  model.renameGroupValue("cat1", axId, gAll, 1, "hovered");
+  assert.equal(model.canRestoreDefaultStates("cat1", axId), true, "renamed");
+  assert.equal(model.canRestoreDefaultStates("cat1", "ax2"), false, "not a state axis");
+});
+
+test("restoring the default states replaces the ALL list and keeps conditional groups", () => {
+  load();
+  const axId = model.insertAxis("state");
+  const gAll = entry(axId).groups[0].id;
+  model.removeGroupValue("cat1", axId, gAll, 0);
+  model.addGroupValue("cat1", axId, gAll, "selected");
+  const gid = model.addGroup("cat1", axId, { ax1: ["feedback"] });
+  model.addGroupValue("cat1", axId, gid, "hover");
+  assert.ok(model.restoreDefaultStates("cat1", axId));
+  assert.deepEqual(allValues(axId), STATES);
+  assert.equal(entry(axId).groups.length, 2, "conditional group kept");
+  assert.equal(model.canRestoreDefaultStates("cat1", axId), false);
+  assert.equal(model.restoreDefaultStates("cat1", axId), false, "nothing to restore");
+});
+
+test("a range on a state axis also counts as different from the defaults", () => {
+  load();
+  const axId = model.insertAxis("state");
+  const gAll = entry(axId).groups[0].id;
+  model.setGroupGenerator("cat1", axId, gAll, "numeric");
+  assert.equal(model.canRestoreDefaultStates("cat1", axId), true);
+  assert.ok(model.restoreDefaultStates("cat1", axId));
+  assert.equal(entry(axId).groups[0].generator.type, "custom");
+  assert.deepEqual(allValues(axId), STATES);
+});

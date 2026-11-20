@@ -900,14 +900,46 @@ function isValidAxisName(name, exceptAxId) {
 // Adds an axis to the formula (and so to every category), before scale in
 // Tier 1 and last in Tier 2. Returns the new axis id, or null for a missing,
 // reserved or duplicate name.
+// A new axis named "state" starts with the default states in every
+// category's ALL group; any other new axis starts empty.
 function insertAxis(name) {
   const slug = slugName(name);
   if (!isValidAxisName(slug)) return null;
   const ax = { id: "ax" + ++axisSeq, name: slug, locked: false, slot: "middle" };
   const scaleIdx = scaleAxisIndex();
   axes.splice(scaleIdx < 0 ? axes.length : scaleIdx, 0, ax);
-  categories.forEach((c) => (c.values[ax.id] = mkAxisEntry()));
+  categories.forEach((c) => {
+    c.values[ax.id] = mkAxisEntry();
+    if (isStateAxis(ax)) allGroup(c.values[ax.id]).generator = mkGenerator(DEFAULT_STATES);
+  });
   return ax.id;
+}
+
+/* ── Default states ────────────────────────────────── */
+// The interaction states a "state" axis starts with. "default" is a real
+// value here: only bracketed values like [default] are left out of names.
+const DEFAULT_STATES = ["default", "hover", "focus", "focus-visible", "active", "disabled", "visited"];
+
+function isStateAxis(ax) {
+  return !!ax && ax.name === "state";
+}
+
+// True when an axis named state has an ALL group that isn't exactly the
+// default states as a literal list (a value was removed, renamed or added,
+// or the group generates its values).
+function canRestoreDefaultStates(catId, axId) {
+  const entry = findEntry(catId, axId);
+  if (!entry || !isStateAxis(axes.find((a) => a.id === axId))) return false;
+  const gen = allGroup(entry).generator;
+  return gen.type !== "custom" || JSON.stringify(gen.list) !== JSON.stringify(DEFAULT_STATES);
+}
+
+// Replaces the state axis's ALL list with the default states. Conditional
+// groups are left alone.
+function restoreDefaultStates(catId, axId) {
+  if (!canRestoreDefaultStates(catId, axId)) return false;
+  allGroup(findEntry(catId, axId)).generator = mkGenerator(DEFAULT_STATES);
+  return true;
 }
 
 function renameAxis(axId, name) {
@@ -1750,6 +1782,9 @@ if (typeof module === "object" && module.exports) {
     setGroupGenerator,
     setGeneratorConfig,
     convertToLiteralList,
+    DEFAULT_STATES,
+    canRestoreDefaultStates,
+    restoreDefaultStates,
     canSetGroupTokenType,
     setGroupTokenType,
     setAxisUnused,
