@@ -748,7 +748,7 @@
         width: 15px;
         height: 15px;
         flex-shrink: 0;
-        margin: 0 4px 0 2px;
+        margin: 0 3px 0 6px;
         accent-color: var(--accent);
         cursor: pointer;
       }
@@ -951,6 +951,14 @@
         font-size: 11.5px;
         color: var(--tx-3);
         font-style: italic;
+      }
+      .convert-literal {
+        width: 100%;
+        height: 30px;
+        font-size: 12.5px;
+        border: 1px dashed var(--bd-2);
+        background: transparent;
+        color: var(--tx-2);
       }
       .add-group {
         width: 100%;
@@ -1196,7 +1204,7 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
-      /* The dot glows briefly each time the generated tokens change. */
+      /* The dot pulses three times each time the generated tokens change. */
       .out-dot {
         width: 9px;
         height: 9px;
@@ -1205,7 +1213,7 @@
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
       }
       .out-dot.is-pulsing {
-        animation: out-dot-glow 0.9s ease-out;
+        animation: out-dot-glow 0.8s ease-out 3;
       }
       @keyframes out-dot-glow {
         0% {
@@ -1871,7 +1879,7 @@
         return `
         <section class="col${unused ? " is-unused" : ""}" data-col="${esc(ax.id)}" aria-label="${esc(ax.name)} axis">
           <header class="col-head">
-            <div class="col-title">${grip}${useBox}${name}${trash}</div>
+            <div class="col-title">${grip}${name}${useBox}${trash}</div>
             <div class="col-summary">${summary}</div>
           </header>
           <div class="col-body">${body}</div>
@@ -1933,9 +1941,11 @@
             .join("")}</ul>
             <input type="text" class="add-value" placeholder="+ add ${esc(ax.name)}" data-act="add-value" ${ref} data-fk="add:${gk}" aria-label="Add a ${esc(ax.name)} value; use [brackets] to leave it out of names" spellcheck="false" />`;
         } else {
-          // Adding a value turns a generated range into a literal list of its values.
+          // A generated group has one way of making values. To edit them one by
+          // one, convert it to a literal list of the same values.
           values = `<ul class="values is-generated" aria-label="${esc(ax.name)} values">${vals.map((v) => `<li class="value-chip">${esc(v)}</li>`).join("")}</ul>
-            <input type="text" class="add-value" placeholder="+ add ${esc(ax.name)}" data-act="add-value" ${ref} data-fk="add:${gk}" aria-label="Add a ${esc(ax.name)} value; this turns the range into a literal list" title="Adding a value turns this range into a literal list" spellcheck="false" />`;
+            <button type="button" class="convert-literal" data-act="convert-literal" ${ref} data-fk="convert:${gk}"
+              title="Keep these values as a literal list you can add to, rename and remove from">Convert to literal list</button>`;
         }
         const empty = vals.length
           ? ""
@@ -2203,6 +2213,9 @@
             return openPopover({ kind: "new-group", axId, draft: {} }, el);
           case "edit-condition":
             return openPopover({ kind: "condition", axId, groupId }, el);
+          case "convert-literal":
+            pendingFocusFk = "add:" + groupId;
+            return edit(() => convertToLiteralList(c.id, axId, groupId));
           case "remove-group":
             pendingFocusFk = "addgroup:" + axId;
             return edit(() => removeGroup(c.id, axId, groupId));
@@ -2641,7 +2654,7 @@
         if (focus) id("out-tab-" + tab).focus();
       }
 
-      // Glows the header dot when the generated tokens (names or types) change.
+      // Pulses the header dot when the generated tokens (names or types) change.
       let outSignature = null;
       function pulseOutputDot() {
         const signature = JSON.stringify(allTokens());

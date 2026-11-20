@@ -1126,6 +1126,15 @@ function removeGroupValue(catId, axId, groupId, index) {
   return true;
 }
 
+// Replaces a group's numeric, ordinal or t-shirt values with a literal list
+// of the same values, which can then be edited one by one.
+function convertToLiteralList(catId, axId, groupId) {
+  const group = findGroup(catId, axId, groupId);
+  if (!group || group.generator.type === "custom") return false;
+  literalGenerator(group);
+  return true;
+}
+
 // Switches how a group makes its values. The literal list and the range
 // settings are kept, so switching back restores them.
 function setGroupGenerator(catId, axId, groupId, type) {
@@ -1740,6 +1749,7 @@ if (typeof module === "object" && module.exports) {
     removeGroupValue,
     setGroupGenerator,
     setGeneratorConfig,
+    convertToLiteralList,
     canSetGroupTokenType,
     setGroupTokenType,
     setAxisUnused,

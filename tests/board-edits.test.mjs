@@ -178,6 +178,19 @@ test("switching a group's generator keeps its settings and changes its values", 
   assert.deepEqual(entry("ax2").groups[0].generator.list, ["4", "8", "12", "16"]);
 });
 
+test("converting a generated range to a literal list keeps the same values", () => {
+  load();
+  model.setGroupGenerator("cat1", "ax2", "gAll", "tshirt");
+  const before = names();
+  assert.ok(model.convertToLiteralList("cat1", "ax2", "gAll"));
+  const gen = entry("ax2").groups[0].generator;
+  assert.equal(gen.type, "custom");
+  assert.deepEqual(gen.list, ["xs", "sm", "md", "lg", "xl"]);
+  assert.deepEqual(names(), before);
+  assert.equal(model.convertToLiteralList("cat1", "ax2", "gAll"), false, "already a literal list");
+  assert.equal(model.convertToLiteralList("cat1", "ax2", "nope"), false);
+});
+
 test("a group sets a token type only when its condition includes the first axis", () => {
   load({ ax3: { groups: [ALL(list("hover"))] } }, { axes: [...AXES, { id: "ax3", name: "state", locked: false, slot: "middle" }] });
   const onRole = model.addGroup("cat1", "ax3", { ax2: ["text"] });
